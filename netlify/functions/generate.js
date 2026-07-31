@@ -81,12 +81,15 @@ function buildPrompt(category, desc, examples) {
   const exampleText = examples.join("; ");
   return "You generate entries for a songwriting-challenge generator. Category: " + category + " — " + desc +
     ". Examples already in use: " + exampleText + ". Give ONE brand-new " + category +
-    " entry, different from the examples, matching the same style and length. Reply with only the entry text — no quotes, no numbering, no explanation.";
+    " entry, different from the examples, matching the same style and length. This entry gets stitched together" +
+    " with the other categories into one sentence, so do not end it with a period or any other trailing punctuation." +
+    " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 
 function sanitize(text) {
   let t = String(text).trim().split("\n")[0].trim();
   t = t.replace(/^["'“”\-\s\d.]+/, "").replace(/["'“”]+$/, "").trim();
+  t = t.replace(/[.!?,;:]+$/, "").trim();
   if (!t || t.length > 140) return "";
   return t;
 }

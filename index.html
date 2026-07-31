@@ -796,6 +796,13 @@ function renderLocks(){
   });
 }
 
+// Strips trailing sentence punctuation so fragments read cleanly once stitched
+// together — matters for AI-generated entries, which don't always honor the
+// "no trailing punctuation" instruction in the generation prompt.
+function stripTrailingPunct(s){
+  return String(s).trim().replace(/[.!?,;:]+$/,"").trim();
+}
+
 function buildMission(vals){
   const useMood = isActive("mood") && vals.mood;
   const useGenre = isActive("genre") && vals.genre;
@@ -803,13 +810,13 @@ function buildMission(vals){
   const useTwist = isActive("twist") && vals.twist;
 
   const descriptors = [];
-  if(useMood) descriptors.push(vals.mood.toLowerCase());
-  if(useGenre) descriptors.push(vals.genre);
+  if(useMood) descriptors.push(stripTrailingPunct(vals.mood).toLowerCase());
+  if(useGenre) descriptors.push(stripTrailingPunct(vals.genre));
 
   let mission = "Write a " + (descriptors.length ? descriptors.join(" ")+" song" : "song");
-  if(useSubject) mission += " about "+vals.subject;
+  if(useSubject) mission += " about "+stripTrailingPunct(vals.subject);
   mission += ".";
-  if(useTwist) mission += " Constraint: "+vals.twist+".";
+  if(useTwist) mission += " Constraint: "+stripTrailingPunct(vals.twist)+".";
   return mission;
 }
 
@@ -926,12 +933,15 @@ function buildAIPrompt(cat, examples){
   const exampleText = examples.join("; ");
   return "You generate entries for a songwriting-challenge generator. Category: "+LABELS[cat]+" — "+desc+
     ". Examples already in use: "+exampleText+". Give ONE brand-new "+LABELS[cat].toLowerCase()+
-    " entry, different from the examples, matching the same style and length. Reply with only the entry text — no quotes, no numbering, no explanation.";
+    " entry, different from the examples, matching the same style and length. This entry gets stitched together"+
+    " with the other categories into one sentence, so do not end it with a period or any other trailing punctuation."+
+    " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 
 function sanitizeAIText(text){
   let t = String(text).trim().split("\n")[0].trim();
   t = t.replace(/^["'“”\-\s\d.]+/,"").replace(/["'“”]+$/,"").trim();
+  t = t.replace(/[.!?,;:]+$/,"").trim();
   if(!t || t.length > 140) return "";
   return t;
 }
