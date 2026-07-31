@@ -89,6 +89,31 @@ const DATA = {
 
 Add, remove, or edit entries in any of those four arrays — everything else (spinning, locking, the ticket text, favorites, and what the AI is told to imitate) works off these lists automatically. No other code needs to change.
 
+## Roadmap
+
+### Phase 1 — MVP (done)
+- Static, no-backend reel/lever mechanic with lock/reroll per category.
+- Favorites + history + settings, persisted client-side via `localStorage`.
+- Optional AI-generated entries (Groq site-wide key, or visitor's own Claude/OpenAI BYOK key).
+- Deployable as either a plain static file or with serverless functions (Netlify/Vercel).
+
+### Phase 2 — Accounts + cross-device sync
+The current favorites/history are per-browser only (`localStorage`) — nothing survives a new device, a cleared cache, or a different browser. Phase 2 adds real accounts so that data can follow the person, not the browser:
+
+- **Sign in with Google / Discord / Facebook** (OAuth) — no passwords to manage, and Discord fits the Suno/music-community audience particularly well.
+- A small backend + database to store, per account:
+  - Favorites (already-shaped as `{no, time, vals, mission}` objects — the existing shape can move over largely as-is).
+  - History (same shape, capped/paginated instead of the current 100-entry local cap).
+  - Settings (which reels are active, preferred AI source/model) so a signed-in visitor's setup follows them.
+- Anonymous/local mode stays fully supported — signing in is an upgrade, not a requirement. On first sign-in, offer to import the current browser's local favorites/history into the account (one-time merge).
+- Needs: an auth provider (e.g. Auth.js/NextAuth, Clerk, Supabase Auth, or Netlify Identity) + a small database (Supabase/Postgres, Firebase, or a simple Netlify/Vercel-native KV store) — choice mainly depends on which host we lean into, since it changes the serverless-function story already in place for AI mode.
+
+### Phase 3 — ideas beyond that (not committed, just directions)
+- Shareable links for a single ticket/prompt (e.g. `?t=<id>`) so a challenge can be sent to someone else and render identically, signed in or not.
+- Public favorites/leaderboard of community-submitted challenges, opt-in.
+- The "project type" switch mentioned below (songwriting vs. general writing vs. app ideas) as a swappable `DATA` set, possibly per-account default.
+- Rate limiting / abuse protection on the AI endpoints if traffic grows (noted as a known gap in the OpenAI relay section above).
+
 ## Notes
 
 - Fully responsive, keyboard-operable (Tab to a reel + Enter/Space to reroll it, Space on the page to pull the lever), and respects `prefers-reduced-motion`.
