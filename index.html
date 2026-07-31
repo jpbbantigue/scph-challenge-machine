@@ -864,6 +864,7 @@ async function getValue(cat){
 }
 
 /* ---------------- spin logic ---------------- */
+function sleep(ms){ return new Promise(resolve=>setTimeout(resolve, ms)); }
 const SPIN_DURATIONS = {genre:520, mood:680, subject:840, twist:1000};
 let spinning = false;
 
