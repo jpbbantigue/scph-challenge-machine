@@ -81,92 +81,105 @@ body{
   color:var(--text-muted);
   font-family:var(--font-body);
   min-height:100vh;
-  display:flex;
-  justify-content:center;
-  padding:32px 16px 64px;
 }
 
-.room{
-  width:100%;
-  max-width:760px;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
+a{color:var(--amber);text-decoration:none;}
+a:hover{color:var(--ph-blue);}
 
-/* ---------- header / marquee ---------- */
-.marquee{
-  position:relative;
-  background:linear-gradient(180deg,var(--panel-hi),var(--panel) 40%,var(--panel-lo));
-  border-radius:10px;
-  padding:22px 24px 20px;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.05) inset,
-    0 -6px 14px rgba(0,0,0,0.5) inset,
-    0 10px 26px rgba(0,0,0,0.55);
+.wrap{max-width:960px;margin:0 auto;padding-left:clamp(16px,4vw,24px);padding-right:clamp(16px,4vw,24px);}
+
+/* ---------- top nav ---------- */
+.topnav{
+  position:sticky;top:0;z-index:15;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px clamp(16px,4vw,48px);
+  background:rgba(8,8,11,0.85);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  flex-wrap:wrap;
+}
+.topnav .brand{display:flex;align-items:center;gap:10px;}
+.topnav .brand img{width:30px;height:30px;flex:0 0 auto;}
+.topnav .wordmark{
+  font-family:var(--font-display);font-weight:700;font-size:20px;
+  letter-spacing:0.03em;color:var(--ink);
+}
+.accent{color:var(--amber);}
+.topnav .navlinks{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.navlink{
+  font-family:var(--font-display);font-size:12px;letter-spacing:0.08em;
+  color:var(--text-muted);text-transform:uppercase;
+  background:none;border:none;padding:0;cursor:pointer;
+  transition:color .15s ease;
+}
+.navlink:hover{color:var(--ink);}
+.pill-btn{
+  font-family:var(--font-body);font-weight:600;font-size:13px;
+  border:none;border-radius:999px;padding:9px 18px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .1s ease, filter .15s ease;
+}
+.pill-btn:hover{filter:brightness(1.08);}
+.pill-btn:active{transform:scale(.96);}
+.pill-btn.ph{background:var(--ph-blue);color:#04101a;}
+
+/* ---------- hero / arena ---------- */
+.hero{
+  max-width:920px;margin:0 auto;
+  padding:clamp(40px,8vw,72px) clamp(16px,4vw,24px) 0;
   text-align:center;
 }
-.marquee::before,.marquee::after{
-  content:"";
-  position:absolute;
-  top:10px;
-  width:8px;height:8px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#e8cf7a,var(--brass-dim));
-  box-shadow:0 1px 1px rgba(0,0,0,0.6);
+.hero .eyebrow{
+  font-family:var(--font-display);font-size:12px;letter-spacing:0.16em;
+  color:var(--amber);text-transform:uppercase;margin-bottom:14px;
 }
-.marquee::before{left:12px;}
-.marquee::after{right:12px;}
-.marquee h1{
-  font-family:var(--font-display);
-  font-weight:700;
-  letter-spacing:0.06em;
-  font-size:clamp(22px,5vw,34px);
+.hero h1{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(38px,7vw,64px);line-height:1.05;letter-spacing:0.02em;
   margin:0;
-  color:#f1e6c9;
-  text-shadow:0 1px 0 rgba(255,255,255,0.15), 0 2px 3px rgba(0,0,0,0.8);
 }
-.marquee h1 .accent{color:var(--amber);}
-.marquee p{
-  margin:6px 0 0;
-  font-size:13px;
-  letter-spacing:0.03em;
-  color:var(--text-muted);
+.hero h1 span{display:block;}
+.hero h1 .line1{color:var(--ink);}
+.hero h1 .line2{color:var(--amber);text-shadow:0 0 24px rgba(255,33,66,0.45);}
+.hero p{
+  font-family:var(--font-body);font-size:16px;color:var(--text-muted);
+  max-width:480px;margin:18px auto 0;line-height:1.55;
 }
-.settings-btn{
-  position:absolute;
-  top:14px;right:14px;
-  width:30px;height:30px;
-  border-radius:50%;
-  border:1px solid var(--brass-dim);
-  background:var(--panel-lo);
-  color:var(--brass);
-  font-size:15px;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s ease;
+
+/* ---------- eyebrow / section heading (shared) ---------- */
+.section-eyebrow{
+  font-family:var(--font-display);font-size:12px;letter-spacing:0.16em;
+  text-transform:uppercase;margin-bottom:8px;
 }
-.settings-btn:hover{color:var(--amber);border-color:var(--amber-dim);transform:rotate(20deg);}
-.settings-btn:active{transform:rotate(20deg) scale(.9);}
+.section-eyebrow.red{color:var(--amber);}
+.section-eyebrow.blue{color:var(--ph-blue);}
+.section-h2{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(24px,4vw,32px);margin:0 0 22px;color:var(--ink);
+}
 
 /* ---------- console ---------- */
+.console-section{max-width:920px;margin:36px auto 0;padding:0 clamp(16px,4vw,24px);}
 .console{
-  background:linear-gradient(180deg,var(--panel-hi),var(--panel) 60%,var(--panel-lo));
+  position:relative;
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;
-  padding:22px 18px 26px;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.06) inset,
-    0 -10px 22px rgba(0,0,0,0.55) inset,
-    0 14px 30px rgba(0,0,0,0.55);
+  padding:clamp(20px,4vw,34px) clamp(16px,4vw,28px) 30px;
+  box-shadow:0 10px 28px rgba(0,0,0,0.55);
+  overflow:hidden;
+}
+.console::before{
+  content:"";
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--amber),var(--ph-blue));
 }
 
 .reels{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-  margin-bottom:22px;
-}
-@media (max-width:640px){
-  .reels{grid-template-columns:1fr 1fr;}
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:16px;
+  margin-bottom:26px;
 }
 
 .reel-unit{
@@ -272,27 +285,27 @@ body{
   font-family:var(--font-display);
   font-weight:700;
   letter-spacing:0.12em;
-  font-size:17px;
-  color:#3a0f0a;
-  background:radial-gradient(circle at 35% 30%,#ff8a72,var(--red) 55%,var(--red-dim) 100%);
+  font-size:18px;
+  color:#fff;
+  background:linear-gradient(135deg,var(--amber-hi),var(--red) 60%,var(--red-dim) 100%);
   border:none;
-  border-radius:999px;
+  border-radius:8px;
   padding:16px 46px;
   cursor:pointer;
   box-shadow:
     0 1px 0 rgba(255,255,255,0.4) inset,
     0 -4px 8px rgba(0,0,0,0.35) inset,
-    0 8px 0 var(--red-dim),
+    0 0 16px 1px rgba(255,33,66,0.6),
     0 12px 18px rgba(0,0,0,0.55);
   transition:transform .08s ease, box-shadow .08s ease;
 }
 .lever:hover:not(:disabled){transform:scale(1.03);}
 .lever:active,.lever.pressed{
-  transform:translateY(6px);
+  transform:translateY(2px);
   box-shadow:
     0 1px 0 rgba(255,255,255,0.3) inset,
     0 -3px 6px rgba(0,0,0,0.35) inset,
-    0 2px 0 var(--red-dim),
+    0 0 10px 1px rgba(255,33,66,0.7),
     0 4px 8px rgba(0,0,0,0.5);
 }
 .lever:disabled{opacity:.6;cursor:default;}
@@ -302,11 +315,11 @@ body{
 .ticket{
   position:relative;
   width:100%;
-  max-width:480px;
+  max-width:560px;
   background:var(--ticket);
   color:var(--ink);
   border:1px solid var(--ticket-line);
-  border-top:2px solid var(--ph-blue);
+  border-top:2px solid var(--amber);
   border-radius:10px;
   padding:22px 22px 18px;
   box-shadow:0 14px 30px rgba(0,0,0,0.55);
@@ -411,6 +424,120 @@ details[open] summary::before{content:"▾ ";}
 .list button.mini:active{transform:scale(.93);}
 .empty-note{padding:8px 0 14px;font-size:12.5px;color:var(--ink-soft,#7d7062);}
 
+/* ---------- stat strip ---------- */
+.stat-strip-section{max-width:960px;margin:56px auto 0;padding:0 clamp(16px,4vw,24px);}
+.stat-strip{
+  display:flex;flex-wrap:wrap;
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  overflow:hidden;
+}
+.stat-cell{
+  flex:1 1 200px;padding:18px 20px;text-align:center;
+  border-left:1px solid rgba(255,255,255,0.06);
+}
+.stat-cell:first-child{border-left:none;}
+.stat-cell .stat-label{
+  font-family:var(--font-display);font-size:13px;letter-spacing:0.08em;color:var(--ink);
+}
+.stat-cell .stat-sub{
+  font-family:var(--font-body);font-size:12px;color:var(--text-muted);margin-top:3px;
+}
+
+/* ---------- how it works ---------- */
+.hiw-section{max-width:960px;margin:64px auto 0;padding:0 clamp(16px,4vw,24px);}
+.hiw-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;
+}
+.hiw-card{
+  background:var(--panel);border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;padding:22px 20px;
+}
+.hiw-card .step-no{
+  font-family:var(--font-display);font-size:28px;font-weight:700;
+  color:var(--amber);opacity:0.5;
+}
+.hiw-card .step-title{
+  font-family:var(--font-display);font-size:16px;color:var(--ink);margin-top:6px;
+}
+.hiw-card .step-body{
+  font-family:var(--font-body);font-size:13.5px;color:var(--text-muted);
+  margin-top:6px;line-height:1.55;
+}
+
+/* ---------- community CTA ---------- */
+.community-section{max-width:960px;margin:64px auto 0;padding:0 clamp(16px,4vw,24px);}
+.community-card{
+  background:var(--ticket);
+  border:1px solid var(--ticket-line);
+  border-top:2px solid var(--ph-blue);
+  border-radius:10px;
+  padding:clamp(24px,5vw,40px);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.5);
+}
+.community-card .community-copy{max-width:480px;}
+.community-card h2{
+  font-family:var(--font-display);font-weight:700;font-size:clamp(22px,4vw,28px);
+  margin:0;color:var(--ink);
+}
+.community-card p{
+  font-family:var(--font-body);font-size:14px;color:var(--text-muted);
+  margin:10px 0 0;line-height:1.55;
+}
+
+/* ---------- recent pulls ---------- */
+.pulls-section{max-width:960px;margin:64px auto 0;padding:0 clamp(16px,4vw,24px);}
+.recent-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:28px;
+}
+.recent-card{
+  background:var(--panel);border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;padding:18px 18px 16px;
+}
+.recent-card .recent-time{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;
+  color:var(--text-muted);text-transform:uppercase;
+}
+.recent-card .recent-label{
+  font-family:var(--font-body);font-size:13.5px;color:var(--ink);
+  margin-top:8px;line-height:1.55;
+}
+.pulls-section .panels{max-width:none;}
+
+/* ---------- footer ---------- */
+.site-footer{
+  margin-top:48px;border-top:1px solid rgba(255,255,255,0.08);
+  padding:32px clamp(16px,4vw,48px) 28px;
+}
+.footer-inner{
+  max-width:960px;margin:0 auto;
+  display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;
+}
+.footer-brand{max-width:280px;}
+.footer-brand .fb-row{display:flex;align-items:center;gap:9px;}
+.footer-brand img{width:24px;height:24px;flex:0 0 auto;}
+.footer-brand .fb-name{
+  font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);
+}
+.footer-brand p{
+  font-family:var(--font-body);font-size:12.5px;color:var(--text-muted);
+  margin-top:8px;line-height:1.55;
+}
+.footer-col-title{
+  font-family:var(--font-display);font-size:11px;letter-spacing:0.08em;
+  color:var(--brass);text-transform:uppercase;margin-bottom:10px;
+}
+.footer-links{display:flex;flex-direction:column;gap:7px;}
+.footer-links a{font-size:13px;color:var(--text-muted);}
+.footer-links a:hover{color:var(--amber);}
+.footer-bottom{
+  max-width:960px;margin:24px auto 0;padding-top:18px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  font-size:11.5px;color:var(--ink-soft);text-align:center;
+}
+
 /* ---------- settings drawer ---------- */
 .drawer-backdrop{
   position:fixed;inset:0;background:rgba(0,0,0,0.55);
@@ -468,7 +595,8 @@ details[open] summary::before{content:"▾ ";}
 #signInButtons button,#signOutBtn{width:100%;text-align:center;}
 #signOutBtn:not([hidden]){margin-top:6px;}
 .foot-note{
-  text-align:center;font-size:12px;color:var(--ink-soft);padding-top:6px;
+  text-align:center;font-size:12px;color:var(--ink-soft);
+  max-width:520px;margin:36px auto 0;padding:0 16px;
 }
 .discord-cta{padding-top:2px;}
 .discord-cta a{
@@ -489,39 +617,114 @@ details[open] summary::before{content:"▾ ";}
 </style>
 </head>
 <body>
-<div class="room">
 
-  <header class="marquee">
-    <button class="settings-btn" id="settingsBtn" aria-label="Open settings" title="Settings">⚙</button>
-    <h1><span class="accent">SCPH</span> Challenge Machine</h1>
-    <p>Pull the lever. Get a dare. Make the song.</p>
-  </header>
+<nav class="topnav">
+  <div class="brand">
+    <img src="assets/scph-icon-slot.svg" alt="SCPH">
+    <span class="wordmark"><span class="accent">SCPH</span> CHALLENGE MACHINE</span>
+  </div>
+  <div class="navlinks">
+    <a class="navlink" href="#arena">Machine</a>
+    <a class="navlink" href="#how-it-works">How it works</a>
+    <a class="navlink" href="#community">Community</a>
+    <a class="navlink" href="#pulls">History</a>
+    <button class="navlink" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">Settings</button>
+    <a class="pill-btn ph" href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join Discord</a>
+  </div>
+</nav>
 
+<section class="hero" id="arena">
+  <div class="eyebrow">Free · No sign-up · SCPH community tool</div>
+  <h1>
+    <span class="line1">YOUR NEXT SONG</span>
+    <span class="line2">STARTS HERE</span>
+  </h1>
+  <p>Pull the lever. Get a genre, mood, subject and twist. Take the dare into Suno and see what happens.</p>
+</section>
+
+<div class="console-section">
   <main class="console" aria-label="Prompt roulette machine">
     <div class="reels" id="reels"></div>
     <div class="lever-row">
       <button class="lever" id="pullLever">Pull</button>
     </div>
   </main>
+</div>
 
-  <div class="ticket-wrap">
-    <article class="ticket" id="ticket" aria-live="polite">
-      <div class="ticket-head">
-        <span id="ticketNo">No. 000001</span>
-        <span id="ticketTime">--:--</span>
-      </div>
-      <div id="ticketBody"></div>
-      <div class="ticket-mission" id="ticketMission"></div>
-      <div class="ticket-actions">
-        <button id="copyBtn" type="button">Copy prompt</button>
-        <button id="favBtn" type="button">☆ Save to favorites</button>
-      </div>
-    </article>
+<div class="ticket-wrap">
+  <article class="ticket" id="ticket" aria-live="polite">
+    <div class="ticket-head">
+      <span id="ticketNo">No. 000001</span>
+      <span id="ticketTime">--:--</span>
+    </div>
+    <div id="ticketBody"></div>
+    <div class="ticket-mission" id="ticketMission"></div>
+    <div class="ticket-actions">
+      <button id="copyBtn" type="button">Copy prompt</button>
+      <button id="favBtn" type="button">☆ Save to favorites</button>
+    </div>
+  </article>
+</div>
+
+<div class="stat-strip-section">
+  <div class="stat-strip">
+    <div class="stat-cell">
+      <div class="stat-label">FOUR REELS</div>
+      <div class="stat-sub">Genre · Mood · Subject · Twist</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">SPIN → LOCK → WRITE</div>
+      <div class="stat-sub">Keep what works, reroll the rest</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">FREE, NO SIGN-UP</div>
+      <div class="stat-sub">Runs entirely in your browser</div>
+    </div>
   </div>
+</div>
+
+<section class="hiw-section" id="how-it-works">
+  <div class="section-eyebrow red">How it works</div>
+  <h2 class="section-h2">Three steps to a finished dare</h2>
+  <div class="hiw-grid">
+    <div class="hiw-card">
+      <div class="step-no">01</div>
+      <div class="step-title">Spin the reels</div>
+      <div class="step-body">Pull the lever for a random genre, mood, subject and twist.</div>
+    </div>
+    <div class="hiw-card">
+      <div class="step-no">02</div>
+      <div class="step-title">Lock what you love</div>
+      <div class="step-body">Keep the parts that click and reroll the rest until it feels right.</div>
+    </div>
+    <div class="hiw-card">
+      <div class="step-no">03</div>
+      <div class="step-title">Write the song</div>
+      <div class="step-body">Take the dare into Suno and see where the constraint takes you.</div>
+    </div>
+  </div>
+</section>
+
+<section class="community-section" id="community">
+  <div class="community-card">
+    <div class="community-copy">
+      <div class="section-eyebrow blue">Community</div>
+      <h2>Join the SCPH Discord</h2>
+      <p>Share your pulls, get feedback on the finished song, and see what other writers made from the same dare.</p>
+    </div>
+    <a class="pill-btn ph" href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord →</a>
+  </div>
+</section>
+
+<section class="pulls-section" id="pulls">
+  <div class="section-eyebrow red">Recent pulls</div>
+  <h2 class="section-h2">Fresh off the reels</h2>
+  <div class="recent-grid" id="recentPulls" hidden></div>
+  <p class="empty-note" id="recentPullsEmpty">No challenges pulled yet — hit the lever above.</p>
 
   <section class="panels">
     <details>
-      <summary>History</summary>
+      <summary>Full history</summary>
       <ul class="list" id="historyList"></ul>
     </details>
     <details>
@@ -529,12 +732,37 @@ details[open] summary::before{content:"▾ ";}
       <ul class="list" id="favList"></ul>
     </details>
   </section>
+</section>
 
-  <p class="foot-note">Every result is a starting point, not a rulebook — bend it if the song wants something else.</p>
-  <p class="foot-note discord-cta">
-    <a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the SCPH Discord community →</a>
-  </p>
-</div>
+<p class="foot-note">Every result is a starting point, not a rulebook — bend it if the song wants something else.</p>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="fb-row">
+        <img src="assets/scph-icon-slot.svg" alt="SCPH">
+        <div class="fb-name"><span class="accent">SCPH</span> Challenge Machine</div>
+      </div>
+      <p>A community songwriting-prompt tool by Suno Creatives PH. Not affiliated with Suno.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Quick links</div>
+      <div class="footer-links">
+        <a href="#arena">Machine</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#pulls">History &amp; favorites</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <div class="footer-links">
+        <a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Discord</a>
+        <a href="https://github.com/jpbbantigue/scph-challenge-machine" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© SCPH — Suno Creatives PH. Built by the community, for the community.</div>
+</footer>
 
 <div class="drawer-backdrop" id="drawerBackdrop" hidden>
   <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
@@ -750,6 +978,8 @@ const els = {
   favBtn: document.getElementById("favBtn"),
   historyList: document.getElementById("historyList"),
   favList: document.getElementById("favList"),
+  recentPulls: document.getElementById("recentPulls"),
+  recentPullsEmpty: document.getElementById("recentPullsEmpty"),
   lever: document.getElementById("pullLever"),
   settingsBtn: document.getElementById("settingsBtn"),
   drawerBackdrop: document.getElementById("drawerBackdrop"),
@@ -887,6 +1117,31 @@ function renderHistory(){
     emptyText:"No challenges pulled yet — hit the lever above.",
     actionLabel:"Restore",
     onAction:(item)=>{ state.current = item; renderTicket(); saveState(); }
+  });
+  renderRecentPulls();
+}
+function renderRecentPulls(){
+  const recent = state.history.slice().reverse().slice(0,3);
+  if(!recent.length){
+    els.recentPulls.hidden = true;
+    els.recentPullsEmpty.hidden = false;
+    return;
+  }
+  els.recentPullsEmpty.hidden = true;
+  els.recentPulls.hidden = false;
+  els.recentPulls.innerHTML = "";
+  recent.forEach(item=>{
+    const card = document.createElement("div");
+    card.className = "recent-card";
+    const time = document.createElement("div");
+    time.className = "recent-time";
+    time.textContent = item.time;
+    const label = document.createElement("div");
+    label.className = "recent-label";
+    label.textContent = item.mission;
+    card.appendChild(time);
+    card.appendChild(label);
+    els.recentPulls.appendChild(card);
   });
 }
 function renderFavorites(){

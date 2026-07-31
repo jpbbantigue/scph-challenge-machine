@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <circle cx="32" cy="32" r="30" fill="#0d0d11"></circle>
+  <path d="M32 2 A30 30 0 0 1 62 32" fill="none" stroke="#00c2ff" stroke-width="3" stroke-linecap="round"></path>
+  <path d="M62 32 A30 30 0 0 1 32 62" fill="none" stroke="#ff2142" stroke-width="3" stroke-linecap="round"></path>
+  <path d="M32 62 A30 30 0 0 1 2 32" fill="none" stroke="#ff2142" stroke-width="3" stroke-linecap="round"></path>
+  <path d="M2 32 A30 30 0 0 1 32 2" fill="none" stroke="#00c2ff" stroke-width="3" stroke-linecap="round"></path>
+  <g><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(0 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(45 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(90 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(135 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(180 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(225 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(270 32 32)"></polygon><polygon points="32,32 29,6 35,6" fill="#fcd116" transform="rotate(315 32 32)"></polygon></g>
+  <circle cx="32" cy="32" r="11" fill="#fcd116"></circle>
+  <circle cx="32" cy="32" r="11" fill="none" stroke="#0d0d11" stroke-width="1.5"></circle>
+  <path d="M32 8 L33.8 12.2 L38.2 12.6 L34.8 15.4 L35.9 19.8 L32 17.3 L28.1 19.8 L29.2 15.4 L25.8 12.6 L30.2 12.2 Z" fill="#ff2142"></path>
+</svg>
