@@ -1,15 +1,15 @@
-# Suno Challenge Machine
+# SCPH Challenge Machine
 
-A webapp that generates random songwriting-challenge prompts (genre + mood + subject + a production twist) for use with Suno. It works as a single static file with no backend at all — and it optionally upgrades to AI-generated (rather than fixed-list) entries if you deploy it with one small serverless function.
+A webapp that generates random songwriting-challenge prompts (genre + mood + subject + a production twist) for use with Suno. It works as a single static file with no backend at all — and it optionally upgrades to AI-generated (rather than fixed-list) entries, and to signed-in accounts, if you deploy it with a few small serverless functions.
 
 ## What it does
 
 - Pull the lever to spin four "reels": Genre, Mood, Subject, Twist.
 - Lock any reel (🔒) to keep its value while the others reroll.
 - Click a single reel window to reroll just that one.
+- Flip any of the four reels on/off with the switch under each one — mix and match freely (e.g. Genre-only, Subject + Twist only, all four, whatever). At least one reel always stays on so there's something to write.
 - Copy the assembled prompt straight into Suno.
-- Save favorites and browse history — stored in the visitor's own browser (`localStorage`), so nothing is shared across users and no server storage is needed.
-- Turn **any** of the four reels off in Settings — mix and match freely (e.g. Genre-only, Subject + Twist only, all four, whatever). At least one reel always stays on so there's something to write.
+- Save favorites and browse history — stored in the visitor's own browser (`localStorage`) by default, so nothing is shared across users and no server storage is needed. Optionally sign in (see **Accounts** below) to sync the same data across devices.
 - Optional **AI-generated entries**, with a choice of three sources: this site's own Groq key (if deployed with one), or a visitor's own Claude or ChatGPT API key.
 
 ## Two ways to run it
@@ -74,6 +74,53 @@ Both platforms have a CLI that runs the functions locally:
 
 Either way, create a `.env` file locally with `GROQ_API_KEY=your-key-here` (and don't commit it).
 
+## Accounts (Phase 2, Netlify only)
+
+Signing in with Google, Discord, or Facebook lets a visitor's favorites, history, and settings follow them across devices instead of staying on one browser (`localStorage`). This is built on Netlify specifically — it uses [Netlify Blobs](https://docs.netlify.com/blobs/overview/) (a zero-config key/value store bundled into the platform) for storage, so it doesn't work on the Vercel deploy path.
+
+It's fully optional and degrades gracefully: with no provider credentials configured, the sign-in buttons just don't appear and the app behaves exactly like Phase 1 (local-only).
+
+**Files involved:**
+```
+netlify/functions/auth-start.js     — redirects to the provider's consent screen
+netlify/functions/auth-callback.js  — exchanges the code, sets a signed session cookie
+netlify/functions/auth-logout.js    — clears the session cookie
+netlify/functions/auth-me.js        — tells the frontend who's signed in (if anyone)
+netlify/functions/data.js           — GET/PUT the signed-in visitor's favorites/history/settings
+netlify/functions/_lib/*.js         — shared session-signing, provider configs, and Blobs helpers
+```
+
+#### 1. Register an OAuth app with each provider you want to offer
+
+You don't have to do all three — only providers with both env vars set (below) show up as sign-in options.
+
+- **Google**: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → Create Credentials → OAuth client ID → Web application. Authorized redirect URI: `https://<your-site>/api/auth-callback?provider=google`.
+- **Discord**: [Discord Developer Portal](https://discord.com/developers/applications) → New Application → OAuth2. Redirect URI: `https://<your-site>/api/auth-callback?provider=discord`.
+- **Facebook**: [Meta for Developers](https://developers.facebook.com/apps) → Create App → add the "Facebook Login" product. Valid OAuth redirect URI: `https://<your-site>/api/auth-callback?provider=facebook`. Note: while the app is in development mode, Facebook only lets *your own* Facebook account sign in — you'd need to submit the app for review to open it to the public.
+
+#### 2. Set environment variables in Netlify
+
+`Site configuration → Environment variables`, mark each as secret:
+
+| Variable | Where it comes from |
+|---|---|
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud Console credential |
+| `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` | Discord application's OAuth2 page |
+| `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` | Facebook app's Basic Settings |
+| `SESSION_SECRET` | Any long random string you generate yourself (e.g. `openssl rand -hex 32`) — signs the session cookie, don't reuse it elsewhere |
+
+You only need the client id/secret pair for the providers you actually registered — omit the rest and those buttons stay hidden.
+
+#### 3. Deploy
+
+Netlify Blobs needs no separate setup or database to provision — it's available automatically to any Netlify site. Push to `main` (or your deploy branch) and redeploy after adding the env vars above.
+
+#### How it works, briefly
+
+- Sign-in is a standard OAuth "authorization code" redirect flow — no third-party auth library, just three small functions per provider path plus one shared session helper (a self-contained HMAC-signed cookie, using only Node's built-in `crypto`, no JWT dependency).
+- On first sign-in, this browser's local favorites/history are merged with whatever's already on the account (de-duplicated by challenge text) rather than one side overwriting the other.
+- After that, favorites/history/settings changes are still saved to `localStorage` immediately (so nothing is lost if a request fails) and pushed to the account in the background, debounced.
+
 ## Customizing the prompt lists
 
 All the content lives in one place near the top of the `<script>` block, in the `DATA` object:
@@ -97,16 +144,13 @@ Add, remove, or edit entries in any of those four arrays — everything else (sp
 - Optional AI-generated entries (Groq site-wide key, or visitor's own Claude/OpenAI BYOK key).
 - Deployable as either a plain static file or with serverless functions (Netlify/Vercel).
 
-### Phase 2 — Accounts + cross-device sync
-The current favorites/history are per-browser only (`localStorage`) — nothing survives a new device, a cleared cache, or a different browser. Phase 2 adds real accounts so that data can follow the person, not the browser:
+### Phase 2 — Accounts + cross-device sync (done, Netlify only)
+Favorites/history/settings can now follow the person instead of the browser — see the **Accounts** section above for setup:
 
-- **Sign in with Google / Discord / Facebook** (OAuth) — no passwords to manage, and Discord fits the Suno/music-community audience particularly well.
-- A small backend + database to store, per account:
-  - Favorites (already-shaped as `{no, time, vals, mission}` objects — the existing shape can move over largely as-is).
-  - History (same shape, capped/paginated instead of the current 100-entry local cap).
-  - Settings (which reels are active, preferred AI source/model) so a signed-in visitor's setup follows them.
-- Anonymous/local mode stays fully supported — signing in is an upgrade, not a requirement. On first sign-in, offer to import the current browser's local favorites/history into the account (one-time merge).
-- Needs: an auth provider (e.g. Auth.js/NextAuth, Clerk, Supabase Auth, or Netlify Identity) + a small database (Supabase/Postgres, Firebase, or a simple Netlify/Vercel-native KV store) — choice mainly depends on which host we lean into, since it changes the serverless-function story already in place for AI mode.
+- **Sign in with Google / Discord / Facebook** (OAuth) — no passwords to manage.
+- Storage via **Netlify Blobs** (no separate database service needed), keyed per account, holding favorites, history, and settings (active reels + locks).
+- Anonymous/local mode stays fully supported — signing in is an upgrade, not a requirement. On first sign-in, local favorites/history are merged into the account rather than overwritten.
+- Netlify-only for now — the Vercel deploy path still works for the static app + AI mode, just not accounts (Vercel would need its own KV choice, e.g. Vercel KV/Upstash, to get parity).
 
 ### Phase 3 — ideas beyond that (not committed, just directions)
 - Shareable links for a single ticket/prompt (e.g. `?t=<id>`) so a challenge can be sent to someone else and render identically, signed in or not.
@@ -117,7 +161,7 @@ The current favorites/history are per-browser only (`localStorage`) — nothing 
 ## Notes
 
 - Fully responsive, keyboard-operable (Tab to a reel + Enter/Space to reroll it, Space on the page to pull the lever), and respects `prefers-reduced-motion`.
-- Data persists per-browser via `localStorage` under the key `sunoChallengeMachine.v1`. Clearing site data resets history/favorites/ticket counter.
-- The only external calls from the page itself are to Google Fonts (Oswald, IBM Plex Mono, Work Sans). AI mode additionally calls your own `/api/generate` endpoint, which in turn calls Groq server-side.
-- No accounts, no tracking, no client-side API keys.
+- Data persists per-browser via `localStorage` under the key `sunoChallengeMachine.v1` (kept as-is from Phase 1 so existing visitors don't lose data on the rename). Clearing site data resets history/favorites/ticket counter, unless signed in — see **Accounts**.
+- The only external calls from the page itself are to Google Fonts (Baloo 2, IBM Plex Mono, Nunito). AI mode additionally calls your own `/api/generate` endpoint, which in turn calls Groq server-side; account sign-in calls `/api/auth-*` and `/api/data`.
+- No tracking, no client-side API keys sent anywhere but the provider they're for. Accounts are opt-in (see **Accounts** above) — nothing is tracked beyond what's needed to sync your own favorites/history.
 - The app is structured category-by-category (`DATA`, `LABELS`, `ORDER`, `AI_CAT_DESC` all keyed the same way) so it'd be straightforward later to add a "project type" switch (songwriting vs. general writing vs. app ideas, etc.) that swaps in a different `DATA` set — not built yet, but the code doesn't fight that direction.
