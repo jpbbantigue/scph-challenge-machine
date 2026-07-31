@@ -46,23 +46,26 @@
 </script>
 <style>
 :root{
-  --bg-0:#0f0d0b;
-  --bg-1:#17140f;
-  --panel:#211d18;
-  --panel-hi:#332c24;
-  --panel-lo:#161310;
-  --brass:#c9a227;
-  --brass-dim:#8a6f1e;
-  --amber:#ffb238;
-  --amber-dim:#a3701c;
-  --red:#e14b3d;
-  --red-dim:#8f271e;
-  --ticket:#f3ecdd;
-  --ticket-line:#c9bfa6;
-  --ink:#2b2620;
-  --ink-soft:#5b5142;
-  --text-muted:#b8ab95;
-  --focus:#ffcf6e;
+  --bg-0:#08080b;
+  --bg-1:#0d0d11;
+  --panel:#131318;
+  --panel-hi:#1b1b22;
+  --panel-lo:#0a0a0d;
+  --brass:#fcd116;
+  --brass-dim:#8a7a1e;
+  --amber:#ff2142;
+  --amber-dim:#7a0f22;
+  --amber-hi:#ff4d6b;
+  --ph-blue:#00c2ff;
+  --ph-blue-hi:#6fe0ff;
+  --red:#ff2142;
+  --red-dim:#7a0f22;
+  --ticket:#121218;
+  --ticket-line:rgba(255,255,255,0.12);
+  --ink:#f5f5f7;
+  --ink-soft:#9a9aa6;
+  --text-muted:#a6a6b2;
+  --focus:#00c2ff;
   --font-display:'Oswald',sans-serif;
   --font-mono:'IBM Plex Mono',monospace;
   --font-body:'Work Sans',sans-serif;
@@ -72,7 +75,7 @@
 html,body{margin:0;padding:0;}
 body{
   background:
-    radial-gradient(ellipse at 50% -10%, #23201a 0%, transparent 55%),
+    radial-gradient(ellipse at 50% -10%, #1a0d12 0%, transparent 55%),
     radial-gradient(ellipse at 50% 120%, #000 0%, transparent 60%),
     var(--bg-0);
   color:var(--text-muted);
@@ -147,7 +150,7 @@ body{
 
 /* ---------- console ---------- */
 .console{
-  background:linear-gradient(180deg,#2c2620,#1c1813 60%,#141110);
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel) 60%,var(--panel-lo));
   border-radius:14px;
   padding:22px 18px 26px;
   box-shadow:
@@ -177,7 +180,7 @@ body{
   width:26px;height:26px;
   border-radius:50%;
   border:1px solid var(--brass-dim);
-  background:radial-gradient(circle at 35% 30%,#4a4034,#201c17);
+  background:radial-gradient(circle at 35% 30%,var(--panel-hi),var(--panel-lo));
   color:var(--text-muted);
   font-size:12px;
   cursor:pointer;
@@ -189,7 +192,7 @@ body{
 .lock-toggle[aria-pressed="true"]{
   color:#fff;
   border-color:var(--red);
-  box-shadow:0 0 8px 2px rgba(225,75,61,0.65), 0 0 0 2px rgba(225,75,61,0.25) inset;
+  box-shadow:0 0 8px 2px rgba(255,33,66,0.65), 0 0 0 2px rgba(255,33,66,0.25) inset;
 }
 .lock-toggle:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{
   outline:2px solid var(--focus);
@@ -199,7 +202,7 @@ body{
 .reel-window{
   width:100%;
   min-height:74px;
-  background:linear-gradient(180deg,#0c0a08,#141010);
+  background:linear-gradient(180deg,var(--panel-lo),#000);
   border-radius:6px;
   border:1px solid #000;
   box-shadow:
@@ -213,7 +216,7 @@ body{
   cursor:pointer;
   transition:box-shadow .15s ease, transform .1s ease;
 }
-.reel-window:hover{box-shadow:0 2px 6px rgba(0,0,0,0.7) inset, 0 0 0 1px rgba(255,178,56,0.25);transform:translateY(-1px);}
+.reel-window:hover{box-shadow:0 2px 6px rgba(0,0,0,0.7) inset, 0 0 0 1px rgba(255,33,66,0.3);transform:translateY(-1px);}
 .reel-window:active{transform:translateY(0) scale(.98);}
 
 .reel-value{
@@ -224,7 +227,7 @@ body{
   line-height:1.25;
   text-align:center;
   color:var(--amber);
-  text-shadow:0 0 6px rgba(255,178,56,0.55), 0 0 1px rgba(255,178,56,0.4);
+  text-shadow:0 0 6px rgba(255,33,66,0.6), 0 0 1px rgba(255,33,66,0.4);
   word-break:break-word;
 }
 .reel-window.spinning .reel-value{filter:blur(1.5px);opacity:.85;}
@@ -302,10 +305,11 @@ body{
   max-width:480px;
   background:var(--ticket);
   color:var(--ink);
-  border-radius:2px;
+  border:1px solid var(--ticket-line);
+  border-top:2px solid var(--ph-blue);
+  border-radius:10px;
   padding:22px 22px 18px;
-  transform:rotate(-0.6deg);
-  box-shadow:0 14px 30px rgba(0,0,0,0.45), 0 2px 0 rgba(0,0,0,0.1);
+  box-shadow:0 14px 30px rgba(0,0,0,0.55);
   font-family:var(--font-mono);
 }
 .ticket::before{
@@ -443,7 +447,7 @@ details[open] summary::before{content:"▾ ";}
   transition:border-color .15s ease, box-shadow .15s ease;
 }
 .drawer select:focus,.drawer input[type=text]:focus,.drawer input[type=password]:focus{
-  outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,178,56,0.2);
+  outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,33,66,0.25);
 }
 .drawer select{font-family:var(--font-body);font-size:13px;cursor:pointer;}
 .byok-fields{margin-top:2px;}
