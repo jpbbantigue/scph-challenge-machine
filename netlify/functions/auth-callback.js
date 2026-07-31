@@ -58,7 +58,7 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 302,
-    headers: { Location: "/" },
+    headers: { Location: "/", "Cache-Control": "no-store" },
     multiValueHeaders: {
       "Set-Cookie": [
         sessionCookie(token),

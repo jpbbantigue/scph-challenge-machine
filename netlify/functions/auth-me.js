@@ -10,7 +10,7 @@ exports.handler = async (event) => {
     : { signedIn: false, providers };
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     body: JSON.stringify(body)
   };
 };

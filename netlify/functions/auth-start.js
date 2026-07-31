@@ -25,7 +25,8 @@ exports.handler = async (event) => {
     statusCode: 302,
     headers: {
       Location: cfg.authorizeUrl + "?" + params.toString(),
-      "Set-Cookie": "scph_oauth_state=" + state + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600"
+      "Set-Cookie": "scph_oauth_state=" + state + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600",
+      "Cache-Control": "no-store"
     },
     body: ""
   };
