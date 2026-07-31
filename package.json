@@ -1,8 +1,11 @@
 {
-  "name": "suno-challenge-machine",
+  "name": "scph-challenge-machine",
   "private": true,
   "version": "1.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
   }
 }

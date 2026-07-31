@@ -3,41 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Suno Challenge Machine — song prompt roulette</title>
-<meta name="description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject and a production twist.">
+<title>SCPH Challenge Machine — song prompt roulette</title>
+<meta name="description" content="Pull the lever for a random SCPH songwriting challenge: genre, mood, subject and a production twist.">
+<link rel="icon" href="favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg-0:#0f0d0b;
-  --bg-1:#17140f;
-  --panel:#211d18;
-  --panel-hi:#332c24;
-  --panel-lo:#161310;
-  --brass:#c9a227;
-  --brass-dim:#8a6f1e;
-  --amber:#ffb238;
-  --amber-dim:#a3701c;
-  --red:#e14b3d;
-  --red-dim:#8f271e;
-  --ticket:#f3ecdd;
-  --ticket-line:#c9bfa6;
-  --ink:#2b2620;
-  --ink-soft:#5b5142;
-  --text-muted:#b8ab95;
-  --focus:#ffcf6e;
-  --font-display:'Oswald',sans-serif;
+  --bg-0:#0a1132;
+  --bg-1:#101a4a;
+  --panel:#152163;
+  --panel-hi:#213585;
+  --panel-lo:#0b1340;
+  --brass:#ffd447;
+  --brass-dim:#caa412;
+  --amber:#ffd447;
+  --amber-dim:#e0a90f;
+  --blue:#3f6bff;
+  --blue-dim:#0038a8;
+  --red:#ff4d5e;
+  --red-dim:#ce1126;
+  --ticket:#fff8ea;
+  --ticket-line:#e6d6a3;
+  --ink:#2a2210;
+  --ink-soft:#7a6a3a;
+  --text-muted:#c3cdf5;
+  --focus:#ffd447;
+  --font-display:'Baloo 2',sans-serif;
   --font-mono:'IBM Plex Mono',monospace;
-  --font-body:'Work Sans',sans-serif;
+  --font-body:'Nunito',sans-serif;
 }
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
   background:
-    radial-gradient(ellipse at 50% -10%, #23201a 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 120%, #000 0%, transparent 60%),
+    radial-gradient(circle at 50% 0%, #1c2b7a 0%, transparent 55%),
+    radial-gradient(circle at 15% 100%, rgba(206,17,38,0.25) 0%, transparent 45%),
+    radial-gradient(circle at 85% 100%, rgba(63,107,255,0.25) 0%, transparent 45%),
     var(--bg-0);
   color:var(--text-muted);
   font-family:var(--font-body);
@@ -58,63 +62,72 @@ body{
 /* ---------- header / marquee ---------- */
 .marquee{
   position:relative;
+  overflow:hidden;
   background:linear-gradient(180deg,var(--panel-hi),var(--panel) 40%,var(--panel-lo));
-  border-radius:10px;
-  padding:22px 24px 20px;
+  border-radius:20px;
+  padding:26px 24px 22px;
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.05) inset,
-    0 -6px 14px rgba(0,0,0,0.5) inset,
-    0 10px 26px rgba(0,0,0,0.55);
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 -6px 14px rgba(0,0,0,0.4) inset,
+    0 10px 26px rgba(0,10,40,0.55);
   text-align:center;
+  border-top:3px solid var(--blue);
+  border-bottom:3px solid var(--red-dim);
 }
-.marquee::before,.marquee::after{
+.marquee::before{
   content:"";
   position:absolute;
-  top:10px;
-  width:8px;height:8px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#e8cf7a,var(--brass-dim));
-  box-shadow:0 1px 1px rgba(0,0,0,0.6);
+  top:-40%;left:50%;
+  width:340px;height:340px;
+  transform:translateX(-50%);
+  background:conic-gradient(from 0deg, var(--amber) 0deg 8deg, transparent 8deg 22.5deg);
+  opacity:0.16;
+  border-radius:50%;
+  pointer-events:none;
 }
-.marquee::before{left:12px;}
-.marquee::after{right:12px;}
 .marquee h1{
+  position:relative;
   font-family:var(--font-display);
   font-weight:700;
-  letter-spacing:0.06em;
-  font-size:clamp(22px,5vw,34px);
+  letter-spacing:0.02em;
+  font-size:clamp(24px,5.5vw,36px);
   margin:0;
-  color:#f1e6c9;
-  text-shadow:0 1px 0 rgba(255,255,255,0.15), 0 2px 3px rgba(0,0,0,0.8);
+  color:#fff6dc;
+  text-shadow:0 1px 0 rgba(255,255,255,0.2), 0 3px 0 var(--blue-dim), 0 6px 10px rgba(0,0,0,0.5);
 }
+.marquee h1 .accent{color:var(--amber);}
 .marquee p{
-  margin:6px 0 0;
-  font-size:13px;
-  letter-spacing:0.03em;
+  position:relative;
+  margin:8px 0 0;
+  font-size:13.5px;
+  font-weight:600;
+  letter-spacing:0.01em;
   color:var(--text-muted);
 }
 .settings-btn{
   position:absolute;
   top:14px;right:14px;
-  width:30px;height:30px;
+  width:34px;height:34px;
   border-radius:50%;
-  border:1px solid var(--brass-dim);
+  border:2px solid var(--amber-dim);
   background:var(--panel-lo);
   color:var(--brass);
-  font-size:15px;
+  font-size:16px;
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;
 }
-.settings-btn:hover{color:var(--amber);border-color:var(--amber-dim);}
+.settings-btn:hover{color:var(--amber);border-color:var(--amber);transform:rotate(25deg) scale(1.08);}
 
 /* ---------- console ---------- */
 .console{
-  background:linear-gradient(180deg,#2c2620,#1c1813 60%,#141110);
-  border-radius:14px;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel) 55%,var(--panel-lo));
+  border-radius:22px;
   padding:22px 18px 26px;
   box-shadow:
     0 1px 0 rgba(255,255,255,0.06) inset,
-    0 -10px 22px rgba(0,0,0,0.55) inset,
-    0 14px 30px rgba(0,0,0,0.55);
+    0 -10px 22px rgba(0,0,0,0.4) inset,
+    0 14px 30px rgba(0,10,40,0.5);
 }
 
 .reels{
@@ -135,20 +148,21 @@ body{
 }
 
 .lock-toggle{
-  width:26px;height:26px;
+  width:28px;height:28px;
   border-radius:50%;
-  border:1px solid var(--brass-dim);
-  background:radial-gradient(circle at 35% 30%,#4a4034,#201c17);
+  border:2px solid var(--blue-dim);
+  background:radial-gradient(circle at 35% 30%,#2c3d8f,#12193f);
   color:var(--text-muted);
   font-size:12px;
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:box-shadow .15s ease, color .15s ease, border-color .15s ease;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease, color .15s ease, border-color .15s ease;
 }
+.lock-toggle:hover{transform:scale(1.1) rotate(-8deg);}
 .lock-toggle[aria-pressed="true"]{
   color:#fff;
   border-color:var(--red);
-  box-shadow:0 0 8px 2px rgba(225,75,61,0.65), 0 0 0 2px rgba(225,75,61,0.25) inset;
+  box-shadow:0 0 8px 2px rgba(255,77,94,0.6), 0 0 0 2px rgba(255,77,94,0.25) inset;
 }
 .lock-toggle:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{
   outline:2px solid var(--focus);
@@ -158,11 +172,11 @@ body{
 .reel-window{
   width:100%;
   min-height:74px;
-  background:linear-gradient(180deg,#0c0a08,#141010);
-  border-radius:6px;
-  border:1px solid #000;
+  background:linear-gradient(180deg,var(--panel-lo),#0e153e);
+  border-radius:14px;
+  border:2px solid var(--blue-dim);
   box-shadow:
-    0 2px 6px rgba(0,0,0,0.7) inset,
+    0 2px 6px rgba(0,0,0,0.5) inset,
     0 0 0 1px rgba(255,255,255,0.03);
   display:flex;
   align-items:center;
@@ -170,8 +184,9 @@ body{
   padding:8px 6px;
   overflow:hidden;
   cursor:pointer;
+  transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.reel-window:hover{box-shadow:0 2px 6px rgba(0,0,0,0.7) inset, 0 0 0 1px rgba(255,178,56,0.25);}
+.reel-window:hover{transform:translateY(-2px) scale(1.02);border-color:var(--amber);box-shadow:0 4px 10px rgba(0,0,0,0.4) inset, 0 0 0 1px rgba(255,212,71,0.35);}
 
 .reel-value{
   font-family:var(--font-display);
@@ -181,7 +196,7 @@ body{
   line-height:1.25;
   text-align:center;
   color:var(--amber);
-  text-shadow:0 0 6px rgba(255,178,56,0.55), 0 0 1px rgba(255,178,56,0.4);
+  text-shadow:0 0 6px rgba(255,212,71,0.55), 0 0 1px rgba(255,212,71,0.4);
   word-break:break-word;
 }
 .reel-window.spinning .reel-value{filter:blur(1.5px);opacity:.85;}
@@ -197,36 +212,57 @@ body{
   letter-spacing:0.16em;
   color:var(--brass);
 }
-.reel-unit.disabled{opacity:0.35;}
+.reel-unit.disabled .reel-window,.reel-unit.disabled .reel-label,.reel-unit.disabled .lock-toggle{opacity:0.35;}
 .reel-unit.disabled .reel-window{cursor:not-allowed;}
+
+.reel-switch{display:inline-flex;cursor:pointer;}
+.reel-switch input{position:absolute;opacity:0;width:1px;height:1px;}
+.reel-switch-track{
+  width:34px;height:18px;border-radius:999px;
+  background:var(--panel-lo);
+  border:2px solid var(--blue-dim);
+  display:inline-flex;align-items:center;
+  padding:1px;
+  transition:background .15s ease, border-color .15s ease;
+}
+.reel-switch-thumb{
+  width:12px;height:12px;border-radius:50%;
+  background:var(--text-muted);
+  transform:translateX(0);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), background .15s ease;
+}
+.reel-switch input:checked + .reel-switch-track{background:var(--blue-dim);border-color:var(--amber);}
+.reel-switch input:checked + .reel-switch-track .reel-switch-thumb{transform:translateX(16px);background:var(--amber);}
+.reel-switch input:focus-visible + .reel-switch-track{outline:2px solid var(--focus);outline-offset:2px;}
 
 /* lever */
 .lever-row{display:flex;justify-content:center;}
 .lever{
   font-family:var(--font-display);
   font-weight:700;
-  letter-spacing:0.12em;
-  font-size:17px;
-  color:#3a0f0a;
-  background:radial-gradient(circle at 35% 30%,#ff8a72,var(--red) 55%,var(--red-dim) 100%);
-  border:none;
+  letter-spacing:0.06em;
+  font-size:18px;
+  color:#3a0508;
+  background:radial-gradient(circle at 35% 30%,#ff8a94,var(--red) 55%,var(--red-dim) 100%);
+  border:3px solid var(--amber);
   border-radius:999px;
   padding:16px 46px;
   cursor:pointer;
   box-shadow:
     0 1px 0 rgba(255,255,255,0.4) inset,
-    0 -4px 8px rgba(0,0,0,0.35) inset,
+    0 -4px 8px rgba(0,0,0,0.25) inset,
     0 8px 0 var(--red-dim),
-    0 12px 18px rgba(0,0,0,0.55);
-  transition:transform .08s ease, box-shadow .08s ease;
+    0 12px 18px rgba(0,10,40,0.5);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .12s ease;
 }
+.lever:hover:not(:disabled){transform:scale(1.05);}
 .lever:active,.lever.pressed{
   transform:translateY(6px);
   box-shadow:
     0 1px 0 rgba(255,255,255,0.3) inset,
-    0 -3px 6px rgba(0,0,0,0.35) inset,
+    0 -3px 6px rgba(0,0,0,0.3) inset,
     0 2px 0 var(--red-dim),
-    0 4px 8px rgba(0,0,0,0.5);
+    0 4px 8px rgba(0,10,40,0.45);
 }
 .lever:disabled{opacity:.6;cursor:default;}
 
@@ -238,16 +274,23 @@ body{
   max-width:480px;
   background:var(--ticket);
   color:var(--ink);
-  border-radius:2px;
-  padding:22px 22px 18px;
+  border-radius:14px;
+  padding:24px 22px 18px;
   transform:rotate(-0.6deg);
-  box-shadow:0 14px 30px rgba(0,0,0,0.45), 0 2px 0 rgba(0,0,0,0.1);
+  box-shadow:0 14px 30px rgba(0,8,35,0.5), 0 2px 0 rgba(0,0,0,0.1);
   font-family:var(--font-mono);
+  overflow:hidden;
+}
+.ticket::after{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;height:6px;
+  background:linear-gradient(90deg,var(--blue-dim) 0 34%,var(--red-dim) 34% 67%,var(--amber) 67% 100%);
 }
 .ticket::before{
   content:"";
   position:absolute;
-  top:-9px;left:0;right:0;
+  top:-3px;left:0;right:0;
   height:18px;
   background-image:radial-gradient(circle at 8px 9px, transparent 8px, var(--ticket) 8.5px);
   background-size:18px 18px;
@@ -307,9 +350,10 @@ body{
 .panels{display:flex;flex-direction:column;gap:10px;}
 details{
   background:var(--panel);
-  border-radius:8px;
+  border-radius:16px;
   padding:2px 16px;
-  box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
+  border:1px solid rgba(255,212,71,0.12);
 }
 summary{
   font-family:var(--font-display);
@@ -345,10 +389,11 @@ details[open] summary::before{content:"▾ ";}
 .drawer-backdrop:not([hidden]){display:flex;}
 .drawer{
   background:var(--panel);
-  border-radius:12px;
+  border-radius:20px;
   padding:22px 22px 20px;
   width:100%;max-width:340px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+  box-shadow:0 20px 50px rgba(0,5,30,0.6);
+  border:2px solid var(--blue-dim);
 }
 .drawer h2{
   font-family:var(--font-display);
@@ -383,6 +428,8 @@ details[open] summary::before{content:"▾ ";}
 .hint{font-size:11.5px;color:var(--ink-soft,#7d7062);margin-top:2px;}
 .ai-error{color:var(--red)!important;}
 .drawer hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:14px 0;}
+#signInButtons{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+#signInButtons button,#signOutBtn{width:100%;text-align:center;}
 .foot-note{
   text-align:center;font-size:12px;color:#6b6154;padding-top:6px;
 }
@@ -403,8 +450,8 @@ details[open] summary::before{content:"▾ ";}
 
   <header class="marquee">
     <button class="settings-btn" id="settingsBtn" aria-label="Open settings" title="Settings">⚙</button>
-    <h1>Suno Challenge Machine</h1>
-    <p>Pull the lever. Get a dare. Make the song.</p>
+    <h1><span class="accent">SCPH</span> Challenge Machine</h1>
+    <p>Pull the lever. Get a dare. Make the song. 🎶</p>
   </header>
 
   <main class="console" aria-label="Prompt roulette machine">
@@ -446,11 +493,19 @@ details[open] summary::before{content:"▾ ";}
 <div class="drawer-backdrop" id="drawerBackdrop" hidden>
   <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
     <h2 id="drawerTitle">Settings</h2>
-    <label><input type="checkbox" id="toggleGenre" checked> Include Genre reel</label>
-    <label><input type="checkbox" id="toggleMood" checked> Include Mood reel</label>
-    <label><input type="checkbox" id="toggleSubject" checked> Include Subject reel</label>
-    <label><input type="checkbox" id="toggleTwist" checked> Include Twist reel</label>
-    <p class="hint">At least one reel has to stay on so there's something to write.</p>
+    <div id="accountSection">
+      <label class="field-label">Account</label>
+      <p class="hint" id="accountStatus">Checking sign-in status…</p>
+      <div id="signInButtons" hidden>
+        <button type="button" class="done account-btn" data-provider="google">Sign in with Google</button>
+        <button type="button" class="done account-btn" data-provider="discord">Sign in with Discord</button>
+        <button type="button" class="done account-btn" data-provider="facebook">Sign in with Facebook</button>
+      </div>
+      <button type="button" class="done" id="signOutBtn" hidden>Sign out</button>
+      <p class="hint">Signing in syncs your favorites, history, and settings to your account, so they follow you across devices and browsers.</p>
+    </div>
+    <hr>
+    <p class="hint">Flip reels on or off with the switch under each one on the machine. At least one has to stay on.</p>
     <hr>
     <label class="field-label" for="aiSource">AI-generated entries</label>
     <select id="aiSource">
@@ -517,6 +572,103 @@ function loadState(){
 }
 function saveState(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){/* storage unavailable */}
+  debouncedPushAccountData();
+}
+
+/* ---------------- account sync (Phase 2) ---------------- */
+const account = { signedIn:false, provider:null, name:null };
+
+function debounce(fn, wait){
+  let t;
+  return function(){ clearTimeout(t); t = setTimeout(fn, wait); };
+}
+
+async function pushAccountData(){
+  if(!account.signedIn) return;
+  try{
+    await fetch("/api/data", {
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        favorites: state.favorites,
+        history: state.history,
+        settings: { active: state.active, locks: state.locks }
+      })
+    });
+  }catch(e){ /* best-effort — local data is still safe either way */ }
+}
+const debouncedPushAccountData = debounce(pushAccountData, 800);
+
+// Combines two lists of tickets, de-duplicating by mission text, newest first.
+function mergeTicketLists(a, b){
+  const seen = new Set();
+  const merged = [];
+  a.concat(b).forEach(item=>{
+    if(!item || seen.has(item.mission)) return;
+    seen.add(item.mission);
+    merged.push(item);
+  });
+  return merged;
+}
+
+async function pullAccountData(){
+  let res;
+  try{ res = await fetch("/api/data"); }catch(e){ return; }
+  if(!res.ok) return;
+  const remote = await res.json();
+  state.favorites = mergeTicketLists(state.favorites, remote.favorites || []);
+  state.history = mergeTicketLists(state.history, remote.history || []).slice(-100);
+  if(remote.settings){
+    if(remote.settings.active) state.active = remote.settings.active;
+    if(remote.settings.locks) state.locks = remote.settings.locks;
+  }
+  saveState();
+  ORDER.forEach(cat=>{ activeToggleInput(cat).checked = !!state.active[cat]; });
+  applyActiveClasses();
+  renderLocks();
+  renderHistory();
+  renderFavorites();
+}
+
+function renderAccountUI(){
+  if(!els.accountStatus) return;
+  if(account.signedIn){
+    els.accountStatus.textContent = "Signed in with "+account.provider+" as "+account.name+". Synced across your devices.";
+    els.signInButtons.hidden = true;
+    els.signOutBtn.hidden = false;
+  } else {
+    els.accountStatus.textContent = "Not signed in — favorites/history stay on this browser only.";
+    els.signInButtons.hidden = false;
+    els.signOutBtn.hidden = true;
+  }
+}
+
+async function checkAccount(){
+  let res, data;
+  try{
+    res = await fetch("/api/auth-me");
+    data = await res.json();
+  }catch(e){
+    els.accountStatus.textContent = "Accounts aren't available right now.";
+    els.signInButtons.hidden = true;
+    els.signOutBtn.hidden = true;
+    return;
+  }
+  const providers = data.providers || [];
+  els.signInButtons.querySelectorAll(".account-btn").forEach(btn=>{
+    btn.hidden = !providers.includes(btn.dataset.provider);
+  });
+  if(providers.length === 0){
+    els.accountStatus.textContent = "Accounts aren't configured on this deployment yet.";
+    els.signInButtons.hidden = true;
+    els.signOutBtn.hidden = true;
+    return;
+  }
+  account.signedIn = !!data.signedIn;
+  account.provider = data.provider || null;
+  account.name = data.name || null;
+  renderAccountUI();
+  if(account.signedIn) await pullAccountData();
 }
 
 function pick(cat){
@@ -533,7 +685,11 @@ ORDER.forEach(cat=>{
   unit.innerHTML =
     '<button class="lock-toggle" data-cat="'+cat+'" aria-pressed="false" title="Lock this reel" aria-label="Lock '+LABELS[cat]+' reel">&#128274;</button>'+
     '<div class="reel-window" data-cat="'+cat+'" tabindex="0" role="button" aria-label="Reroll '+LABELS[cat]+'"><span class="reel-value">—</span></div>'+
-    '<div class="reel-label">'+LABELS[cat].toUpperCase()+'</div>';
+    '<div class="reel-label">'+LABELS[cat].toUpperCase()+'</div>'+
+    '<label class="reel-switch" title="Turn the '+LABELS[cat]+' reel on or off">'+
+      '<input type="checkbox" class="active-toggle" data-cat="'+cat+'" checked>'+
+      '<span class="reel-switch-track"><span class="reel-switch-thumb"></span></span>'+
+    '</label>';
   reelsEl.appendChild(unit);
 });
 
@@ -551,10 +707,6 @@ const els = {
   settingsBtn: document.getElementById("settingsBtn"),
   drawerBackdrop: document.getElementById("drawerBackdrop"),
   closeSettings: document.getElementById("closeSettings"),
-  toggleGenre: document.getElementById("toggleGenre"),
-  toggleMood: document.getElementById("toggleMood"),
-  toggleSubject: document.getElementById("toggleSubject"),
-  toggleTwist: document.getElementById("toggleTwist"),
   aiSource: document.getElementById("aiSource"),
   byokFields: document.getElementById("byokFields"),
   byokKey: document.getElementById("byokKey"),
@@ -562,6 +714,9 @@ const els = {
   byokDestNote: document.getElementById("byokDestNote"),
   testAIBtn: document.getElementById("testAIBtn"),
   aiStatus: document.getElementById("aiStatus"),
+  accountStatus: document.getElementById("accountStatus"),
+  signInButtons: document.getElementById("signInButtons"),
+  signOutBtn: document.getElementById("signOutBtn"),
   announcer: document.getElementById("announcer")
 };
 
@@ -1019,20 +1174,21 @@ els.favBtn.addEventListener("click", ()=>{
   saveState();
 });
 
-els.settingsBtn.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = false; els.toggleMood.focus(); });
+els.settingsBtn.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = false; els.closeSettings.focus(); });
 els.closeSettings.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = true; els.settingsBtn.focus(); });
 els.drawerBackdrop.addEventListener("click", (e)=>{ if(e.target===els.drawerBackdrop) els.drawerBackdrop.hidden = true; });
 document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && !els.drawerBackdrop.hidden) els.drawerBackdrop.hidden = true; });
 
-const reelToggles = {genre: els.toggleGenre, mood: els.toggleMood, subject: els.toggleSubject, twist: els.toggleTwist};
+function activeToggleInput(cat){ return reelsEl.querySelector('.active-toggle[data-cat="'+cat+'"]'); }
 ORDER.forEach(cat=>{
-  reelToggles[cat].addEventListener("change", ()=>{
-    if(!reelToggles[cat].checked && activeCount() <= 1 && isActive(cat)){
+  const input = activeToggleInput(cat);
+  input.addEventListener("change", ()=>{
+    if(!input.checked && activeCount() <= 1 && isActive(cat)){
       // don't allow turning off the last remaining active reel
-      reelToggles[cat].checked = true;
+      input.checked = true;
       return;
     }
-    state.active[cat] = reelToggles[cat].checked;
+    state.active[cat] = input.checked;
     applyActiveClasses();
     if(state.current){ state.current.mission = buildMission(state.current.vals); renderTicket(); }
     saveState();
@@ -1081,12 +1237,17 @@ els.byokModel.addEventListener("input", ()=>{
 });
 els.testAIBtn.addEventListener("click", ()=>{ testAIEndpoint(); });
 
+els.signInButtons.querySelectorAll(".account-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{ window.location.href = "/api/auth-start?provider="+btn.dataset.provider; });
+});
+els.signOutBtn.addEventListener("click", async ()=>{
+  try{ await fetch("/api/auth-logout", {method:"POST"}); }catch(e){}
+  window.location.reload();
+});
+
 /* ---------------- init ---------------- */
 function init(){
-  els.toggleGenre.checked = !!state.active.genre;
-  els.toggleMood.checked = !!state.active.mood;
-  els.toggleSubject.checked = !!state.active.subject;
-  els.toggleTwist.checked = !!state.active.twist;
+  ORDER.forEach(cat=>{ activeToggleInput(cat).checked = !!state.active[cat]; });
   applyActiveClasses();
   renderLocks();
 
@@ -1106,6 +1267,7 @@ function init(){
   }
   renderHistory();
   renderFavorites();
+  checkAccount();
 }
 init();
 
