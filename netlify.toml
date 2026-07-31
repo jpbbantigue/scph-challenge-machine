@@ -1,0 +1,18 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[functions]
+  node_bundler = "esbuild"
+
+# The app's client code always calls /api/generate. On Vercel that path is
+# already a native serverless function (api/generate.js). On Netlify this
+# redirect points the same path at the equivalent Netlify Function, so the
+# exact same index.html works unmodified on either host.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

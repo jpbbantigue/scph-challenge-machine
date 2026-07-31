@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suno Challenge Machine — song prompt roulette</title>
+<meta name="description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject and a production twist.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#0f0d0b;
+  --bg-1:#17140f;
+  --panel:#211d18;
+  --panel-hi:#332c24;
+  --panel-lo:#161310;
+  --brass:#c9a227;
+  --brass-dim:#8a6f1e;
+  --amber:#ffb238;
+  --amber-dim:#a3701c;
+  --red:#e14b3d;
+  --red-dim:#8f271e;
+  --ticket:#f3ecdd;
+  --ticket-line:#c9bfa6;
+  --ink:#2b2620;
+  --ink-soft:#5b5142;
+  --text-muted:#b8ab95;
+  --focus:#ffcf6e;
+  --font-display:'Oswald',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --font-body:'Work Sans',sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at 50% -10%, #23201a 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 120%, #000 0%, transparent 60%),
+    var(--bg-0);
+  color:var(--text-muted);
+  font-family:var(--font-body);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:32px 16px 64px;
+}
+
+.room{
+  width:100%;
+  max-width:760px;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+/* ---------- header / marquee ---------- */
+.marquee{
+  position:relative;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel) 40%,var(--panel-lo));
+  border-radius:10px;
+  padding:22px 24px 20px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.05) inset,
+    0 -6px 14px rgba(0,0,0,0.5) inset,
+    0 10px 26px rgba(0,0,0,0.55);
+  text-align:center;
+}
+.marquee::before,.marquee::after{
+  content:"";
+  position:absolute;
+  top:10px;
+  width:8px;height:8px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#e8cf7a,var(--brass-dim));
+  box-shadow:0 1px 1px rgba(0,0,0,0.6);
+}
+.marquee::before{left:12px;}
+.marquee::after{right:12px;}
+.marquee h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  letter-spacing:0.06em;
+  font-size:clamp(22px,5vw,34px);
+  margin:0;
+  color:#f1e6c9;
+  text-shadow:0 1px 0 rgba(255,255,255,0.15), 0 2px 3px rgba(0,0,0,0.8);
+}
+.marquee p{
+  margin:6px 0 0;
+  font-size:13px;
+  letter-spacing:0.03em;
+  color:var(--text-muted);
+}
+.settings-btn{
+  position:absolute;
+  top:14px;right:14px;
+  width:30px;height:30px;
+  border-radius:50%;
+  border:1px solid var(--brass-dim);
+  background:var(--panel-lo);
+  color:var(--brass);
+  font-size:15px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.settings-btn:hover{color:var(--amber);border-color:var(--amber-dim);}
+
+/* ---------- console ---------- */
+.console{
+  background:linear-gradient(180deg,#2c2620,#1c1813 60%,#141110);
+  border-radius:14px;
+  padding:22px 18px 26px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 -10px 22px rgba(0,0,0,0.55) inset,
+    0 14px 30px rgba(0,0,0,0.55);
+}
+
+.reels{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:22px;
+}
+@media (max-width:640px){
+  .reels{grid-template-columns:1fr 1fr;}
+}
+
+.reel-unit{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+
+.lock-toggle{
+  width:26px;height:26px;
+  border-radius:50%;
+  border:1px solid var(--brass-dim);
+  background:radial-gradient(circle at 35% 30%,#4a4034,#201c17);
+  color:var(--text-muted);
+  font-size:12px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:box-shadow .15s ease, color .15s ease, border-color .15s ease;
+}
+.lock-toggle[aria-pressed="true"]{
+  color:#fff;
+  border-color:var(--red);
+  box-shadow:0 0 8px 2px rgba(225,75,61,0.65), 0 0 0 2px rgba(225,75,61,0.25) inset;
+}
+.lock-toggle:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{
+  outline:2px solid var(--focus);
+  outline-offset:2px;
+}
+
+.reel-window{
+  width:100%;
+  min-height:74px;
+  background:linear-gradient(180deg,#0c0a08,#141010);
+  border-radius:6px;
+  border:1px solid #000;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.7) inset,
+    0 0 0 1px rgba(255,255,255,0.03);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 6px;
+  overflow:hidden;
+  cursor:pointer;
+}
+.reel-window:hover{box-shadow:0 2px 6px rgba(0,0,0,0.7) inset, 0 0 0 1px rgba(255,178,56,0.25);}
+
+.reel-value{
+  font-family:var(--font-display);
+  font-weight:600;
+  letter-spacing:0.02em;
+  font-size:14px;
+  line-height:1.25;
+  text-align:center;
+  color:var(--amber);
+  text-shadow:0 0 6px rgba(255,178,56,0.55), 0 0 1px rgba(255,178,56,0.4);
+  word-break:break-word;
+}
+.reel-window.spinning .reel-value{filter:blur(1.5px);opacity:.85;}
+.reel-window.settle .reel-value{animation:settle .28s ease-out;}
+@keyframes settle{
+  0%{transform:translateY(-6px);opacity:.4;}
+  100%{transform:translateY(0);opacity:1;}
+}
+
+.reel-label{
+  font-family:var(--font-display);
+  font-size:11px;
+  letter-spacing:0.16em;
+  color:var(--brass);
+}
+.reel-unit.disabled{opacity:0.35;}
+.reel-unit.disabled .reel-window{cursor:not-allowed;}
+
+/* lever */
+.lever-row{display:flex;justify-content:center;}
+.lever{
+  font-family:var(--font-display);
+  font-weight:700;
+  letter-spacing:0.12em;
+  font-size:17px;
+  color:#3a0f0a;
+  background:radial-gradient(circle at 35% 30%,#ff8a72,var(--red) 55%,var(--red-dim) 100%);
+  border:none;
+  border-radius:999px;
+  padding:16px 46px;
+  cursor:pointer;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.4) inset,
+    0 -4px 8px rgba(0,0,0,0.35) inset,
+    0 8px 0 var(--red-dim),
+    0 12px 18px rgba(0,0,0,0.55);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.lever:active,.lever.pressed{
+  transform:translateY(6px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.3) inset,
+    0 -3px 6px rgba(0,0,0,0.35) inset,
+    0 2px 0 var(--red-dim),
+    0 4px 8px rgba(0,0,0,0.5);
+}
+.lever:disabled{opacity:.6;cursor:default;}
+
+/* ---------- ticket ---------- */
+.ticket-wrap{display:flex;justify-content:center;padding:6px 0 4px;}
+.ticket{
+  position:relative;
+  width:100%;
+  max-width:480px;
+  background:var(--ticket);
+  color:var(--ink);
+  border-radius:2px;
+  padding:22px 22px 18px;
+  transform:rotate(-0.6deg);
+  box-shadow:0 14px 30px rgba(0,0,0,0.45), 0 2px 0 rgba(0,0,0,0.1);
+  font-family:var(--font-mono);
+}
+.ticket::before{
+  content:"";
+  position:absolute;
+  top:-9px;left:0;right:0;
+  height:18px;
+  background-image:radial-gradient(circle at 8px 9px, transparent 8px, var(--ticket) 8.5px);
+  background-size:18px 18px;
+  background-repeat:repeat-x;
+  background-position:9px 0;
+}
+.ticket-head{
+  display:flex;justify-content:space-between;
+  font-size:11px;letter-spacing:0.08em;
+  color:var(--ink-soft);
+  border-bottom:1px dashed var(--ticket-line);
+  padding-bottom:10px;margin-bottom:12px;
+  text-transform:uppercase;
+}
+.ticket-line{
+  display:flex;gap:10px;
+  font-size:13.5px;line-height:1.55;
+  margin-bottom:6px;
+}
+.ticket-line .tag{
+  flex:0 0 auto;
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:11px;letter-spacing:0.1em;
+  color:var(--ink-soft);
+  min-width:64px;
+  padding-top:2px;
+}
+.ticket-line .val{font-weight:500;}
+.ticket-mission{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed var(--ticket-line);
+  font-size:13.5px;
+  line-height:1.6;
+  font-style:italic;
+}
+.ticket-actions{
+  display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;
+}
+.ticket-actions button{
+  font-family:var(--font-body);
+  font-size:12.5px;
+  font-weight:600;
+  border:1px solid var(--ink-soft);
+  background:transparent;
+  color:var(--ink);
+  padding:8px 14px;
+  border-radius:20px;
+  cursor:pointer;
+}
+.ticket-actions button:hover{background:rgba(43,38,32,0.08);}
+.ticket-actions button.favd{background:var(--ink);color:var(--ticket);}
+.copy-flash{color:#3a6b3a;}
+
+/* ---------- panels (history / favorites) ---------- */
+.panels{display:flex;flex-direction:column;gap:10px;}
+details{
+  background:var(--panel);
+  border-radius:8px;
+  padding:2px 16px;
+  box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;
+}
+summary{
+  font-family:var(--font-display);
+  letter-spacing:0.08em;
+  font-size:13px;
+  color:var(--brass);
+  padding:12px 0;
+  cursor:pointer;
+  list-style:none;
+}
+summary::-webkit-details-marker{display:none;}
+summary::before{content:"▸ ";}
+details[open] summary::before{content:"▾ ";}
+.list{list-style:none;margin:0;padding:0 0 14px;font-size:13px;}
+.list li{
+  padding:8px 0;
+  border-top:1px solid rgba(255,255,255,0.06);
+  display:flex;justify-content:space-between;gap:10px;
+  color:var(--text-muted);
+}
+.list li:first-child{border-top:none;}
+.list button.mini{
+  background:none;border:none;color:var(--amber);cursor:pointer;font-size:12px;
+  font-family:var(--font-body);font-weight:600;flex:0 0 auto;
+}
+.empty-note{padding:8px 0 14px;font-size:12.5px;color:var(--ink-soft,#7d7062);}
+
+/* ---------- settings drawer ---------- */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.55);
+  align-items:center;justify-content:center;padding:20px;z-index:20;
+}
+.drawer-backdrop:not([hidden]){display:flex;}
+.drawer{
+  background:var(--panel);
+  border-radius:12px;
+  padding:22px 22px 20px;
+  width:100%;max-width:340px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+}
+.drawer h2{
+  font-family:var(--font-display);
+  font-size:16px;letter-spacing:0.08em;
+  color:#f1e6c9;margin:0 0 14px;
+}
+.drawer label{
+  display:flex;align-items:center;gap:10px;
+  font-size:14px;color:var(--text-muted);
+  padding:8px 0;
+}
+.drawer input[type=checkbox]{width:16px;height:16px;accent-color:var(--amber);}
+.field-label{
+  display:block;font-family:var(--font-display);font-size:11px;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--brass);
+  margin:12px 0 4px;
+}
+.drawer select,.drawer input[type=text],.drawer input[type=password]{
+  width:100%;background:var(--panel-lo);color:var(--text-muted);
+  border:1px solid var(--brass-dim);border-radius:6px;
+  padding:8px 9px;font-family:var(--font-mono);font-size:12.5px;
+}
+.drawer select{font-family:var(--font-body);font-size:13px;cursor:pointer;}
+.byok-fields{margin-top:2px;}
+.byok-fields button.done{margin-top:10px;padding:7px 14px;font-size:12px;}
+.drawer .drawer-actions{margin-top:16px;display:flex;justify-content:flex-end;}
+.drawer button.done{
+  font-family:var(--font-body);font-weight:600;font-size:13px;
+  background:var(--amber);color:#2b1c05;border:none;
+  padding:9px 18px;border-radius:20px;cursor:pointer;
+}
+.hint{font-size:11.5px;color:var(--ink-soft,#7d7062);margin-top:2px;}
+.ai-error{color:var(--red)!important;}
+.drawer hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:14px 0;}
+.foot-note{
+  text-align:center;font-size:12px;color:#6b6154;padding-top:6px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .reel-window.spinning .reel-value,.reel-window.settle .reel-value{animation:none;filter:none;}
+  .lever,.lever:active{transition:none;}
+}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+</style>
+</head>
+<body>
+<div class="room">
+
+  <header class="marquee">
+    <button class="settings-btn" id="settingsBtn" aria-label="Open settings" title="Settings">⚙</button>
+    <h1>Suno Challenge Machine</h1>
+    <p>Pull the lever. Get a dare. Make the song.</p>
+  </header>
+
+  <main class="console" aria-label="Prompt roulette machine">
+    <div class="reels" id="reels"></div>
+    <div class="lever-row">
+      <button class="lever" id="pullLever">Pull</button>
+    </div>
+  </main>
+
+  <div class="ticket-wrap">
+    <article class="ticket" id="ticket" aria-live="polite">
+      <div class="ticket-head">
+        <span id="ticketNo">No. 000001</span>
+        <span id="ticketTime">--:--</span>
+      </div>
+      <div id="ticketBody"></div>
+      <div class="ticket-mission" id="ticketMission"></div>
+      <div class="ticket-actions">
+        <button id="copyBtn" type="button">Copy prompt</button>
+        <button id="favBtn" type="button">☆ Save to favorites</button>
+      </div>
+    </article>
+  </div>
+
+  <section class="panels">
+    <details>
+      <summary>History</summary>
+      <ul class="list" id="historyList"></ul>
+    </details>
+    <details>
+      <summary>Favorites</summary>
+      <ul class="list" id="favList"></ul>
+    </details>
+  </section>
+
+  <p class="foot-note">Every result is a starting point, not a rulebook — bend it if the song wants something else.</p>
+</div>
+
+<div class="drawer-backdrop" id="drawerBackdrop" hidden>
+  <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <h2 id="drawerTitle">Settings</h2>
+    <label><input type="checkbox" id="toggleGenre" checked> Include Genre reel</label>
+    <label><input type="checkbox" id="toggleMood" checked> Include Mood reel</label>
+    <label><input type="checkbox" id="toggleSubject" checked> Include Subject reel</label>
+    <label><input type="checkbox" id="toggleTwist" checked> Include Twist reel</label>
+    <p class="hint">At least one reel has to stay on so there's something to write.</p>
+    <hr>
+    <label class="field-label" for="aiSource">AI-generated entries</label>
+    <select id="aiSource">
+      <option value="off">Off — use the built-in lists</option>
+      <option value="groq">This site's AI (Groq, no key needed)</option>
+      <option value="anthropic">My own Claude API key</option>
+      <option value="openai">My own ChatGPT (OpenAI) API key</option>
+    </select>
+    <div class="byok-fields" id="byokFields" hidden>
+      <label class="field-label" for="byokKey">API key</label>
+      <input type="password" id="byokKey" placeholder="sk-ant-... / sk-...">
+      <label class="field-label" for="byokModel">Model (optional override)</label>
+      <input type="text" id="byokModel">
+      <p class="hint">Stored only in this browser's local storage, sent <span id="byokDestNote"></span>.</p>
+      <button type="button" class="done" id="testAIBtn">Test connection</button>
+    </div>
+    <p class="hint" id="aiStatus" style="min-height:14px;"></p>
+    <div class="drawer-actions">
+      <button class="done" id="closeSettings" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<span class="sr-only" id="announcer" role="status" aria-live="polite"></span>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- data ---------------- */
+const DATA = {
+  genre: ["Shoegaze","Skweee","Vaporwave","Cumbia","Bluegrass","UK Drill","Motorik Krautrock","Dub","Bossa Nova","Doom Metal","Yacht Rock","Bedroom Pop","Highlife","Zydeco","Grime","City Pop","Post-Punk","Freak Folk","Chiptune","Trip-Hop","Math Rock","Neo-Soul","Outlaw Country","Afrobeat","Ska","Industrial Techno","Emo","Balkan Brass","Flamenco Pop","Synthwave","Gospel","Bachata","Jungle","Reggaeton","Baroque Pop","Nu-Disco","Sludge Metal","Ambient Drone","Klezmer","Surf Rock","Salsa","Breakcore","Dungeon Synth","Gqom","Bolero","Corridos Tumbados","J-Pop","Britpop","Progressive Bluegrass","Acid Jazz","Dancehall","Country Gospel","Witch House","Powerviolence","Space Disco","Cabaret Jazz","Tejano","Riot Grrrl Punk","Berlin School Electronic","Slowcore","Trap Soul","Baile Funk","Fado","Doo-Wop","Prog Rock","Deconstructed Club","Mariachi","Lo-fi Hip-Hop","New Jack Swing","Sea Shanty","Opera-Pop Crossover","Desert Blues","Anatolian Rock"],
+  mood: ["Bittersweet nostalgia","Manic joy","Quiet dread","Righteous fury","Giddy infatuation","Wistful longing","Defiant swagger","Numb exhaustion","Fragile hope","Petty vengeance","Cosmic loneliness","Cozy contentment","Paranoid unease","Reckless euphoria","Tender grief","Sardonic humor","Feral confidence","Homesick ache","Slow-burn dread","Unbothered cool","Overcaffeinated panic","Melancholic wonder","Triumphant relief","Simmering resentment","Delirious love","Detached irony","Warm gratitude","Restless itch","Solemn reverence","Chaotic glee","Aching regret","Stubborn optimism","Late-night confession","Sun-drunk laziness","Electric anticipation","Guilty relief","Haunted comfort","Playful mischief","Weary determination","Starstruck awe","Bruised pride","Serene detachment","Anxious devotion","Vindictive calm","Unhinged celebration","Quiet defiance","Sudden clarity","Lovesick spiral","Hollow victory","Boundless curiosity","Simmering jealousy","Reluctant tenderness","Feverish obsession","Grounded peace","Manufactured confidence","Dreamy dissociation","Righteous heartbreak","Sleepy rebellion","Electric grief","Unapologetic joy"],
+  subject: ["A lighthouse keeper's last night on the job","Losing a staring contest with your own reflection","The last text message never sent","A getaway driver who has a change of heart mid-heist","Teaching a robot to slow dance","The family recipe nobody wrote down","A submarine crew that hears something outside the hull","Breaking up with your hometown","A con artist falling for their own mark","The neighborhood ice cream truck at 2am","An astronaut homesick for traffic noise","A wedding toast that turns into a confession","The last payphone in the city","Two exes running into each other at an evacuation shelter","A locksmith who can't unlock their own front door","A retired boxer coaching kids who don't know his name","The group chat that goes silent after the funeral","A time capsule opened one year too early","Learning your childhood home was sold to strangers","A carousel operator falling in love with a rider","The last shift at a video rental store","A storm chaser who is actually running from something","Karaoke night as a form of therapy","A letter to the version of you that gave up","The dog who waits at the door for someone not coming back","A magician whose tricks stopped working the night his father died","Finding your ex's handwriting in a used book","A diner that only comes alive after midnight","The understudy who finally gets the part","Packing up a childhood bedroom for the last time","A truck-stop confession between strangers","The last voicemail saved on a dead phone","Falling in love at the DMV","A grandmother teaching her grandkid to drive stick","The town that disappears when the factory closes","A séance that actually works","Two rival food-truck owners falling for each other","The mixtape that never got finished","A firefighter who can't go back inside one more burning building","Watching your favorite bar get turned into a bank","A wedding band playing the same song for the thousandth time","The last day of a touring carnival","A locket with a photo no one remembers taking","Reuniting with a childhood best friend at a class reunion","A blackout that brings a whole street outside","The mechanic who fixes cars for people who ghosted him","A prisoner's first meal after release","Falling asleep on a night bus next to a stranger who becomes family","The last flight before an airport shuts down","A fortune teller who finally gets her own reading","Missing someone you were relieved to lose","A librarian reading the last checkout card of a retired book","The song that plays at every family funeral","A boxer's hands after the final bell","Watching wildfire smoke turn the sky orange from a rooftop party","The apology that arrives thirty years late","A subway musician who used to headline arenas","Packing a hurricane go-bag with your ex's old sweatshirt","The last cigarette shared on a fire escape","A search-and-rescue dog retiring after one mission too many","Two strangers stuck in an elevator during a proposal","The graffiti that outlives the building","A wedding dress found at a thrift store still tagged","A radio DJ who talks to no one but keeps broadcasting","Coming home to a house that sold without you knowing","A eulogy written by someone who never got along with the deceased","The last game of catch before a kid grows up","A power outage that reunites an estranged family for one candlelit night"],
+  twist: ["No drums until the final chorus","Vocals must whisper for the first verse","A key change every chorus","The song must end mid-sentence","Only one instrument besides vocals","The chorus can't repeat the same melody twice","Must include a spoken-word bridge","Under 90 seconds total","Start with the chorus, no intro","The bassline never repeats","A time-signature change in the bridge","No metaphors — only literal images","The title must be the song's last line","Must include a false ending","Backing vocals answer the lead like a conversation","The tempo doubles in the final third","Only five chords total, no more","Percussion made entirely of non-drum sounds","Must reference the weather at least twice","Verse and chorus melodies share no notes","The song fades in already mid-performance","No repeated words across the entire lyric","A one-line callback to verse one at the very end","The bridge is entirely instrumental","Harmony only on the last word of each line","Opens a cappella","The key must feel unresolved until the final chord","Must include a crowd or field-recording texture","The second verse flips the meaning of the first","A duet between two opposing perspectives","No cymbals anywhere in the mix","The chorus lyric is a single repeated phrase","Must include a count-in or studio chatter at the start","The outro strips back to a single instrument","The rhyme scheme breaks on purpose in the final verse","Must name a real or invented street","Tempo matches a resting heartbeat, 60–100 bpm","Addressed to a 'you' who never speaks back","Must include a full bar of near-silence","The melody fits a two-note vocal range","The rhythm is borrowed from something non-musical","The chorus arrives before the first verse ends","Must include a question that's never answered","The final chorus drops the drums entirely","Must include a whispered aside not meant for the listener","Works as both a lullaby and a warning","Uses call-and-response between two vocal characters","Each verse gets shorter than the last","Ends on a deliberately unresolved chord","No chorus at all — only evolving verses","The song seems to end, then doesn't","Instrumentation thins out with every verse until just voice remains","Includes a spoken date, time, or place, like a report","Written as a message left on an answering machine","The melody moves mostly in half-steps","Includes a line borrowed from an overheard conversation"]
+};
+
+const LABELS = {genre:"Genre",mood:"Mood",subject:"Subject",twist:"Twist"};
+const ORDER = ["genre","mood","subject","twist"];
+const STORE_KEY = "sunoChallengeMachine.v1";
+
+/* ---------------- state ---------------- */
+let state = loadState();
+
+function loadState(){
+  let saved = {};
+  try{ saved = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ saved = {}; }
+  const merged = Object.assign({
+    ticketNo: 0,
+    aiSource: "off",
+    byokKeys: {anthropic:"", openai:""},
+    byokModels: {anthropic:"", openai:""},
+    active: {genre:true, mood:true, subject:true, twist:true},
+    locks: {genre:false,mood:false,subject:false,twist:false},
+    current: null,
+    history: [],
+    favorites: []
+  }, saved);
+  if(saved.aiMode === true && !saved.aiSource){ merged.aiSource = "groq"; }
+  delete merged.aiMode;
+  merged.byokKeys = Object.assign({anthropic:"", openai:""}, merged.byokKeys);
+  merged.byokModels = Object.assign({anthropic:"", openai:""}, merged.byokModels);
+  return merged;
+}
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){/* storage unavailable */}
+}
+
+function pick(cat){
+  const list = DATA[cat];
+  return list[Math.floor(Math.random()*list.length)];
+}
+
+/* ---------------- DOM build ---------------- */
+const reelsEl = document.getElementById("reels");
+ORDER.forEach(cat=>{
+  const unit = document.createElement("div");
+  unit.className = "reel-unit";
+  unit.dataset.cat = cat;
+  unit.innerHTML =
+    '<button class="lock-toggle" data-cat="'+cat+'" aria-pressed="false" title="Lock this reel" aria-label="Lock '+LABELS[cat]+' reel">&#128274;</button>'+
+    '<div class="reel-window" data-cat="'+cat+'" tabindex="0" role="button" aria-label="Reroll '+LABELS[cat]+'"><span class="reel-value">—</span></div>'+
+    '<div class="reel-label">'+LABELS[cat].toUpperCase()+'</div>';
+  reelsEl.appendChild(unit);
+});
+
+const els = {
+  ticket: document.getElementById("ticket"),
+  ticketNo: document.getElementById("ticketNo"),
+  ticketTime: document.getElementById("ticketTime"),
+  ticketBody: document.getElementById("ticketBody"),
+  ticketMission: document.getElementById("ticketMission"),
+  copyBtn: document.getElementById("copyBtn"),
+  favBtn: document.getElementById("favBtn"),
+  historyList: document.getElementById("historyList"),
+  favList: document.getElementById("favList"),
+  lever: document.getElementById("pullLever"),
+  settingsBtn: document.getElementById("settingsBtn"),
+  drawerBackdrop: document.getElementById("drawerBackdrop"),
+  closeSettings: document.getElementById("closeSettings"),
+  toggleGenre: document.getElementById("toggleGenre"),
+  toggleMood: document.getElementById("toggleMood"),
+  toggleSubject: document.getElementById("toggleSubject"),
+  toggleTwist: document.getElementById("toggleTwist"),
+  aiSource: document.getElementById("aiSource"),
+  byokFields: document.getElementById("byokFields"),
+  byokKey: document.getElementById("byokKey"),
+  byokModel: document.getElementById("byokModel"),
+  byokDestNote: document.getElementById("byokDestNote"),
+  testAIBtn: document.getElementById("testAIBtn"),
+  aiStatus: document.getElementById("aiStatus"),
+  announcer: document.getElementById("announcer")
+};
+
+/* ---------------- rendering ---------------- */
+function reelUnit(cat){ return reelsEl.querySelector('.reel-unit[data-cat="'+cat+'"]'); }
+function reelWindow(cat){ return reelsEl.querySelector('.reel-window[data-cat="'+cat+'"]'); }
+function reelValueEl(cat){ return reelWindow(cat).querySelector(".reel-value"); }
+function lockBtn(cat){ return reelsEl.querySelector('.lock-toggle[data-cat="'+cat+'"]'); }
+
+function isActive(cat){
+  return !!state.active[cat];
+}
+
+function activeCount(){
+  return ORDER.reduce((n,cat)=>n + (isActive(cat) ? 1 : 0), 0);
+}
+
+function applyActiveClasses(){
+  ORDER.forEach(cat=>{
+    const unit = reelUnit(cat);
+    unit.classList.toggle("disabled", !isActive(cat));
+  });
+}
+
+function renderReelValues(vals){
+  ORDER.forEach(cat=>{
+    reelValueEl(cat).textContent = isActive(cat) ? (vals[cat] || "—") : "OFF";
+  });
+}
+
+function renderLocks(){
+  ORDER.forEach(cat=>{
+    lockBtn(cat).setAttribute("aria-pressed", String(!!state.locks[cat]));
+  });
+}
+
+function buildMission(vals){
+  const useMood = isActive("mood") && vals.mood;
+  const useGenre = isActive("genre") && vals.genre;
+  const useSubject = isActive("subject") && vals.subject;
+  const useTwist = isActive("twist") && vals.twist;
+
+  const descriptors = [];
+  if(useMood) descriptors.push(vals.mood.toLowerCase());
+  if(useGenre) descriptors.push(vals.genre);
+
+  let mission = "Write a " + (descriptors.length ? descriptors.join(" ")+" song" : "song");
+  if(useSubject) mission += " about "+vals.subject;
+  mission += ".";
+  if(useTwist) mission += " Constraint: "+vals.twist+".";
+  return mission;
+}
+
+function ticketLinesHTML(vals){
+  let html = "";
+  ORDER.forEach(cat=>{
+    if(!isActive(cat)) return;
+    html += '<div class="ticket-line"><span class="tag">'+LABELS[cat].toUpperCase()+'</span><span class="val">'+escapeHTML(vals[cat])+'</span></div>';
+  });
+  return html;
+}
+
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function padTicketNo(n){
+  return "No. "+String(n).padStart(6,"0");
+}
+
+function nowLabel(){
+  const d = new Date();
+  return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+}
+
+function renderTicket(){
+  const c = state.current;
+  if(!c) return;
+  els.ticketNo.textContent = padTicketNo(c.no);
+  els.ticketTime.textContent = c.time;
+  els.ticketBody.innerHTML = ticketLinesHTML(c.vals);
+  els.ticketMission.textContent = c.mission;
+  els.favBtn.classList.toggle("favd", isFavorited(c));
+  els.favBtn.textContent = isFavorited(c) ? "★ Saved" : "☆ Save to favorites";
+}
+
+function isFavorited(ticket){
+  return state.favorites.some(f=>f.mission===ticket.mission);
+}
+
+function renderList(container, items, opts){
+  if(!items.length){
+    container.innerHTML = '<li class="empty-note" style="border:none;">'+opts.emptyText+'</li>';
+    return;
+  }
+  container.innerHTML = "";
+  items.slice().reverse().slice(0,25).forEach(item=>{
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.textContent = item.mission;
+    li.appendChild(span);
+    const btn = document.createElement("button");
+    btn.className = "mini";
+    btn.type = "button";
+    btn.textContent = opts.actionLabel;
+    btn.addEventListener("click", ()=>opts.onAction(item));
+    li.appendChild(btn);
+    container.appendChild(li);
+  });
+}
+
+function renderHistory(){
+  renderList(els.historyList, state.history, {
+    emptyText:"No challenges pulled yet — hit the lever above.",
+    actionLabel:"Restore",
+    onAction:(item)=>{ state.current = item; renderTicket(); saveState(); }
+  });
+}
+function renderFavorites(){
+  renderList(els.favList, state.favorites, {
+    emptyText:"Nothing saved yet — star a ticket to keep it.",
+    actionLabel:"Remove",
+    onAction:(item)=>{
+      state.favorites = state.favorites.filter(f=>f.mission!==item.mission);
+      renderFavorites(); renderTicket(); saveState();
+    }
+  });
+}
+
+/* ---------------- AI mode: Groq (this site's key) or bring-your-own-key ---------------- */
+// Three sources, chosen via the Settings dropdown:
+//  - "groq":      calls this site's own /api/generate function, which holds a
+//                 site-wide Groq key server-side. See README for deploy steps.
+//  - "anthropic": calls Anthropic's API directly from the browser using the
+//                 visitor's own key (Anthropic supports this via a special
+//                 header). The key never leaves the browser.
+//  - "openai":    OpenAI's API blocks direct browser calls, so the visitor's
+//                 own key is relayed through this site's /api/openai-generate
+//                 function for a single request and is never stored server-side.
+const AI_ENDPOINT = "/api/generate";
+const OPENAI_RELAY_ENDPOINT = "/api/openai-generate";
+const DEFAULT_BYOK_MODEL = { anthropic: "claude-haiku-4-5-20251001", openai: "gpt-4o-mini" };
+const AI_CAT_DESC = {
+  genre: "a music genre or micro-genre name, 1-4 words, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
+  mood: "a short emotional mood or vibe for a song, 2-4 words, adjective + noun (like 'Bittersweet nostalgia')",
+  subject: "a single vivid, specific lyrical premise for a song, written as a short story pitch, one sentence",
+  twist: "one short production or songwriting constraint or dare for a song, one sentence, in the spirit of 'no drums until the final chorus'"
+};
+
+function setAIStatus(text, isError){
+  if(!els.aiStatus) return;
+  els.aiStatus.textContent = text || "";
+  els.aiStatus.classList.toggle("ai-error", !!isError);
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+
+function buildAIPrompt(cat, examples){
+  const desc = AI_CAT_DESC[cat];
+  const exampleText = examples.join("; ");
+  return "You generate entries for a songwriting-challenge generator. Category: "+LABELS[cat]+" — "+desc+
+    ". Examples already in use: "+exampleText+". Give ONE brand-new "+LABELS[cat].toLowerCase()+
+    " entry, different from the examples, matching the same style and length. Reply with only the entry text — no quotes, no numbering, no explanation.";
+}
+
+function sanitizeAIText(text){
+  let t = String(text).trim().split("\n")[0].trim();
+  t = t.replace(/^["'“”\-\s\d.]+/,"").replace(/["'“”]+$/,"").trim();
+  if(!t || t.length > 140) return "";
+  return t;
+}
+
+async function groqGenerate(cat, examples){
+  let res;
+  try{
+    res = await fetch(AI_ENDPOINT, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({category: cat, examples: examples})
+    });
+  }catch(networkErr){
+    throw new Error("Couldn't reach the AI endpoint");
+  }
+  if(!res.ok){
+    let detail = "";
+    try{ detail = (await res.json()).error || ""; }catch(e){}
+    throw new Error(res.status === 404
+      ? "AI endpoint not found — this site isn't deployed with the serverless function"
+      : (detail || ("AI request failed ("+res.status+")")));
+  }
+  const data = await res.json();
+  const text = (data && data.text) ? String(data.text).trim() : "";
+  if(!text) throw new Error("Empty AI response");
+  return text;
+}
+
+async function anthropicGenerate(cat, examples){
+  const key = (state.byokKeys.anthropic || "").trim();
+  if(!key) throw new Error("Add your Claude API key in Settings");
+  const model = (state.byokModels.anthropic || "").trim() || DEFAULT_BYOK_MODEL.anthropic;
+  const prompt = buildAIPrompt(cat, examples);
+
+  let res;
+  try{
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key": key,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 60,
+        messages: [{role:"user", content: prompt}]
+      })
+    });
+  }catch(networkErr){
+    throw new Error("Couldn't reach the Claude API (network or CORS)");
+  }
+  if(!res.ok){
+    let detail = "";
+    try{ const errBody = await res.json(); detail = errBody && errBody.error && errBody.error.message; }catch(e){}
+    throw new Error("Claude API error ("+res.status+")"+(detail?": "+detail:""));
+  }
+  const data = await res.json();
+  const raw = data && data.content && data.content[0] && data.content[0].text;
+  const text = sanitizeAIText(raw || "");
+  if(!text) throw new Error("Claude returned an unusable response");
+  return text;
+}
+
+async function openaiGenerate(cat, examples){
+  const key = (state.byokKeys.openai || "").trim();
+  if(!key) throw new Error("Add your ChatGPT (OpenAI) API key in Settings");
+  const model = (state.byokModels.openai || "").trim() || DEFAULT_BYOK_MODEL.openai;
+
+  let res;
+  try{
+    res = await fetch(OPENAI_RELAY_ENDPOINT, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({apiKey: key, model: model, category: cat, examples: examples})
+    });
+  }catch(networkErr){
+    throw new Error("Couldn't reach this site's OpenAI relay endpoint");
+  }
+  if(!res.ok){
+    let detail = "";
+    try{ detail = (await res.json()).error || ""; }catch(e){}
+    throw new Error(res.status === 404
+      ? "OpenAI relay endpoint not found — this site isn't deployed with that function"
+      : (detail || ("OpenAI request failed ("+res.status+")")));
+  }
+  const data = await res.json();
+  const text = (data && data.text) ? String(data.text).trim() : "";
+  if(!text) throw new Error("Empty response from OpenAI");
+  return text;
+}
+
+async function aiGenerate(cat){
+  const examples = shuffle(DATA[cat]).slice(0,5);
+  if(state.aiSource === "anthropic") return anthropicGenerate(cat, examples);
+  if(state.aiSource === "openai") return openaiGenerate(cat, examples);
+  return groqGenerate(cat, examples);
+}
+
+function aiSourceLabel(src){
+  return src==="anthropic" ? "Claude" : src==="openai" ? "ChatGPT" : "This site's AI";
+}
+
+async function testAIEndpoint(){
+  if(!state.aiSource || state.aiSource === "off"){ setAIStatus(""); return false; }
+  setAIStatus("Checking AI connection…");
+  const probeCat = ORDER.find(isActive) || "genre";
+  try{
+    await aiGenerate(probeCat);
+    setAIStatus(aiSourceLabel(state.aiSource)+" ready — fresh entries generate on every pull.");
+    return true;
+  }catch(err){
+    setAIStatus((err && err.message ? err.message : "AI unavailable")+" — using the built-in lists instead.", true);
+    return false;
+  }
+}
+
+async function getValue(cat){
+  if(state.aiSource && state.aiSource !== "off"){
+    try{
+      const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
+      const value = await Promise.race([aiGenerate(cat), timeout]);
+      if(value) return value;
+    }catch(e){ /* fall through to the built-in list below */ }
+  }
+  return pick(cat);
+}
+
+/* ---------------- spin logic ---------------- */
+const SPIN_DURATIONS = {genre:520, mood:680, subject:840, twist:1000};
+let spinning = false;
+
+// valuePromise resolves to the final string this reel should land on (may take a while in AI mode).
+async function spinReel(cat, valuePromise){
+  const win = reelWindow(cat);
+  const valEl = reelValueEl(cat);
+
+  if(!isActive(cat)){
+    valEl.textContent = "OFF";
+    return null;
+  }
+  if(state.locks[cat]){
+    const v = await valuePromise;
+    valEl.textContent = v;
+    return v;
+  }
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduced){
+    const v = await valuePromise;
+    valEl.textContent = v;
+    return v;
+  }
+
+  win.classList.add("spinning");
+  const minDuration = SPIN_DURATIONS[cat];
+  const start = performance.now();
+  let finalValue = null;
+  valuePromise.then(v=>{ finalValue = v; }).catch(()=>{ finalValue = pick(cat); });
+
+  while(true){
+    const elapsed = performance.now() - start;
+    if(finalValue !== null && elapsed >= minDuration) break;
+    // once minDuration has passed and we're still waiting (AI mode), show a "thinking" cue instead of noise
+    valEl.textContent = (elapsed > minDuration) ? "…" : pick(cat);
+    await sleep(Math.min(40 + (elapsed/minDuration)*140, 220));
+  }
+
+  win.classList.remove("spinning");
+  valEl.textContent = finalValue;
+  win.classList.add("settle");
+  setTimeout(()=>win.classList.remove("settle"), 300);
+  return finalValue;
+}
+
+async function pullLever(){
+  if(spinning) return;
+  spinning = true;
+  els.lever.disabled = true;
+  els.lever.classList.add("pressed");
+  setTimeout(()=>els.lever.classList.remove("pressed"), 140);
+
+  const results = await Promise.all(ORDER.map(cat=>{
+    if(!isActive(cat)) return spinReel(cat, Promise.resolve(null));
+    const valuePromise = (state.locks[cat] && state.current) ? Promise.resolve(state.current.vals[cat]) : getValue(cat);
+    return spinReel(cat, valuePromise);
+  }));
+  const vals = {};
+  ORDER.forEach((cat,i)=>{ vals[cat] = results[i]; });
+
+  state.ticketNo += 1;
+  const ticket = {
+    no: state.ticketNo,
+    time: nowLabel(),
+    vals: vals,
+    mission: buildMission(vals)
+  };
+  state.current = ticket;
+  state.history.push(ticket);
+  if(state.history.length > 100) state.history.shift();
+
+  renderTicket();
+  renderHistory();
+  saveState();
+  els.announcer.textContent = "New challenge: "+ticket.mission;
+
+  spinning = false;
+  els.lever.disabled = false;
+}
+
+async function rerollSingle(cat){
+  if(spinning || state.locks[cat] || !isActive(cat)) return;
+  if(!state.current){ pullLever(); return; }
+  spinning = true;
+  const value = await spinReel(cat, getValue(cat));
+  state.current.vals[cat] = value;
+  state.current.mission = buildMission(state.current.vals);
+  renderTicket();
+  saveState();
+  els.announcer.textContent = "Updated "+LABELS[cat]+": "+value;
+  spinning = false;
+}
+
+/* ---------------- events ---------------- */
+els.lever.addEventListener("click", pullLever);
+
+document.addEventListener("keydown", (e)=>{
+  if(e.code === "Space" && document.activeElement === document.body){
+    e.preventDefault();
+    pullLever();
+  }
+});
+
+ORDER.forEach(cat=>{
+  reelWindow(cat).addEventListener("click", ()=>rerollSingle(cat));
+  reelWindow(cat).addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); rerollSingle(cat); }
+  });
+  lockBtn(cat).addEventListener("click", (e)=>{
+    e.stopPropagation();
+    state.locks[cat] = !state.locks[cat];
+    renderLocks();
+    saveState();
+  });
+});
+
+els.copyBtn.addEventListener("click", ()=>{
+  if(!state.current) return;
+  const text = state.current.mission;
+  const done = ()=>{
+    const original = els.copyBtn.textContent;
+    els.copyBtn.textContent = "Copied!";
+    els.copyBtn.classList.add("copy-flash");
+    setTimeout(()=>{ els.copyBtn.textContent = original; els.copyBtn.classList.remove("copy-flash"); }, 1400);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+});
+function fallbackCopy(text, done){
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+els.favBtn.addEventListener("click", ()=>{
+  if(!state.current) return;
+  if(isFavorited(state.current)){
+    state.favorites = state.favorites.filter(f=>f.mission!==state.current.mission);
+  } else {
+    state.favorites.push(state.current);
+  }
+  renderFavorites();
+  renderTicket();
+  saveState();
+});
+
+els.settingsBtn.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = false; els.toggleMood.focus(); });
+els.closeSettings.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = true; els.settingsBtn.focus(); });
+els.drawerBackdrop.addEventListener("click", (e)=>{ if(e.target===els.drawerBackdrop) els.drawerBackdrop.hidden = true; });
+document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && !els.drawerBackdrop.hidden) els.drawerBackdrop.hidden = true; });
+
+const reelToggles = {genre: els.toggleGenre, mood: els.toggleMood, subject: els.toggleSubject, twist: els.toggleTwist};
+ORDER.forEach(cat=>{
+  reelToggles[cat].addEventListener("change", ()=>{
+    if(!reelToggles[cat].checked && activeCount() <= 1 && isActive(cat)){
+      // don't allow turning off the last remaining active reel
+      reelToggles[cat].checked = true;
+      return;
+    }
+    state.active[cat] = reelToggles[cat].checked;
+    applyActiveClasses();
+    if(state.current){ state.current.mission = buildMission(state.current.vals); renderTicket(); }
+    saveState();
+  });
+});
+
+function updateByokFieldsVisibility(){
+  const src = state.aiSource;
+  const show = (src === "anthropic" || src === "openai");
+  els.byokFields.hidden = !show;
+  if(show){
+    els.byokKey.value = state.byokKeys[src] || "";
+    els.byokModel.value = state.byokModels[src] || "";
+    els.byokModel.placeholder = DEFAULT_BYOK_MODEL[src];
+    els.byokDestNote.textContent = src === "anthropic"
+      ? "directly to Anthropic's API from your browser — this site never sees it"
+      : "to this site's relay function, which forwards it to OpenAI for that one request and doesn't store it";
+  }
+}
+
+els.aiSource.addEventListener("change", async ()=>{
+  state.aiSource = els.aiSource.value;
+  updateByokFieldsVisibility();
+  saveState();
+  if(state.aiSource === "off"){ setAIStatus(""); return; }
+  if(state.aiSource === "groq" || (state.byokKeys[state.aiSource] || "").trim()){
+    await testAIEndpoint();
+  } else {
+    setAIStatus("Add your API key above, then hit \u201cTest connection.\u201d");
+  }
+});
+
+els.byokKey.addEventListener("input", ()=>{
+  const src = state.aiSource;
+  if(src === "anthropic" || src === "openai"){
+    state.byokKeys[src] = els.byokKey.value;
+    saveState();
+  }
+});
+els.byokModel.addEventListener("input", ()=>{
+  const src = state.aiSource;
+  if(src === "anthropic" || src === "openai"){
+    state.byokModels[src] = els.byokModel.value;
+    saveState();
+  }
+});
+els.testAIBtn.addEventListener("click", ()=>{ testAIEndpoint(); });
+
+/* ---------------- init ---------------- */
+function init(){
+  els.toggleGenre.checked = !!state.active.genre;
+  els.toggleMood.checked = !!state.active.mood;
+  els.toggleSubject.checked = !!state.active.subject;
+  els.toggleTwist.checked = !!state.active.twist;
+  applyActiveClasses();
+  renderLocks();
+
+  els.aiSource.value = state.aiSource || "off";
+  updateByokFieldsVisibility();
+  if(state.aiSource && state.aiSource !== "off") testAIEndpoint();
+
+  if(state.current){
+    renderReelValues(state.current.vals);
+    renderTicket();
+  } else {
+    const placeholder = {genre:"—",mood:"—",subject:"—",twist:"—"};
+    renderReelValues(placeholder);
+    els.ticketBody.innerHTML = '<div class="ticket-line"><span class="val">Pull the lever to get your first challenge.</span></div>';
+    els.ticketNo.textContent = padTicketNo(0);
+    els.ticketTime.textContent = "";
+  }
+  renderHistory();
+  renderFavorites();
+}
+init();
+
+})();
+</script>
+</body>
+</html>
