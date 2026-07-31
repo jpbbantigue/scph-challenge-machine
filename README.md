@@ -2,6 +2,8 @@
 
 A webapp that generates random songwriting-challenge prompts (genre + mood + subject + a production twist) for use with Suno. It works as a single static file with no backend at all — and it optionally upgrades to AI-generated (rather than fixed-list) entries, and to signed-in accounts, if you deploy it with a few small serverless functions.
 
+Built by [SCPH — Suno Creatives PH](https://discord.gg/nSdj4wBZv). Join the Discord if you want to share challenges, prompts, or tracks made with this.
+
 ## What it does
 
 - Pull the lever to spin four "reels": Genre, Mood, Subject, Twist.

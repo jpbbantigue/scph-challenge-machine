@@ -3,12 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCPH Challenge Machine — song prompt roulette</title>
-<meta name="description" content="Pull the lever for a random SCPH songwriting challenge: genre, mood, subject and a production twist.">
+<title>SCPH Challenge Machine — Suno Songwriting Prompt Generator</title>
+<meta name="description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist. Free prompt generator by the SCPH (Suno Creatives PH) community.">
+<meta name="keywords" content="Suno, Suno AI, songwriting prompts, song idea generator, music prompt generator, Suno challenge, SCPH, Suno Creatives PH, AI music, songwriting challenge">
+<meta name="author" content="SCPH — Suno Creatives PH">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://scphchallengemachine.netlify.app/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SCPH Challenge Machine">
+<meta property="og:title" content="SCPH Challenge Machine — Suno Songwriting Prompt Generator">
+<meta property="og:description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist. Free prompt generator by the SCPH (Suno Creatives PH) community.">
+<meta property="og:url" content="https://scphchallengemachine.netlify.app/">
+<meta property="og:image" content="https://scphchallengemachine.netlify.app/favicon.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SCPH Challenge Machine — Suno Songwriting Prompt Generator">
+<meta name="twitter:description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist.">
+<meta name="twitter:image" content="https://scphchallengemachine.netlify.app/favicon.png">
+
+<meta name="theme-color" content="#0f0d0b">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "SCPH Challenge Machine",
+  "url": "https://scphchallengemachine.netlify.app/",
+  "description": "Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "SCPH — Suno Creatives PH",
+    "sameAs": ["https://discord.gg/nSdj4wBZv"]
+  }
+}
+</script>
 <style>
 :root{
   --bg-0:#0f0d0b;
@@ -431,6 +466,12 @@ details[open] summary::before{content:"▾ ";}
 .foot-note{
   text-align:center;font-size:12px;color:var(--ink-soft);padding-top:6px;
 }
+.discord-cta{padding-top:2px;}
+.discord-cta a{
+  color:var(--amber);font-weight:600;text-decoration:none;
+  transition:color .15s ease;
+}
+.discord-cta a:hover{color:#ffc35e;text-decoration:underline;}
 
 @media (prefers-reduced-motion: reduce){
   .reel-window.spinning .reel-value,.reel-window.settle .reel-value{animation:none;filter:none;}
@@ -486,6 +527,9 @@ details[open] summary::before{content:"▾ ";}
   </section>
 
   <p class="foot-note">Every result is a starting point, not a rulebook — bend it if the song wants something else.</p>
+  <p class="foot-note discord-cta">
+    <a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the SCPH Discord community →</a>
+  </p>
 </div>
 
 <div class="drawer-backdrop" id="drawerBackdrop" hidden>
@@ -501,6 +545,7 @@ details[open] summary::before{content:"▾ ";}
       </div>
       <button type="button" class="done" id="signOutBtn" hidden>Sign out</button>
       <p class="hint">Signing in syncs your favorites, history, and settings to your account, so they follow you across devices and browsers.</p>
+      <p class="hint discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the SCPH Discord community →</a></p>
     </div>
     <hr>
     <p class="hint">Flip reels on or off with the switch under each one on the machine. At least one has to stay on.</p>
