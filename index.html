@@ -425,8 +425,9 @@ details[open] summary::before{content:"▾ ";}
 .hint{font-size:11.5px;color:var(--ink-soft,#7d7062);margin-top:2px;}
 .ai-error{color:var(--red)!important;}
 .drawer hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:14px 0;}
-#signInButtons{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+#signInButtons:not([hidden]){display:flex;flex-direction:column;gap:8px;margin-top:6px;}
 #signInButtons button,#signOutBtn{width:100%;text-align:center;}
+#signOutBtn:not([hidden]){margin-top:6px;}
 .foot-note{
   text-align:center;font-size:12px;color:var(--ink-soft);padding-top:6px;
 }
