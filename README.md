@@ -161,6 +161,7 @@ Favorites/history/settings can now follow the person instead of the browser — 
 - The "project type" switch mentioned below (songwriting vs. general writing vs. app ideas) as a swappable `DATA` set, possibly per-account default.
 - Rate limiting / abuse protection on the AI endpoints if traffic grows (noted as a known gap in the OpenAI relay section above).
 - **Monetize the page through ads** — likely a lightweight ad network (e.g. Google AdSense or an ethical/privacy-respecting alternative) placed around the machine without disrupting the pull/lock/reroll flow; would need a placement pass so ads don't compete with the lever or ticket for attention, plus a look at CMP/consent requirements depending on visitor region.
+- **Audit the `twist` list for real-world Suno feasibility.** Some existing constraints are technically achievable in Suno but expensive to actually land — they take many regenerations/credits before Suno respects the exact constraint (e.g. precise structural rules like "no drums until the final chorus" or "under 90 seconds total"). Worth tagging or reweighting twists by how reliably Suno honors them, so the dares stay fun without burning credits chasing an edge case.
 
 ## Notes
 
