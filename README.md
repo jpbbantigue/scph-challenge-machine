@@ -6,10 +6,11 @@ Built by [SCPH — Suno Creatives PH](https://discord.gg/nSdj4wBZv). Join the Di
 
 ## What it does
 
-- Pull the lever to spin four "reels": Genre, Mood, Subject, Twist.
+- Pull the lever to spin five "reels": Genre, Genre 2, Mood, Subject, Twist.
 - Lock any reel (🔒) to keep its value while the others reroll.
 - Click a single reel window to reroll just that one.
-- Flip any of the four reels on/off with the switch under each one — mix and match freely (e.g. Genre-only, Subject + Twist only, all four, whatever). At least one reel always stays on so there's something to write.
+- Flip any reel on/off with the switch under each one — mix and match freely (e.g. Genre-only, Subject + Twist only, all five, whatever). At least one reel always stays on so there's something to write.
+- **Genre 2 is a genre-fusion reel**, off by default. Turn it on to pull a second, independent genre alongside the first — when they land on two different genres, the mission reads as a fusion (e.g. "Shoegaze x Cumbia fusion"); if they land on the same genre, or only one Genre reel is on, it just reads as that one genre.
 - Copy the assembled prompt straight into Suno.
 - Save favorites and browse history — stored in the visitor's own browser (`localStorage`) by default, so nothing is shared across users and no server storage is needed. Optionally sign in (see **Accounts** below) to sync the same data across devices.
 - Optional **AI-generated entries**, with a choice of three sources: this site's own Groq key (if deployed with one), or a visitor's own Claude or ChatGPT API key.
@@ -159,6 +160,7 @@ Favorites/history/settings can now follow the person instead of the browser — 
 - Public favorites/leaderboard of community-submitted challenges, opt-in.
 - The "project type" switch mentioned below (songwriting vs. general writing vs. app ideas) as a swappable `DATA` set, possibly per-account default.
 - Rate limiting / abuse protection on the AI endpoints if traffic grows (noted as a known gap in the OpenAI relay section above).
+- **Monetize the page through ads** — likely a lightweight ad network (e.g. Google AdSense or an ethical/privacy-respecting alternative) placed around the machine without disrupting the pull/lock/reroll flow; would need a placement pass so ads don't compete with the lever or ticket for attention, plus a look at CMP/consent requirements depending on visitor region.
 
 ## Notes
 
