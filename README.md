@@ -132,7 +132,7 @@ This site's own Groq key ("This site's AI" in Settings) is metered at 50 free **
 - Requires sign-in — anonymous visitors are prompted to sign in or use their own key instead.
 - Tracked in the same Netlify Blobs record as favorites/history (see `_lib/store.js`: `consumeAICredit`, `DAILY_AI_CREDIT_LIMIT`), resetting daily (UTC).
 - `auth-me.js` returns the live balance so Settings can show "N / 50 free AI rolls left today" without an extra request.
-- If a pull hits the daily limit (or the request otherwise fails), a visible notice appears above the ticket ("Daily AI limit reached — showing built-in results instead.") rather than silently degrading — that pull falls back to the built-in list for every reel it touched.
+- **Once the daily limit is reached, the Pull button itself disables** (with an explanatory tooltip and a note under the AI dropdown in Settings) rather than letting the visitor keep clicking into silent built-in-list fallbacks — they have to switch AI off in Settings, or add their own key, to keep rolling for free. If a request fails for another reason (network error, timeout, etc.) the pull still falls back to the built-in list for that attempt, with a visible banner above the ticket explaining why.
 - No purchase/top-up flow yet — a "Get More Credits" option to extend the daily limit after a paid transaction is a planned future addition, not built.
 - **Suno Creatives PH Discord members getting a 100/day limit is planned but deferred** — the plan is to request Discord's `guilds` OAuth scope at sign-in and check server membership automatically via `/users/@me/guilds` (no manual verification step), refreshed each time someone signs in. Not built yet; needs the Discord server's guild ID once picked back up.
 

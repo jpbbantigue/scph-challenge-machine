@@ -823,12 +823,14 @@ function updateProfileLink(){
 // account; BYOK Claude/OpenAI keys are never metered (that's the visitor's
 // own API cost). Shows the live balance, or a nudge to sign in / use BYOK.
 function updateAICreditsHint(){
+  updateCreditsExhaustedState();
   if(!els.aiCreditsHint) return;
   if(state.aiSource !== "groq"){ els.aiCreditsHint.textContent = ""; return; }
   if(!account.signedIn){
     els.aiCreditsHint.textContent = "Sign in above to use this site's AI — free daily credits per account.";
   } else if(account.credits){
-    els.aiCreditsHint.textContent = account.credits.remaining+" / "+account.credits.limit+" free AI rolls left today.";
+    els.aiCreditsHint.textContent = account.credits.remaining+" / "+account.credits.limit+" free AI rolls left today."
+      + (account.credits.remaining <= 0 ? " Switch AI off (or add your own key) to keep rolling for free." : "");
   } else {
     els.aiCreditsHint.textContent = "";
   }
@@ -1308,6 +1310,9 @@ async function groqGenerateBatch(cat, keys){
   if(!res.ok){
     let detail = "";
     try{ detail = (await res.json()).error || ""; }catch(e){}
+    // A 429 means today's credits are gone — reflect that immediately (rather
+    // than waiting for the next successful call) so the lever disables now.
+    if(res.status === 429 && account.credits){ account.credits.remaining = 0; renderAccountUI(); }
     throw new Error(res.status === 404
       ? "AI endpoint not found — this site isn't deployed with the serverless function"
       : (detail || ("AI request failed ("+res.status+")")));
@@ -1469,6 +1474,23 @@ async function getFreshValuesForPull(keys){
 function sleep(ms){ return new Promise(resolve=>setTimeout(resolve, ms)); }
 const DEFAULT_SPIN_DURATION = 700;
 let spinning = false;
+let creditsExhausted = false;
+
+// Keeps the lever disabled while spinning OR while this site's own AI is
+// selected, the visitor is signed in, and today's credits are used up —
+// rather than letting them keep pulling into a silent built-in-list
+// fallback, they have to explicitly switch AI off (or add their own key)
+// to keep rolling for free.
+function applyLeverState(){
+  els.lever.disabled = spinning || creditsExhausted;
+  els.lever.title = creditsExhausted
+    ? "Daily AI limit reached — switch AI off in Settings (or add your own key) to keep rolling for free."
+    : "";
+}
+function updateCreditsExhaustedState(){
+  creditsExhausted = !!(state.aiSource === "groq" && account.signedIn && account.credits && account.credits.remaining <= 0);
+  applyLeverState();
+}
 
 // valuePromise resolves to the final string this reel should land on (may take a while in AI mode).
 async function spinReel(key, valuePromise){
@@ -1534,9 +1556,9 @@ function recordRollStats(categoryId){
 }
 
 async function pullLever(){
-  if(spinning) return;
+  if(spinning || creditsExhausted) return;
   spinning = true;
-  els.lever.disabled = true;
+  applyLeverState();
   els.lever.classList.add("pressed");
   setTimeout(()=>els.lever.classList.remove("pressed"), 140);
 
@@ -1573,11 +1595,11 @@ async function pullLever(){
   els.announcer.textContent = "New challenge: "+ticket.mission;
 
   spinning = false;
-  els.lever.disabled = false;
+  applyLeverState();
 }
 
 async function rerollSingle(key){
-  if(spinning || currentLocks()[key] || !isActive(key)) return;
+  if(spinning || creditsExhausted || currentLocks()[key] || !isActive(key)) return;
   if(!state.current || state.current.categoryId !== state.categoryId){ pullLever(); return; }
   spinning = true;
   const freshMap = await getFreshValuesForPull([key]);
