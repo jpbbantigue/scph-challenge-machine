@@ -126,12 +126,15 @@ Netlify Blobs needs no separate setup or database to provision — it's availabl
 
 ## AI credits (Netlify only, requires Accounts)
 
-This site's own Groq key ("This site's AI" in Settings) is metered at 50 free rolls per day per signed-in account, since that key is the site's cost. A visitor's own Claude/OpenAI key (BYOK) is never metered — that's their API cost, not the site's.
+This site's own Groq key ("This site's AI" in Settings) is metered at 50 free **pulls** per day per signed-in account, since that key is the site's cost. A visitor's own Claude/OpenAI key (BYOK) is never metered — that's their API cost, not the site's.
 
+- **1 credit per pull, not per reel.** `generate.js` accepts a batched request — every reel needed for one "Pull" (or one single-reel reroll, as a one-item batch) goes out as a single request and spends exactly 1 credit, regardless of whether that category has 1 active reel or 6.
 - Requires sign-in — anonymous visitors are prompted to sign in or use their own key instead.
 - Tracked in the same Netlify Blobs record as favorites/history (see `_lib/store.js`: `consumeAICredit`, `DAILY_AI_CREDIT_LIMIT`), resetting daily (UTC).
 - `auth-me.js` returns the live balance so Settings can show "N / 50 free AI rolls left today" without an extra request.
+- If a pull hits the daily limit (or the request otherwise fails), a visible notice appears above the ticket ("Daily AI limit reached — showing built-in results instead.") rather than silently degrading — that pull falls back to the built-in list for every reel it touched.
 - No purchase/top-up flow yet — a "Get More Credits" option to extend the daily limit after a paid transaction is a planned future addition, not built.
+- **Suno Creatives PH Discord members getting a 100/day limit is planned but deferred** — the plan is to request Discord's `guilds` OAuth scope at sign-in and check server membership automatically via `/users/@me/guilds` (no manual verification step), refreshed each time someone signs in. Not built yet; needs the Discord server's guild ID once picked back up.
 
 ## Contact form (Resend)
 

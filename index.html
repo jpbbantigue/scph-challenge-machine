@@ -433,6 +433,8 @@ details[open] summary::before{content:"▾ ";}
   </div>
 </section>
 
+<p class="hint" id="aiFallbackNotice" hidden style="max-width:640px;margin:0 auto 14px;padding:10px 16px;text-align:center;border-radius:12px;background:rgba(230,58,70,0.1);border:1px solid rgba(230,58,70,0.3);color:var(--crimson-hi);"></p>
+
 <div class="ticket-wrap">
   <article class="ticket" id="ticket" aria-live="polite">
     <div class="ticket-head">
@@ -971,6 +973,7 @@ const els = {
   ticketMission: document.getElementById("ticketMission"),
   copyBtn: document.getElementById("copyBtn"),
   favBtn: document.getElementById("favBtn"),
+  aiFallbackNotice: document.getElementById("aiFallbackNotice"),
   historyList: document.getElementById("historyList"),
   favList: document.getElementById("favList"),
   recentPulls: document.getElementById("recentPulls"),
@@ -1284,13 +1287,20 @@ function sanitizeAIText(text){
   return t;
 }
 
-async function groqGenerate(cat, r, examples){
+// Batched: one request covers every reel in a single pull (or a single
+// reroll, as a one-item batch), so the daily credit spend is 1 per pull
+// regardless of how many reels that category has active — not 1 per reel.
+async function groqGenerateBatch(cat, keys){
+  const reelsPayload = keys.map(key=>{
+    const r = reelDef(cat, key);
+    return { label: r.label, examples: shuffle(r.items).slice(0,5) };
+  });
   let res;
   try{
     res = await fetch(AI_ENDPOINT, {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({categoryName: cat.name, label: r.label, examples: examples})
+      body: JSON.stringify({categoryName: cat.name, reels: reelsPayload})
     });
   }catch(networkErr){
     throw new Error("Couldn't reach the AI endpoint");
@@ -1303,13 +1313,18 @@ async function groqGenerate(cat, r, examples){
       : (detail || ("AI request failed ("+res.status+")")));
   }
   const data = await res.json();
-  const text = (data && data.text) ? String(data.text).trim() : "";
-  if(!text) throw new Error("Empty AI response");
   // This site's own Groq key is metered per signed-in account (see
   // generate.js) — reflect the updated balance in the account object so
   // Settings shows a live count without an extra round trip.
   if(typeof data.creditsRemaining === "number" && account.credits){ account.credits.remaining = data.creditsRemaining; renderAccountUI(); }
-  return text;
+  const byLabel = {};
+  (data.results||[]).forEach(item=>{ byLabel[item.label] = (item.text||"").trim(); });
+  const out = {};
+  keys.forEach(key=>{
+    const r = reelDef(cat, key);
+    out[key] = byLabel[r.label] || "";
+  });
+  return out;
 }
 
 async function anthropicGenerate(cat, r, examples){
@@ -1377,17 +1392,29 @@ async function openaiGenerate(cat, r, examples){
   return text;
 }
 
+// Anthropic/OpenAI are BYOK (the visitor's own key/cost), so they stay
+// per-reel and unmetered — only the site's own Groq key goes through the
+// batched, credit-metered path (groqGenerateBatch).
 async function aiGenerate(key){
   const cat = currentCategory();
   const r = reelDef(cat, key);
   const examples = shuffle(r.items).slice(0,5);
   if(state.aiSource === "anthropic") return anthropicGenerate(cat, r, examples);
   if(state.aiSource === "openai") return openaiGenerate(cat, r, examples);
-  return groqGenerate(cat, r, examples);
+  throw new Error("groq is handled via the batched path, not aiGenerate");
 }
 
 function aiSourceLabel(src){
   return src==="anthropic" ? "Claude" : src==="openai" ? "ChatGPT" : "This site's AI";
+}
+
+let aiFallbackNoticeTimer = null;
+function showAIFallbackNotice(msg){
+  if(!els.aiFallbackNotice) return;
+  els.aiFallbackNotice.textContent = msg;
+  els.aiFallbackNotice.hidden = false;
+  clearTimeout(aiFallbackNoticeTimer);
+  aiFallbackNoticeTimer = setTimeout(()=>{ els.aiFallbackNotice.hidden = true; }, 6000);
 }
 
 async function testAIEndpoint(){
@@ -1396,7 +1423,8 @@ async function testAIEndpoint(){
   const cat = currentCategory();
   const probeKey = (cat.reels.find(r=>isActive(r.key)) || cat.reels[0]).key;
   try{
-    await aiGenerate(probeKey);
+    if(state.aiSource === "groq"){ await groqGenerateBatch(cat, [probeKey]); }
+    else { await aiGenerate(probeKey); }
     setAIStatus(aiSourceLabel(state.aiSource)+" ready — fresh entries generate on every pull.");
     return true;
   }catch(err){
@@ -1405,15 +1433,36 @@ async function testAIEndpoint(){
   }
 }
 
-async function getValue(key){
-  if(state.aiSource && state.aiSource !== "off"){
+// Resolves a value for every key in `keys`, always — falls back to the
+// built-in list per key (or for the whole batch, for groq) if AI mode is
+// off, unavailable, or (for groq specifically) the daily credit limit or
+// timeout is hit. Groq is one batched request per call (1 credit total,
+// regardless of how many keys); Anthropic/OpenAI stay per-key since they're
+// BYOK and unmetered.
+async function getFreshValuesForPull(keys){
+  const map = {};
+  if(state.aiSource === "groq"){
     try{
       const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
-      const value = await Promise.race([aiGenerate(key), timeout]);
-      if(value) return value;
-    }catch(e){ /* fall through to the built-in list below */ }
+      const batch = await Promise.race([groqGenerateBatch(currentCategory(), keys), timeout]);
+      keys.forEach(key=>{ map[key] = batch[key] || pick(currentCategory(), key); });
+    }catch(err){
+      showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead.");
+      keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
+    }
+    return map;
   }
-  return pick(currentCategory(), key);
+  if(state.aiSource === "anthropic" || state.aiSource === "openai"){
+    await Promise.all(keys.map(async key=>{
+      try{
+        const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
+        map[key] = await Promise.race([aiGenerate(key), timeout]);
+      }catch(e){ map[key] = pick(currentCategory(), key); }
+    }));
+    return map;
+  }
+  keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
+  return map;
 }
 
 /* ---------------- spin logic ---------------- */
@@ -1493,9 +1542,12 @@ async function pullLever(){
 
   const cat = currentCategory();
   const keys = cat.reels.map(r=>r.key);
+  const hasCurrentSameCat = !!(state.current && state.current.categoryId === cat.id);
+  const keysNeedingFresh = keys.filter(key=>isActive(key) && !(currentLocks()[key] && hasCurrentSameCat));
+  const freshMap = keysNeedingFresh.length ? await getFreshValuesForPull(keysNeedingFresh) : {};
   const results = await Promise.all(keys.map(key=>{
     if(!isActive(key)) return spinReel(key, Promise.resolve(null));
-    const valuePromise = (currentLocks()[key] && state.current && state.current.categoryId===cat.id) ? Promise.resolve(state.current.vals[key]) : getValue(key);
+    const valuePromise = (currentLocks()[key] && hasCurrentSameCat) ? Promise.resolve(state.current.vals[key]) : Promise.resolve(freshMap[key]);
     return spinReel(key, valuePromise);
   }));
   const vals = {};
@@ -1528,7 +1580,8 @@ async function rerollSingle(key){
   if(spinning || currentLocks()[key] || !isActive(key)) return;
   if(!state.current || state.current.categoryId !== state.categoryId){ pullLever(); return; }
   spinning = true;
-  const value = await spinReel(key, getValue(key));
+  const freshMap = await getFreshValuesForPull([key]);
+  const value = await spinReel(key, Promise.resolve(freshMap[key]));
   state.current.vals[key] = value;
   state.current.mission = buildMission(state.current.vals);
   renderTicket();

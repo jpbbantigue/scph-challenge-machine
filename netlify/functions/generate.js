@@ -1,18 +1,17 @@
 // Netlify Function: POST /.netlify/functions/generate
 // (reachable at /api/generate via the redirect in netlify.toml)
 //
-// Body: { categoryName: string, label: string, examples: string[] }
-// Returns: { text: string, creditsRemaining: number }  or  { error: string }
+// Body: { categoryName: string, reels: [{ label: string, examples: string[] }, ...] }
+// Returns: { results: [{ label, text }], creditsRemaining }  or  { error: string }
+//
+// Batched by design: one request covers every reel needed for a single
+// "Pull" (or a single reroll, as a one-item batch), so the daily credit
+// spend is 1 per pull rather than 1 per reel regardless of how many reels
+// that category has active.
 //
 // Requires the GROQ_API_KEY environment variable to be set in the Netlify
 // site's dashboard (Site settings > Environment variables). Get a free key
 // at https://console.groq.com — the key never reaches the browser.
-//
-// Generic by design: Prompt Royale has many categories, each with its own
-// reel labels, so instead of a hardcoded description per category+label
-// (which doesn't scale), the description is built from the category name
-// and reel label the client sends, plus a handful of example items from
-// that reel's own list.
 //
 // This endpoint calls a site-wide key (this site's own cost), so unlike the
 // BYOK relay it requires sign-in and is metered by a daily credit allowance
@@ -25,6 +24,7 @@ const { consumeAICredit } = require("./_lib/store");
 
 const MODEL = "llama-3.1-8b-instant";
 const MAX_FIELD_LEN = 60;
+const MAX_REELS_PER_REQUEST = 8;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -44,56 +44,56 @@ exports.handler = async (event) => {
   }
 
   const categoryName = typeof body.categoryName === "string" ? body.categoryName.trim().slice(0, MAX_FIELD_LEN) : "";
-  const label = typeof body.label === "string" ? body.label.trim().slice(0, MAX_FIELD_LEN) : "";
-  if (!categoryName || !label) {
-    return json(400, { error: "Missing categoryName or label" });
+  const reelsIn = Array.isArray(body.reels) ? body.reels.slice(0, MAX_REELS_PER_REQUEST) : [];
+  if (!categoryName || !reelsIn.length) {
+    return json(400, { error: "Missing categoryName or reels" });
   }
-  const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5).map(String) : [];
+  const reels = reelsIn.map((r) => ({
+    label: typeof r.label === "string" ? r.label.trim().slice(0, MAX_FIELD_LEN) : "",
+    examples: Array.isArray(r.examples) ? r.examples.slice(0, 5).map(String) : []
+  })).filter((r) => r.label);
+  if (!reels.length) {
+    return json(400, { error: "No valid reels in request" });
+  }
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return json(500, { error: "Server is missing GROQ_API_KEY — set it in the Netlify site's environment variables." });
   }
 
+  // One credit for the whole batch — this is what makes "1 pull = 1 credit"
+  // true regardless of how many reels that pull touches.
   const credit = await consumeAICredit(user);
   if (!credit.ok) {
     return json(429, { error: "Daily AI limit reached (" + credit.limit + "/day) — try again tomorrow, or add your own Claude/ChatGPT key in Settings." });
   }
 
-  const prompt = buildPrompt(categoryName, label, examples);
+  const results = await Promise.all(reels.map(async (r) => {
+    const prompt = buildPrompt(categoryName, r.label, r.examples);
+    try {
+      const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 1.05,
+          max_tokens: 60
+        })
+      });
+      if (!upstream.ok) return { label: r.label, text: "" };
+      const data = await upstream.json();
+      const raw = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      return { label: r.label, text: sanitize(raw || "") };
+    } catch (e) {
+      return { label: r.label, text: "" };
+    }
+  }));
 
-  let upstream;
-  try {
-    upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 1.05,
-        max_tokens: 60
-      })
-    });
-  } catch (e) {
-    return json(502, { error: "Couldn't reach the AI provider" });
-  }
-
-  if (!upstream.ok) {
-    const detail = await safeText(upstream);
-    return json(502, { error: "AI provider error (" + upstream.status + ")" + (detail ? ": " + detail.slice(0, 200) : "") });
-  }
-
-  const data = await upstream.json();
-  const raw = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-  const text = sanitize(raw || "");
-  if (!text) {
-    return json(502, { error: "AI returned an unusable response" });
-  }
-
-  return json(200, { text: text, creditsRemaining: credit.remaining });
+  return json(200, { results: results, creditsRemaining: credit.remaining });
 };
 
 function buildPrompt(categoryName, label, examples) {
@@ -113,10 +113,6 @@ function sanitize(text) {
   t = t.replace(/[.!?,;:]+$/, "").trim();
   if (!t || t.length > 140) return "";
   return t;
-}
-
-async function safeText(res) {
-  try { return await res.text(); } catch (e) { return ""; }
 }
 
 function json(statusCode, obj) {

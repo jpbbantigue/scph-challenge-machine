@@ -1,22 +1,20 @@
 // Vercel Serverless Function: POST /api/generate
 //
-// Body: { categoryName: string, label: string, examples: string[] }
-// Returns: { text: string }  or  { error: string }
+// Body: { categoryName: string, reels: [{ label: string, examples: string[] }, ...] }
+// Returns: { results: [{ label, text }] }  or  { error: string }
 //
 // Requires the GROQ_API_KEY environment variable to be set in the Vercel
 // project's dashboard (Settings > Environment Variables). Get a free key
 // at https://console.groq.com — the key never reaches the browser.
 //
-// Generic by design: Prompt Royale has many categories, each with its own
-// reel labels, so instead of a hardcoded description per category+label
-// (which doesn't scale), the description is built from the category name
-// and reel label the client sends, plus a handful of example items from
-// that reel's own list — same trust boundary as before (this is a public,
-// unauthenticated, zero-stakes creative-prompt endpoint; the output is
-// only ever shown back to the requester).
+// Batched by design (see netlify/functions/generate.js for why — 1 request
+// per pull instead of 1 per reel). This Vercel path has no accounts/credits
+// (Netlify-only, see README), so there's nothing to meter here — it's the
+// same public, unauthenticated, zero-stakes endpoint as before, just batched.
 
 const MODEL = "llama-3.1-8b-instant";
 const MAX_FIELD_LEN = 60;
+const MAX_REELS_PER_REQUEST = 8;
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
@@ -26,12 +24,19 @@ module.exports = async (req, res) => {
 
   const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {});
   const categoryName = typeof body.categoryName === "string" ? body.categoryName.trim().slice(0, MAX_FIELD_LEN) : "";
-  const label = typeof body.label === "string" ? body.label.trim().slice(0, MAX_FIELD_LEN) : "";
-  if (!categoryName || !label) {
-    res.status(400).json({ error: "Missing categoryName or label" });
+  const reelsIn = Array.isArray(body.reels) ? body.reels.slice(0, MAX_REELS_PER_REQUEST) : [];
+  if (!categoryName || !reelsIn.length) {
+    res.status(400).json({ error: "Missing categoryName or reels" });
     return;
   }
-  const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5).map(String) : [];
+  const reels = reelsIn.map((r) => ({
+    label: typeof r.label === "string" ? r.label.trim().slice(0, MAX_FIELD_LEN) : "",
+    examples: Array.isArray(r.examples) ? r.examples.slice(0, 5).map(String) : []
+  })).filter((r) => r.label);
+  if (!reels.length) {
+    res.status(400).json({ error: "No valid reels in request" });
+    return;
+  }
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -39,43 +44,32 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const prompt = buildPrompt(categoryName, label, examples);
+  const results = await Promise.all(reels.map(async (r) => {
+    const prompt = buildPrompt(categoryName, r.label, r.examples);
+    try {
+      const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 1.05,
+          max_tokens: 60
+        })
+      });
+      if (!upstream.ok) return { label: r.label, text: "" };
+      const data = await upstream.json();
+      const raw = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      return { label: r.label, text: sanitize(raw || "") };
+    } catch (e) {
+      return { label: r.label, text: "" };
+    }
+  }));
 
-  let upstream;
-  try {
-    upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 1.05,
-        max_tokens: 60
-      })
-    });
-  } catch (e) {
-    res.status(502).json({ error: "Couldn't reach the AI provider" });
-    return;
-  }
-
-  if (!upstream.ok) {
-    const detail = await safeText(upstream);
-    res.status(502).json({ error: "AI provider error (" + upstream.status + ")" + (detail ? ": " + detail.slice(0, 200) : "") });
-    return;
-  }
-
-  const data = await upstream.json();
-  const raw = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-  const text = sanitize(raw || "");
-  if (!text) {
-    res.status(502).json({ error: "AI returned an unusable response" });
-    return;
-  }
-
-  res.status(200).json({ text: text });
+  res.status(200).json({ results: results });
 };
 
 function buildPrompt(categoryName, label, examples) {
@@ -95,10 +89,6 @@ function sanitize(text) {
   t = t.replace(/[.!?,;:]+$/, "").trim();
   if (!t || t.length > 140) return "";
   return t;
-}
-
-async function safeText(res) {
-  try { return await res.text(); } catch (e) { return ""; }
 }
 
 function safeParse(s) {

@@ -20,7 +20,8 @@ This branch (`prompt-royale`) reworks the SCPH Challenge Machine into "Prompt Ro
 These were originally deferred pending Phase 2, but turned out not to need a database — they reuse the existing Netlify Blobs account store instead:
 
 - **Contact modal**, wired to actually send email (via Resend) rather than just being UI. See README's "Contact form" section.
-- **Credits system** — 50/day free-AI-roll limit per signed-in account, gating only this site's own Groq key (not BYOK keys). See README's "AI credits" section.
+- **Credits system** — 50/day free-AI-**pull** limit per signed-in account (1 credit per pull, batched across all reels in that pull — not per reel), gating only this site's own Groq key (not BYOK keys). A visible notice appears if a pull hits the limit, rather than silently falling back. See README's "AI credits" section.
+- **Discord community bonus (100/day) — deferred, not built.** Plan: request the `guilds` OAuth scope at Discord sign-in, check membership in the Suno Creatives PH server via `/users/@me/guilds` automatically (no manual verification), and bump the daily limit for verified members. Needs the server's Discord guild ID to proceed.
 - **Public Profile page + gamification** — opt-in public handle, stats (total rolls, per-category rolls, streak), and milestone badges computed on read. Stats start at zero for every account (new and pre-existing) as of this feature — no historical data is backfilled. See README's "Public profile & gamification" section.
 
 ## Phase 2 — not started
