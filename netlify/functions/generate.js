@@ -1,22 +1,23 @@
 // Netlify Function: POST /.netlify/functions/generate
 // (reachable at /api/generate via the redirect in netlify.toml)
 //
-// Body: { category: "genre"|"mood"|"subject"|"twist", examples: string[] }
+// Body: { categoryName: string, label: string, examples: string[] }
 // Returns: { text: string }  or  { error: string }
 //
 // Requires the GROQ_API_KEY environment variable to be set in the Netlify
 // site's dashboard (Site settings > Environment variables). Get a free key
 // at https://console.groq.com — the key never reaches the browser.
-
-const CAT_DESC = {
-  genre: "a music genre or micro-genre name, 1-4 words, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
-  genre2: "a second, different music genre or micro-genre name (1-4 words) meant to be fused with another genre, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
-  mood: "a short emotional mood or vibe for a song, 2-4 words, adjective + noun (like 'Bittersweet nostalgia')",
-  subject: "a single vivid, specific lyrical premise for a song, written as a short story pitch, one sentence",
-  twist: "one short production or songwriting constraint or dare for a song, one sentence, in the spirit of 'no drums until the final chorus'"
-};
+//
+// Generic by design: Prompt Royale has many categories, each with its own
+// reel labels, so instead of a hardcoded description per category+label
+// (which doesn't scale), the description is built from the category name
+// and reel label the client sends, plus a handful of example items from
+// that reel's own list — same trust boundary as before (this is a public,
+// unauthenticated, zero-stakes creative-prompt endpoint; the output is
+// only ever shown back to the requester).
 
 const MODEL = "llama-3.1-8b-instant";
+const MAX_FIELD_LEN = 60;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -30,19 +31,19 @@ exports.handler = async (event) => {
     return json(400, { error: "Invalid JSON body" });
   }
 
-  const category = body.category;
-  const desc = CAT_DESC[category];
-  if (!desc) {
-    return json(400, { error: "Unknown category: " + category });
+  const categoryName = typeof body.categoryName === "string" ? body.categoryName.trim().slice(0, MAX_FIELD_LEN) : "";
+  const label = typeof body.label === "string" ? body.label.trim().slice(0, MAX_FIELD_LEN) : "";
+  if (!categoryName || !label) {
+    return json(400, { error: "Missing categoryName or label" });
   }
-  const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5) : [];
+  const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5).map(String) : [];
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return json(500, { error: "Server is missing GROQ_API_KEY — set it in the Netlify site's environment variables." });
   }
 
-  const prompt = buildPrompt(category, desc, examples);
+  const prompt = buildPrompt(categoryName, label, examples);
 
   let upstream;
   try {
@@ -78,12 +79,31 @@ exports.handler = async (event) => {
   return json(200, { text: text });
 };
 
-function buildPrompt(category, desc, examples) {
+// The Music category's "Twist" reel is a dare the person applies while
+// writing lyrics and prompting Suno (or another AI music generator) — so it
+// needs to stay achievable by writing lyrics/vocal delivery a certain way,
+// not a precise audio-production or music-theory instruction that these
+// tools rarely nail without many costly regenerations (exact chord counts,
+// time-signature changes, mixing/instrumentation specifics, melodic
+// intervals). This keeps AI-generated twists in the same "cheap to actually
+// pull off" lane as the curated built-in list.
+const TWIST_FEASIBILITY_NOTE =
+  " This entry must be a LYRIC-WRITING or VOCAL-DELIVERY constraint the person can" +
+  " satisfy just by how they write the words or sing them (structure, POV, repetition," +
+  " whispering, spoken word, a cappella, duet, etc.) — NOT a precise audio-production or" +
+  " music-theory instruction (avoid exact chord counts, time-signature or key changes," +
+  " mixing/instrumentation specifics, or precise melodic intervals), since AI music" +
+  " generators like Suno rarely execute those reliably without many regenerations.";
+
+function buildPrompt(categoryName, label, examples) {
   const exampleText = examples.join("; ");
-  return "You generate entries for a songwriting-challenge generator. Category: " + category + " — " + desc +
-    ". Examples already in use: " + exampleText + ". Give ONE brand-new " + category +
-    " entry, different from the examples, matching the same style and length. This entry gets stitched together" +
-    " with the other categories into one sentence, so do not end it with a period or any other trailing punctuation." +
+  const isMusicTwist = /music/i.test(categoryName) && /twist/i.test(label);
+  return "You generate entries for a creative-prompt slot machine. Category: " + categoryName +
+    " — reel: '" + label + "'. Examples already in use for this reel: " + exampleText +
+    ". Give ONE brand-new entry for the '" + label + "' reel, 1-6 words, different from the examples," +
+    " matching their tone, style, and length." + (isMusicTwist ? TWIST_FEASIBILITY_NOTE : "") +
+    " This entry gets stitched together with other reels into" +
+    " one sentence, so do not end it with a period or any other trailing punctuation." +
     " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 

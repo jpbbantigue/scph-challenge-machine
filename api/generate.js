@@ -1,21 +1,34 @@
 // Vercel Serverless Function: POST /api/generate
 //
-// Body: { category: "genre"|"mood"|"subject"|"twist", examples: string[] }
+// Body: { categoryName: string, label: string, examples: string[] }
 // Returns: { text: string }  or  { error: string }
 //
 // Requires the GROQ_API_KEY environment variable to be set in the Vercel
 // project's dashboard (Settings > Environment Variables). Get a free key
 // at https://console.groq.com — the key never reaches the browser.
-
-const CAT_DESC = {
-  genre: "a music genre or micro-genre name, 1-4 words, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
-  genre2: "a second, different music genre or micro-genre name (1-4 words) meant to be fused with another genre, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
-  mood: "a short emotional mood or vibe for a song, 2-4 words, adjective + noun (like 'Bittersweet nostalgia')",
-  subject: "a single vivid, specific lyrical premise for a song, written as a short story pitch, one sentence",
-  twist: "one short production or songwriting constraint or dare for a song, one sentence, in the spirit of 'no drums until the final chorus'"
-};
+//
+// Generic by design: Prompt Royale has many categories, each with its own
+// reel labels, so instead of a hardcoded description per category+label
+// (which doesn't scale), the description is built from the category name
+// and reel label the client sends, plus a handful of example items from
+// that reel's own list — same trust boundary as before (this is a public,
+// unauthenticated, zero-stakes creative-prompt endpoint; the output is
+// only ever shown back to the requester).
 
 const MODEL = "llama-3.1-8b-instant";
+const MAX_FIELD_LEN = 60;
+
+// See buildPrompt below — the Music category's "Twist" reel needs to stay a
+// lyric/vocal-delivery constraint the person can actually pull off, not a
+// precise audio-production or music-theory instruction AI music generators
+// like Suno rarely execute without many regenerations.
+const TWIST_FEASIBILITY_NOTE =
+  " This entry must be a LYRIC-WRITING or VOCAL-DELIVERY constraint the person can" +
+  " satisfy just by how they write the words or sing them (structure, POV, repetition," +
+  " whispering, spoken word, a cappella, duet, etc.) — NOT a precise audio-production or" +
+  " music-theory instruction (avoid exact chord counts, time-signature or key changes," +
+  " mixing/instrumentation specifics, or precise melodic intervals), since AI music" +
+  " generators like Suno rarely execute those reliably without many regenerations.";
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
@@ -24,13 +37,13 @@ module.exports = async (req, res) => {
   }
 
   const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {});
-  const category = body.category;
-  const desc = CAT_DESC[category];
-  if (!desc) {
-    res.status(400).json({ error: "Unknown category: " + category });
+  const categoryName = typeof body.categoryName === "string" ? body.categoryName.trim().slice(0, MAX_FIELD_LEN) : "";
+  const label = typeof body.label === "string" ? body.label.trim().slice(0, MAX_FIELD_LEN) : "";
+  if (!categoryName || !label) {
+    res.status(400).json({ error: "Missing categoryName or label" });
     return;
   }
-  const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5) : [];
+  const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5).map(String) : [];
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -38,7 +51,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const prompt = buildPrompt(category, desc, examples);
+  const prompt = buildPrompt(categoryName, label, examples);
 
   let upstream;
   try {
@@ -77,16 +90,22 @@ module.exports = async (req, res) => {
   res.status(200).json({ text: text });
 };
 
-function buildPrompt(category, desc, examples) {
+function buildPrompt(categoryName, label, examples) {
   const exampleText = examples.join("; ");
-  return "You generate entries for a songwriting-challenge generator. Category: " + category + " — " + desc +
-    ". Examples already in use: " + exampleText + ". Give ONE brand-new " + category +
-    " entry, different from the examples, matching the same style and length. Reply with only the entry text — no quotes, no numbering, no explanation.";
+  const isMusicTwist = /music/i.test(categoryName) && /twist/i.test(label);
+  return "You generate entries for a creative-prompt slot machine. Category: " + categoryName +
+    " — reel: '" + label + "'. Examples already in use for this reel: " + exampleText +
+    ". Give ONE brand-new entry for the '" + label + "' reel, 1-6 words, different from the examples," +
+    " matching their tone, style, and length." + (isMusicTwist ? TWIST_FEASIBILITY_NOTE : "") +
+    " This entry gets stitched together with other reels into" +
+    " one sentence, so do not end it with a period or any other trailing punctuation." +
+    " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 
 function sanitize(text) {
   let t = String(text).trim().split("\n")[0].trim();
   t = t.replace(/^["'“”\-\s\d.]+/, "").replace(/["'“”]+$/, "").trim();
+  t = t.replace(/[.!?,;:]+$/, "").trim();
   if (!t || t.length > 140) return "";
   return t;
 }

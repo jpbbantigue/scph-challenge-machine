@@ -3,88 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCPH Challenge Machine — Suno Songwriting Prompt Generator</title>
-<meta name="description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist. Free prompt generator by the SCPH (Suno Creatives PH) community.">
-<meta name="keywords" content="Suno, Suno AI, songwriting prompts, song idea generator, music prompt generator, Suno challenge, SCPH, Suno Creatives PH, AI music, songwriting challenge">
-<meta name="author" content="SCPH — Suno Creatives PH">
+<title>Prompt Royale — AI Creative Prompt Generator</title>
+<meta name="description" content="Pull the lever for a random creative-prompt challenge: songwriting and character-creation dares, built for pairing with Suno and other AI generators. Free, no sign-up.">
+<meta name="keywords" content="Suno, Suno AI, songwriting prompts, character creation prompts, song idea generator, prompt generator, AI music, creative prompt generator, Prompt Royale">
+<meta name="author" content="Prompt Royale">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://scphchallengemachine.netlify.app/">
 
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="SCPH Challenge Machine">
-<meta property="og:title" content="SCPH Challenge Machine — Suno Songwriting Prompt Generator">
-<meta property="og:description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist. Free prompt generator by the SCPH (Suno Creatives PH) community.">
+<meta property="og:site_name" content="Prompt Royale">
+<meta property="og:title" content="Prompt Royale — AI Creative Prompt Generator">
+<meta property="og:description" content="Pull the lever for a random songwriting or character-creation dare. Free, no sign-up.">
 <meta property="og:url" content="https://scphchallengemachine.netlify.app/">
 <meta property="og:image" content="https://scphchallengemachine.netlify.app/favicon.png">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SCPH Challenge Machine — Suno Songwriting Prompt Generator">
-<meta name="twitter:description" content="Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist.">
+<meta name="twitter:title" content="Prompt Royale — AI Creative Prompt Generator">
+<meta name="twitter:description" content="Pull the lever for a random songwriting or character-creation dare.">
 <meta name="twitter:image" content="https://scphchallengemachine.netlify.app/favicon.png">
 
-<meta name="theme-color" content="#0f0d0b">
+<meta name="theme-color" content="#05070d">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "SCPH Challenge Machine",
+  "name": "Prompt Royale",
   "url": "https://scphchallengemachine.netlify.app/",
-  "description": "Pull the lever for a random Suno songwriting challenge: genre, mood, subject, and a production twist.",
+  "description": "Pull the lever for a random songwriting or character-creation prompt.",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Any",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
   "publisher": {
     "@type": "Organization",
-    "name": "SCPH — Suno Creatives PH",
+    "name": "Prompt Royale",
     "sameAs": ["https://discord.gg/nSdj4wBZv"]
   }
 }
 </script>
 <style>
 :root{
-  --bg-0:#08080b;
-  --bg-1:#0d0d11;
-  --panel:#131318;
-  --panel-hi:#1b1b22;
-  --panel-lo:#0a0a0d;
-  --brass:#fcd116;
-  --brass-dim:#8a7a1e;
-  --amber:#ff2142;
-  --amber-dim:#7a0f22;
-  --amber-hi:#ff4d6b;
-  --ph-blue:#00c2ff;
-  --ph-blue-hi:#6fe0ff;
-  --red:#ff2142;
-  --red-dim:#7a0f22;
-  --ticket:#121218;
-  --ticket-line:rgba(255,255,255,0.12);
-  --ink:#f5f5f7;
-  --ink-soft:#9a9aa6;
-  --text-muted:#a6a6b2;
-  --focus:#00c2ff;
-  --font-display:'Oswald',sans-serif;
-  --font-mono:'IBM Plex Mono',monospace;
-  --font-body:'Work Sans',sans-serif;
+  --bg-0:#05070d;
+  --panel:#0c0f1a;
+  --panel-hi:#121629;
+  --panel-lo:#03040a;
+  --ink:#F3F5FC;
+  --ink-soft:rgba(243,245,252,0.65);
+  --ink-mute:rgba(243,245,252,0.42);
+  --royal:#1836B2;
+  --royal-mid:#295BFF;
+  --royal-hi:#4D7CFF;
+  --crimson:#74182D;
+  --crimson-mid:#B51F3E;
+  --crimson-hi:#E63A46;
+  --gold:#C68B24;
+  --gold-mid:#F4BF3A;
+  --gold-hi:#FFD978;
+  --ticket:#0a0d17;
+  --ticket-line:rgba(243,245,252,0.12);
+  --focus:#4D7CFF;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --font-body:'Inter',sans-serif;
 }
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
   background:
-    radial-gradient(ellipse at 50% -10%, #1a0d12 0%, transparent 55%),
+    radial-gradient(ellipse at 50% -10%, #0e1330 0%, transparent 55%),
     radial-gradient(ellipse at 50% 120%, #000 0%, transparent 60%),
     var(--bg-0);
-  color:var(--text-muted);
+  color:var(--ink-soft);
   font-family:var(--font-body);
   min-height:100vh;
 }
 
-a{color:var(--amber);text-decoration:none;}
-a:hover{color:var(--ph-blue);}
+a{color:var(--royal-hi);text-decoration:none;}
+a:hover{color:var(--gold-mid);}
 
 .wrap{max-width:960px;margin:0 auto;padding-left:clamp(16px,4vw,24px);padding-right:clamp(16px,4vw,24px);}
 
@@ -93,22 +92,22 @@ a:hover{color:var(--ph-blue);}
   position:sticky;top:0;z-index:15;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:16px clamp(16px,4vw,48px);
-  background:rgba(8,8,11,0.85);
+  background:rgba(5,7,13,0.85);
   backdrop-filter:blur(6px);
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  border-bottom:1px solid rgba(243,245,252,0.08);
   flex-wrap:wrap;
 }
 .topnav .brand{display:flex;align-items:center;gap:10px;}
 .topnav .brand img{width:30px;height:30px;flex:0 0 auto;}
 .topnav .wordmark{
   font-family:var(--font-display);font-weight:700;font-size:20px;
-  letter-spacing:0.03em;color:var(--ink);
+  letter-spacing:0.02em;color:var(--ink);
 }
-.accent{color:var(--amber);}
+.accent{color:var(--gold-mid);}
 .topnav .navlinks{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
 .navlink{
-  font-family:var(--font-display);font-size:12px;letter-spacing:0.08em;
-  color:var(--text-muted);text-transform:uppercase;
+  font-family:var(--font-display);font-size:12px;letter-spacing:0.06em;
+  color:var(--ink-soft);text-transform:uppercase;
   background:none;border:none;padding:0;cursor:pointer;
   transition:color .15s ease;
 }
@@ -119,9 +118,9 @@ a:hover{color:var(--ph-blue);}
   display:inline-flex;align-items:center;justify-content:center;
   transition:transform .1s ease, filter .15s ease;
 }
-.pill-btn:hover{filter:brightness(1.08);}
+.pill-btn:hover{filter:brightness(1.1);}
 .pill-btn:active{transform:scale(.96);}
-.pill-btn.ph{background:var(--ph-blue);color:#04101a;}
+.pill-btn.ph{background:var(--royal-mid);color:#fff;}
 
 /* ---------- hero / arena ---------- */
 .hero{
@@ -130,49 +129,70 @@ a:hover{color:var(--ph-blue);}
   text-align:center;
 }
 .hero .eyebrow{
-  font-family:var(--font-display);font-size:12px;letter-spacing:0.16em;
-  color:var(--amber);text-transform:uppercase;margin-bottom:14px;
+  font-family:var(--font-display);font-size:12px;letter-spacing:0.14em;
+  color:var(--gold-mid);text-transform:uppercase;margin-bottom:14px;
 }
 .hero h1{
   font-family:var(--font-display);font-weight:700;
-  font-size:clamp(38px,7vw,64px);line-height:1.05;letter-spacing:0.02em;
+  font-size:clamp(38px,7vw,64px);line-height:1.05;letter-spacing:0.01em;
   margin:0;
 }
 .hero h1 span{display:block;}
 .hero h1 .line1{color:var(--ink);}
-.hero h1 .line2{color:var(--amber);text-shadow:0 0 24px rgba(255,33,66,0.45);}
+.hero h1 .line2{color:var(--royal-hi);text-shadow:0 0 24px rgba(77,124,255,0.45);}
 .hero p{
-  font-family:var(--font-body);font-size:16px;color:var(--text-muted);
-  max-width:480px;margin:18px auto 0;line-height:1.55;
+  font-family:var(--font-body);font-size:16px;color:var(--ink-soft);
+  max-width:520px;margin:18px auto 0;line-height:1.55;
+}
+
+/* ---------- category picker ---------- */
+.category-picker{
+  display:flex;justify-content:center;gap:10px;flex-wrap:wrap;
+  margin:26px auto 0;max-width:920px;padding:0 clamp(16px,4vw,24px);
+}
+.category-chip{
+  font-family:var(--font-display);font-weight:600;font-size:13px;
+  letter-spacing:0.02em;
+  border:1px solid rgba(243,245,252,0.15);
+  background:var(--panel);color:var(--ink-soft);
+  border-radius:999px;padding:9px 20px;cursor:pointer;
+  transition:border-color .15s ease, color .15s ease, background .15s ease;
+}
+.category-chip:hover{color:var(--ink);}
+.category-chip[aria-pressed="true"]{color:var(--ink);border-color:var(--royal-hi);background:var(--panel-hi);box-shadow:0 0 0 1px rgba(77,124,255,0.4) inset;}
+.category-chip[data-accent="crimson"][aria-pressed="true"]{border-color:var(--crimson-hi);box-shadow:0 0 0 1px rgba(230,58,70,0.4) inset;}
+.category-blurb{
+  text-align:center;font-size:13px;color:var(--ink-mute);
+  margin-top:10px;
 }
 
 /* ---------- eyebrow / section heading (shared) ---------- */
 .section-eyebrow{
-  font-family:var(--font-display);font-size:12px;letter-spacing:0.16em;
+  font-family:var(--font-display);font-size:12px;letter-spacing:0.14em;
   text-transform:uppercase;margin-bottom:8px;
 }
-.section-eyebrow.red{color:var(--amber);}
-.section-eyebrow.blue{color:var(--ph-blue);}
+.section-eyebrow.gold{color:var(--gold-mid);}
+.section-eyebrow.blue{color:var(--royal-hi);}
 .section-h2{
   font-family:var(--font-display);font-weight:700;
   font-size:clamp(24px,4vw,32px);margin:0 0 22px;color:var(--ink);
 }
 
 /* ---------- console ---------- */
-.console-section{max-width:920px;margin:36px auto 0;padding:0 clamp(16px,4vw,24px);}
+.console-section{max-width:960px;margin:30px auto 0;padding:0 clamp(16px,4vw,24px);}
 .console{
   position:relative;
   background:var(--panel);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:14px;
+  border:1px solid rgba(243,245,252,0.08);
+  border-radius:16px;
   padding:clamp(20px,4vw,34px) clamp(16px,4vw,28px) 30px;
-  box-shadow:0 10px 28px rgba(0,0,0,0.55);
+  box-shadow:0 14px 32px rgba(0,0,0,0.55);
   overflow:hidden;
 }
 .console::before{
   content:"";
   position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--amber),var(--ph-blue));
+  background:linear-gradient(90deg,var(--royal-mid),var(--crimson-mid),var(--gold-mid));
 }
 
 .reels{
@@ -192,9 +212,9 @@ a:hover{color:var(--ph-blue);}
 .lock-toggle{
   width:26px;height:26px;
   border-radius:50%;
-  border:1px solid var(--brass-dim);
+  border:1px solid rgba(243,245,252,0.2);
   background:radial-gradient(circle at 35% 30%,var(--panel-hi),var(--panel-lo));
-  color:var(--text-muted);
+  color:var(--ink-soft);
   font-size:12px;
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
@@ -204,10 +224,10 @@ a:hover{color:var(--ph-blue);}
 .lock-toggle:active{transform:scale(.9);}
 .lock-toggle[aria-pressed="true"]{
   color:#fff;
-  border-color:var(--red);
-  box-shadow:0 0 8px 2px rgba(255,33,66,0.65), 0 0 0 2px rgba(255,33,66,0.25) inset;
+  border-color:var(--gold-mid);
+  box-shadow:0 0 8px 2px rgba(244,191,58,0.55), 0 0 0 2px rgba(244,191,58,0.2) inset;
 }
-.lock-toggle:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{
+.lock-toggle:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{
   outline:2px solid var(--focus);
   outline-offset:2px;
 }
@@ -216,11 +236,11 @@ a:hover{color:var(--ph-blue);}
   width:100%;
   min-height:74px;
   background:linear-gradient(180deg,var(--panel-lo),#000);
-  border-radius:6px;
+  border-radius:8px;
   border:1px solid #000;
   box-shadow:
     0 2px 6px rgba(0,0,0,0.7) inset,
-    0 0 0 1px rgba(255,255,255,0.03);
+    0 0 0 1px rgba(243,245,252,0.03);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -229,18 +249,18 @@ a:hover{color:var(--ph-blue);}
   cursor:pointer;
   transition:box-shadow .15s ease, transform .1s ease;
 }
-.reel-window:hover{box-shadow:0 2px 6px rgba(0,0,0,0.7) inset, 0 0 0 1px rgba(255,33,66,0.3);transform:translateY(-1px);}
+.reel-window:hover{box-shadow:0 2px 6px rgba(0,0,0,0.7) inset, 0 0 0 1px rgba(77,124,255,0.35);transform:translateY(-1px);}
 .reel-window:active{transform:translateY(0) scale(.98);}
 
 .reel-value{
   font-family:var(--font-display);
   font-weight:600;
-  letter-spacing:0.02em;
+  letter-spacing:0.01em;
   font-size:14px;
   line-height:1.25;
   text-align:center;
-  color:var(--amber);
-  text-shadow:0 0 6px rgba(255,33,66,0.6), 0 0 1px rgba(255,33,66,0.4);
+  color:var(--royal-hi);
+  text-shadow:0 0 6px rgba(77,124,255,0.55), 0 0 1px rgba(77,124,255,0.4);
   word-break:break-word;
 }
 .reel-window.spinning .reel-value{filter:blur(1.5px);opacity:.85;}
@@ -253,8 +273,8 @@ a:hover{color:var(--ph-blue);}
 .reel-label{
   font-family:var(--font-display);
   font-size:11px;
-  letter-spacing:0.16em;
-  color:var(--brass);
+  letter-spacing:0.14em;
+  color:var(--gold-mid);
 }
 .reel-unit.disabled .reel-window,.reel-unit.disabled .reel-label,.reel-unit.disabled .lock-toggle{opacity:0.35;}
 .reel-unit.disabled .reel-window{cursor:not-allowed;}
@@ -264,19 +284,19 @@ a:hover{color:var(--ph-blue);}
 .reel-switch-track{
   width:32px;height:18px;border-radius:999px;
   background:var(--panel-lo);
-  border:1px solid var(--brass-dim);
+  border:1px solid rgba(243,245,252,0.2);
   display:inline-flex;align-items:center;
   padding:1px;
   transition:background .15s ease, border-color .15s ease;
 }
 .reel-switch-thumb{
   width:12px;height:12px;border-radius:50%;
-  background:var(--text-muted);
+  background:var(--ink-soft);
   transform:translateX(0);
   transition:transform .15s ease, background .15s ease;
 }
-.reel-switch input:checked + .reel-switch-track{background:var(--red-dim);border-color:var(--amber);}
-.reel-switch input:checked + .reel-switch-track .reel-switch-thumb{transform:translateX(14px);background:var(--amber);}
+.reel-switch input:checked + .reel-switch-track{background:var(--royal);border-color:var(--royal-hi);}
+.reel-switch input:checked + .reel-switch-track .reel-switch-thumb{transform:translateX(14px);background:var(--royal-hi);}
 .reel-switch input:focus-visible + .reel-switch-track{outline:2px solid var(--focus);outline-offset:2px;}
 
 /* lever */
@@ -284,18 +304,18 @@ a:hover{color:var(--ph-blue);}
 .lever{
   font-family:var(--font-display);
   font-weight:700;
-  letter-spacing:0.12em;
+  letter-spacing:0.1em;
   font-size:18px;
   color:#fff;
-  background:linear-gradient(135deg,var(--amber-hi),var(--red) 60%,var(--red-dim) 100%);
+  background:linear-gradient(135deg,var(--crimson-hi),var(--crimson-mid) 60%,var(--crimson) 100%);
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   padding:16px 46px;
   cursor:pointer;
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.4) inset,
+    0 1px 0 rgba(255,255,255,0.35) inset,
     0 -4px 8px rgba(0,0,0,0.35) inset,
-    0 0 16px 1px rgba(255,33,66,0.6),
+    0 0 16px 1px rgba(230,58,70,0.55),
     0 12px 18px rgba(0,0,0,0.55);
   transition:transform .08s ease, box-shadow .08s ease;
 }
@@ -303,9 +323,9 @@ a:hover{color:var(--ph-blue);}
 .lever:active,.lever.pressed{
   transform:translateY(2px);
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.3) inset,
+    0 1px 0 rgba(255,255,255,0.25) inset,
     0 -3px 6px rgba(0,0,0,0.35) inset,
-    0 0 10px 1px rgba(255,33,66,0.7),
+    0 0 10px 1px rgba(230,58,70,0.65),
     0 4px 8px rgba(0,0,0,0.5);
 }
 .lever:disabled{opacity:.6;cursor:default;}
@@ -319,8 +339,8 @@ a:hover{color:var(--ph-blue);}
   background:var(--ticket);
   color:var(--ink);
   border:1px solid var(--ticket-line);
-  border-top:2px solid var(--amber);
-  border-radius:10px;
+  border-top:2px solid var(--gold-mid);
+  border-radius:14px;
   padding:22px 22px 18px;
   box-shadow:0 14px 30px rgba(0,0,0,0.55);
   font-family:var(--font-mono);
@@ -338,7 +358,7 @@ a:hover{color:var(--ph-blue);}
 .ticket-head{
   display:flex;justify-content:space-between;
   font-size:11px;letter-spacing:0.08em;
-  color:var(--ink-soft);
+  color:var(--ink-mute);
   border-bottom:1px dashed var(--ticket-line);
   padding-bottom:10px;margin-bottom:12px;
   text-transform:uppercase;
@@ -352,8 +372,8 @@ a:hover{color:var(--ph-blue);}
   flex:0 0 auto;
   font-family:var(--font-display);
   font-weight:600;
-  font-size:11px;letter-spacing:0.1em;
-  color:var(--ink-soft);
+  font-size:11px;letter-spacing:0.08em;
+  color:var(--ink-mute);
   min-width:64px;
   padding-top:2px;
 }
@@ -373,7 +393,7 @@ a:hover{color:var(--ph-blue);}
   font-family:var(--font-body);
   font-size:12.5px;
   font-weight:600;
-  border:1px solid var(--ink-soft);
+  border:1px solid var(--ink-mute);
   background:transparent;
   color:var(--ink);
   padding:8px 14px;
@@ -381,68 +401,68 @@ a:hover{color:var(--ph-blue);}
   cursor:pointer;
   transition:transform .1s ease, background .15s ease;
 }
-.ticket-actions button:hover{background:rgba(43,38,32,0.08);}
+.ticket-actions button:hover{background:rgba(243,245,252,0.08);}
 .ticket-actions button:active{transform:scale(.95);}
-.ticket-actions button.favd{background:var(--ink);color:var(--ticket);}
-.copy-flash{color:#3a6b3a;}
+.ticket-actions button.favd{background:var(--gold-mid);color:#241a02;border-color:var(--gold-mid);}
+.copy-flash{color:var(--royal-hi);}
 
 /* ---------- panels (history / favorites) ---------- */
 .panels{display:flex;flex-direction:column;gap:10px;}
 details{
   background:var(--panel);
-  border-radius:8px;
+  border-radius:10px;
   padding:2px 16px;
-  box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;
+  box-shadow:0 1px 0 rgba(243,245,252,0.04) inset;
 }
 summary{
   font-family:var(--font-display);
-  letter-spacing:0.08em;
+  letter-spacing:0.06em;
   font-size:13px;
-  color:var(--brass);
+  color:var(--gold-mid);
   padding:12px 0;
   cursor:pointer;
   list-style:none;
   transition:color .15s ease;
 }
-summary:hover{color:var(--amber);}
+summary:hover{color:var(--gold-hi);}
 summary::-webkit-details-marker{display:none;}
 summary::before{content:"▸ ";}
 details[open] summary::before{content:"▾ ";}
 .list{list-style:none;margin:0;padding:0 0 14px;font-size:13px;}
 .list li{
   padding:8px 0;
-  border-top:1px solid rgba(255,255,255,0.06);
+  border-top:1px solid rgba(243,245,252,0.06);
   display:flex;justify-content:space-between;gap:10px;
-  color:var(--text-muted);
+  color:var(--ink-soft);
 }
 .list li:first-child{border-top:none;}
 .list button.mini{
-  background:none;border:none;color:var(--amber);cursor:pointer;font-size:12px;
+  background:none;border:none;color:var(--royal-hi);cursor:pointer;font-size:12px;
   font-family:var(--font-body);font-weight:600;flex:0 0 auto;
   transition:transform .1s ease;
 }
 .list button.mini:active{transform:scale(.93);}
-.empty-note{padding:8px 0 14px;font-size:12.5px;color:var(--ink-soft,#7d7062);}
+.empty-note{padding:8px 0 14px;font-size:12.5px;color:var(--ink-mute);}
 
 /* ---------- stat strip ---------- */
 .stat-strip-section{max-width:960px;margin:56px auto 0;padding:0 clamp(16px,4vw,24px);}
 .stat-strip{
   display:flex;flex-wrap:wrap;
   background:var(--panel);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px;
+  border:1px solid rgba(243,245,252,0.08);
+  border-radius:12px;
   overflow:hidden;
 }
 .stat-cell{
   flex:1 1 200px;padding:18px 20px;text-align:center;
-  border-left:1px solid rgba(255,255,255,0.06);
+  border-left:1px solid rgba(243,245,252,0.06);
 }
 .stat-cell:first-child{border-left:none;}
 .stat-cell .stat-label{
-  font-family:var(--font-display);font-size:13px;letter-spacing:0.08em;color:var(--ink);
+  font-family:var(--font-display);font-size:13px;letter-spacing:0.06em;color:var(--ink);
 }
 .stat-cell .stat-sub{
-  font-family:var(--font-body);font-size:12px;color:var(--text-muted);margin-top:3px;
+  font-family:var(--font-body);font-size:12px;color:var(--ink-soft);margin-top:3px;
 }
 
 /* ---------- how it works ---------- */
@@ -451,18 +471,18 @@ details[open] summary::before{content:"▾ ";}
   display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;
 }
 .hiw-card{
-  background:var(--panel);border:1px solid rgba(255,255,255,0.08);
-  border-radius:8px;padding:22px 20px;
+  background:var(--panel);border:1px solid rgba(243,245,252,0.08);
+  border-radius:12px;padding:22px 20px;
 }
 .hiw-card .step-no{
   font-family:var(--font-display);font-size:28px;font-weight:700;
-  color:var(--amber);opacity:0.5;
+  color:var(--royal-hi);opacity:0.6;
 }
 .hiw-card .step-title{
   font-family:var(--font-display);font-size:16px;color:var(--ink);margin-top:6px;
 }
 .hiw-card .step-body{
-  font-family:var(--font-body);font-size:13.5px;color:var(--text-muted);
+  font-family:var(--font-body);font-size:13.5px;color:var(--ink-soft);
   margin-top:6px;line-height:1.55;
 }
 
@@ -471,8 +491,8 @@ details[open] summary::before{content:"▾ ";}
 .community-card{
   background:var(--ticket);
   border:1px solid var(--ticket-line);
-  border-top:2px solid var(--ph-blue);
-  border-radius:10px;
+  border-top:2px solid var(--royal-hi);
+  border-radius:14px;
   padding:clamp(24px,5vw,40px);
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;
   box-shadow:0 4px 16px rgba(0,0,0,0.5);
@@ -483,7 +503,7 @@ details[open] summary::before{content:"▾ ";}
   margin:0;color:var(--ink);
 }
 .community-card p{
-  font-family:var(--font-body);font-size:14px;color:var(--text-muted);
+  font-family:var(--font-body);font-size:14px;color:var(--ink-soft);
   margin:10px 0 0;line-height:1.55;
 }
 
@@ -493,12 +513,12 @@ details[open] summary::before{content:"▾ ";}
   display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:28px;
 }
 .recent-card{
-  background:var(--panel);border:1px solid rgba(255,255,255,0.08);
-  border-radius:8px;padding:18px 18px 16px;
+  background:var(--panel);border:1px solid rgba(243,245,252,0.08);
+  border-radius:12px;padding:18px 18px 16px;
 }
 .recent-card .recent-time{
   font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;
-  color:var(--text-muted);text-transform:uppercase;
+  color:var(--ink-soft);text-transform:uppercase;
 }
 .recent-card .recent-label{
   font-family:var(--font-body);font-size:13.5px;color:var(--ink);
@@ -508,7 +528,7 @@ details[open] summary::before{content:"▾ ";}
 
 /* ---------- footer ---------- */
 .site-footer{
-  margin-top:48px;border-top:1px solid rgba(255,255,255,0.08);
+  margin-top:48px;border-top:1px solid rgba(243,245,252,0.08);
   padding:32px clamp(16px,4vw,48px) 28px;
 }
 .footer-inner{
@@ -522,59 +542,59 @@ details[open] summary::before{content:"▾ ";}
   font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);
 }
 .footer-brand p{
-  font-family:var(--font-body);font-size:12.5px;color:var(--text-muted);
+  font-family:var(--font-body);font-size:12.5px;color:var(--ink-soft);
   margin-top:8px;line-height:1.55;
 }
 .footer-col-title{
-  font-family:var(--font-display);font-size:11px;letter-spacing:0.08em;
-  color:var(--brass);text-transform:uppercase;margin-bottom:10px;
+  font-family:var(--font-display);font-size:11px;letter-spacing:0.06em;
+  color:var(--gold-mid);text-transform:uppercase;margin-bottom:10px;
 }
 .footer-links{display:flex;flex-direction:column;gap:7px;}
-.footer-links a{font-size:13px;color:var(--text-muted);}
-.footer-links a:hover{color:var(--amber);}
+.footer-links a{font-size:13px;color:var(--ink-soft);}
+.footer-links a:hover{color:var(--gold-mid);}
 .footer-bottom{
   max-width:960px;margin:24px auto 0;padding-top:18px;
-  border-top:1px solid rgba(255,255,255,0.06);
-  font-size:11.5px;color:var(--ink-soft);text-align:center;
+  border-top:1px solid rgba(243,245,252,0.06);
+  font-size:11.5px;color:var(--ink-mute);text-align:center;
 }
 
 /* ---------- settings drawer ---------- */
 .drawer-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,0.55);
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);
   align-items:center;justify-content:center;padding:20px;z-index:20;
 }
 .drawer-backdrop:not([hidden]){display:flex;}
 .drawer{
   background:var(--panel);
-  border-radius:12px;
+  border-radius:16px;
   padding:22px 22px 20px;
   width:100%;max-width:340px;
   box-shadow:0 20px 50px rgba(0,0,0,0.6);
 }
 .drawer h2{
   font-family:var(--font-display);
-  font-size:16px;letter-spacing:0.08em;
-  color:#f1e6c9;margin:0 0 14px;
+  font-size:16px;letter-spacing:0.06em;
+  color:var(--ink);margin:0 0 14px;
 }
 .drawer label{
   display:flex;align-items:center;gap:10px;
-  font-size:14px;color:var(--text-muted);
+  font-size:14px;color:var(--ink-soft);
   padding:8px 0;
 }
-.drawer input[type=checkbox]{width:16px;height:16px;accent-color:var(--amber);}
+.drawer input[type=checkbox]{width:16px;height:16px;accent-color:var(--royal-hi);}
 .field-label{
   display:block;font-family:var(--font-display);font-size:11px;
-  letter-spacing:0.1em;text-transform:uppercase;color:var(--brass);
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--gold-mid);
   margin:12px 0 4px;
 }
 .drawer select,.drawer input[type=text],.drawer input[type=password]{
-  width:100%;background:var(--panel-lo);color:var(--text-muted);
-  border:1px solid var(--brass-dim);border-radius:6px;
+  width:100%;background:var(--panel-lo);color:var(--ink-soft);
+  border:1px solid rgba(243,245,252,0.2);border-radius:8px;
   padding:8px 9px;font-family:var(--font-mono);font-size:12.5px;
   transition:border-color .15s ease, box-shadow .15s ease;
 }
 .drawer select:focus,.drawer input[type=text]:focus,.drawer input[type=password]:focus{
-  outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,33,66,0.25);
+  outline:none;border-color:var(--royal-hi);box-shadow:0 0 0 3px rgba(77,124,255,0.25);
 }
 .drawer select{font-family:var(--font-body);font-size:13px;cursor:pointer;}
 .byok-fields{margin-top:2px;}
@@ -582,28 +602,28 @@ details[open] summary::before{content:"▾ ";}
 .drawer .drawer-actions{margin-top:16px;display:flex;justify-content:flex-end;}
 .drawer button.done{
   font-family:var(--font-body);font-weight:600;font-size:13px;
-  background:var(--amber);color:#2b1c05;border:none;
+  background:var(--gold-mid);color:#241a02;border:none;
   padding:9px 18px;border-radius:20px;cursor:pointer;
   transition:transform .1s ease, background .15s ease;
 }
-.drawer button.done:hover{background:#ffc35e;}
+.drawer button.done:hover{background:var(--gold-hi);}
 .drawer button.done:active{transform:scale(.95);}
-.hint{font-size:11.5px;color:var(--ink-soft,#7d7062);margin-top:2px;}
-.ai-error{color:var(--red)!important;}
-.drawer hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:14px 0;}
+.hint{font-size:11.5px;color:var(--ink-mute);margin-top:2px;}
+.ai-error{color:var(--crimson-hi)!important;}
+.drawer hr{border:none;border-top:1px solid rgba(243,245,252,0.08);margin:14px 0;}
 #signInButtons:not([hidden]){display:flex;flex-direction:column;gap:8px;margin-top:6px;}
 #signInButtons button,#signOutBtn{width:100%;text-align:center;}
 #signOutBtn:not([hidden]){margin-top:6px;}
 .foot-note{
-  text-align:center;font-size:12px;color:var(--ink-soft);
+  text-align:center;font-size:12px;color:var(--ink-mute);
   max-width:520px;margin:36px auto 0;padding:0 16px;
 }
 .discord-cta{padding-top:2px;}
 .discord-cta a{
-  color:var(--amber);font-weight:600;text-decoration:none;
+  color:var(--gold-mid);font-weight:600;text-decoration:none;
   transition:color .15s ease;
 }
-.discord-cta a:hover{color:#ffc35e;text-decoration:underline;}
+.discord-cta a:hover{color:var(--gold-hi);text-decoration:underline;}
 
 @media (prefers-reduced-motion: reduce){
   .reel-window.spinning .reel-value,.reel-window.settle .reel-value{animation:none;filter:none;}
@@ -620,8 +640,8 @@ details[open] summary::before{content:"▾ ";}
 
 <nav class="topnav">
   <div class="brand">
-    <img src="assets/scph-icon-slot.svg" alt="SCPH">
-    <span class="wordmark"><span class="accent">SCPH</span> CHALLENGE MACHINE</span>
+    <img src="assets/scph-icon-slot.svg" alt="Prompt Royale">
+    <span class="wordmark">Prompt <span class="accent">Royale</span></span>
   </div>
   <div class="navlinks">
     <a class="navlink" href="#arena">Machine</a>
@@ -634,13 +654,16 @@ details[open] summary::before{content:"▾ ";}
 </nav>
 
 <section class="hero" id="arena">
-  <div class="eyebrow">Free · No sign-up · SCPH community tool</div>
+  <div class="eyebrow">Free · No sign-up · Community tool</div>
   <h1>
-    <span class="line1">YOUR NEXT SONG</span>
+    <span class="line1">YOUR NEXT IDEA</span>
     <span class="line2">STARTS HERE</span>
   </h1>
-  <p>Pull the lever. Get a genre, mood, subject and twist — or turn on a second genre reel for a fusion pairing. Take the dare into Suno and see what happens.</p>
+  <p>Pick a category, pull the lever, and take the dare wherever you make things — Suno, your notebook, a character sheet.</p>
 </section>
+
+<div class="category-picker" id="categoryPicker" role="tablist" aria-label="Prompt category"></div>
+<p class="category-blurb" id="categoryBlurb"></p>
 
 <div class="console-section">
   <main class="console" aria-label="Prompt roulette machine">
@@ -669,8 +692,8 @@ details[open] summary::before{content:"▾ ";}
 <div class="stat-strip-section">
   <div class="stat-strip">
     <div class="stat-cell">
-      <div class="stat-label">FIVE REELS</div>
-      <div class="stat-sub">Genre · Genre 2 · Mood · Subject · Twist</div>
+      <div class="stat-label">TWO CATEGORIES</div>
+      <div class="stat-sub">Music · Characters — more coming in Phase 2</div>
     </div>
     <div class="stat-cell">
       <div class="stat-label">SPIN → LOCK → WRITE</div>
@@ -684,13 +707,13 @@ details[open] summary::before{content:"▾ ";}
 </div>
 
 <section class="hiw-section" id="how-it-works">
-  <div class="section-eyebrow red">How it works</div>
+  <div class="section-eyebrow gold">How it works</div>
   <h2 class="section-h2">Three steps to a finished dare</h2>
   <div class="hiw-grid">
     <div class="hiw-card">
       <div class="step-no">01</div>
       <div class="step-title">Spin the reels</div>
-      <div class="step-body">Pull the lever for a random genre, mood, subject and twist.</div>
+      <div class="step-body">Pull the lever for a random combination — genre and twist for a song, archetype and flaw for a character.</div>
     </div>
     <div class="hiw-card">
       <div class="step-no">02</div>
@@ -699,8 +722,8 @@ details[open] summary::before{content:"▾ ";}
     </div>
     <div class="hiw-card">
       <div class="step-no">03</div>
-      <div class="step-title">Write the song</div>
-      <div class="step-body">Take the dare into Suno and see where the constraint takes you.</div>
+      <div class="step-title">Take the dare</div>
+      <div class="step-body">Write the song in Suno, sketch the character, and see where the constraint takes you.</div>
     </div>
   </div>
 </section>
@@ -709,15 +732,15 @@ details[open] summary::before{content:"▾ ";}
   <div class="community-card">
     <div class="community-copy">
       <div class="section-eyebrow blue">Community</div>
-      <h2>Join the SCPH Discord</h2>
-      <p>Share your pulls, get feedback on the finished song, and see what other writers made from the same dare.</p>
+      <h2>Join the Discord</h2>
+      <p>Share your pulls, get feedback on what you made, and see what other creators did with the same dare.</p>
     </div>
     <a class="pill-btn ph" href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord →</a>
   </div>
 </section>
 
 <section class="pulls-section" id="pulls">
-  <div class="section-eyebrow red">Recent pulls</div>
+  <div class="section-eyebrow gold">Recent pulls</div>
   <h2 class="section-h2">Fresh off the reels</h2>
   <div class="recent-grid" id="recentPulls" hidden></div>
   <p class="empty-note" id="recentPullsEmpty">No challenges pulled yet — hit the lever above.</p>
@@ -734,16 +757,16 @@ details[open] summary::before{content:"▾ ";}
   </section>
 </section>
 
-<p class="foot-note">Every result is a starting point, not a rulebook — bend it if the song wants something else.</p>
+<p class="foot-note">Every result is a starting point, not a rulebook — bend it if the piece wants something else.</p>
 
 <footer class="site-footer">
   <div class="footer-inner">
     <div class="footer-brand">
       <div class="fb-row">
-        <img src="assets/scph-icon-slot.svg" alt="SCPH">
-        <div class="fb-name"><span class="accent">SCPH</span> Challenge Machine</div>
+        <img src="assets/scph-icon-slot.svg" alt="Prompt Royale">
+        <div class="fb-name">Prompt <span class="accent">Royale</span></div>
       </div>
-      <p>A community songwriting-prompt tool by Suno Creatives PH. Not affiliated with Suno.</p>
+      <p>A community creative-prompt generator. Not affiliated with Suno.</p>
     </div>
     <div>
       <div class="footer-col-title">Quick links</div>
@@ -761,7 +784,7 @@ details[open] summary::before{content:"▾ ";}
       </div>
     </div>
   </div>
-  <div class="footer-bottom">© SCPH — Suno Creatives PH. Built by the community, for the community.</div>
+  <div class="footer-bottom">© Prompt Royale. Built by the community, for the community.</div>
 </footer>
 
 <div class="drawer-backdrop" id="drawerBackdrop" hidden>
@@ -777,7 +800,7 @@ details[open] summary::before{content:"▾ ";}
       </div>
       <button type="button" class="done" id="signOutBtn" hidden>Sign out</button>
       <p class="hint">Signing in syncs your favorites, history, and settings to your account, so they follow you across devices and browsers.</p>
-      <p class="hint discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the SCPH Discord community →</a></p>
+      <p class="hint discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord community →</a></p>
     </div>
     <hr>
     <p class="hint">Flip reels on or off with the switch under each one on the machine. At least one has to stay on.</p>
@@ -810,47 +833,92 @@ details[open] summary::before{content:"▾ ";}
 (function(){
 "use strict";
 
-/* ---------------- data ---------------- */
-const DATA = {
-  genre: ["Shoegaze","Skweee","Vaporwave","Cumbia","Bluegrass","UK Drill","Motorik Krautrock","Dub","Bossa Nova","Doom Metal","Yacht Rock","Bedroom Pop","Highlife","Zydeco","Grime","City Pop","Post-Punk","Freak Folk","Chiptune","Trip-Hop","Math Rock","Neo-Soul","Outlaw Country","Afrobeat","Ska","Industrial Techno","Emo","Balkan Brass","Flamenco Pop","Synthwave","Gospel","Bachata","Jungle","Reggaeton","Baroque Pop","Nu-Disco","Sludge Metal","Ambient Drone","Klezmer","Surf Rock","Salsa","Breakcore","Dungeon Synth","Gqom","Bolero","Corridos Tumbados","J-Pop","Britpop","Progressive Bluegrass","Acid Jazz","Dancehall","Country Gospel","Witch House","Powerviolence","Space Disco","Cabaret Jazz","Tejano","Riot Grrrl Punk","Berlin School Electronic","Slowcore","Trap Soul","Baile Funk","Fado","Doo-Wop","Prog Rock","Deconstructed Club","Mariachi","Lo-fi Hip-Hop","New Jack Swing","Sea Shanty","Opera-Pop Crossover","Desert Blues","Anatolian Rock"],
-  mood: ["Bittersweet nostalgia","Manic joy","Quiet dread","Righteous fury","Giddy infatuation","Wistful longing","Defiant swagger","Numb exhaustion","Fragile hope","Petty vengeance","Cosmic loneliness","Cozy contentment","Paranoid unease","Reckless euphoria","Tender grief","Sardonic humor","Feral confidence","Homesick ache","Slow-burn dread","Unbothered cool","Overcaffeinated panic","Melancholic wonder","Triumphant relief","Simmering resentment","Delirious love","Detached irony","Warm gratitude","Restless itch","Solemn reverence","Chaotic glee","Aching regret","Stubborn optimism","Late-night confession","Sun-drunk laziness","Electric anticipation","Guilty relief","Haunted comfort","Playful mischief","Weary determination","Starstruck awe","Bruised pride","Serene detachment","Anxious devotion","Vindictive calm","Unhinged celebration","Quiet defiance","Sudden clarity","Lovesick spiral","Hollow victory","Boundless curiosity","Simmering jealousy","Reluctant tenderness","Feverish obsession","Grounded peace","Manufactured confidence","Dreamy dissociation","Righteous heartbreak","Sleepy rebellion","Electric grief","Unapologetic joy"],
-  subject: ["A lighthouse keeper's last night on the job","Losing a staring contest with your own reflection","The last text message never sent","A getaway driver who has a change of heart mid-heist","Teaching a robot to slow dance","The family recipe nobody wrote down","A submarine crew that hears something outside the hull","Breaking up with your hometown","A con artist falling for their own mark","The neighborhood ice cream truck at 2am","An astronaut homesick for traffic noise","A wedding toast that turns into a confession","The last payphone in the city","Two exes running into each other at an evacuation shelter","A locksmith who can't unlock their own front door","A retired boxer coaching kids who don't know his name","The group chat that goes silent after the funeral","A time capsule opened one year too early","Learning your childhood home was sold to strangers","A carousel operator falling in love with a rider","The last shift at a video rental store","A storm chaser who is actually running from something","Karaoke night as a form of therapy","A letter to the version of you that gave up","The dog who waits at the door for someone not coming back","A magician whose tricks stopped working the night his father died","Finding your ex's handwriting in a used book","A diner that only comes alive after midnight","The understudy who finally gets the part","Packing up a childhood bedroom for the last time","A truck-stop confession between strangers","The last voicemail saved on a dead phone","Falling in love at the DMV","A grandmother teaching her grandkid to drive stick","The town that disappears when the factory closes","A séance that actually works","Two rival food-truck owners falling for each other","The mixtape that never got finished","A firefighter who can't go back inside one more burning building","Watching your favorite bar get turned into a bank","A wedding band playing the same song for the thousandth time","The last day of a touring carnival","A locket with a photo no one remembers taking","Reuniting with a childhood best friend at a class reunion","A blackout that brings a whole street outside","The mechanic who fixes cars for people who ghosted him","A prisoner's first meal after release","Falling asleep on a night bus next to a stranger who becomes family","The last flight before an airport shuts down","A fortune teller who finally gets her own reading","Missing someone you were relieved to lose","A librarian reading the last checkout card of a retired book","The song that plays at every family funeral","A boxer's hands after the final bell","Watching wildfire smoke turn the sky orange from a rooftop party","The apology that arrives thirty years late","A subway musician who used to headline arenas","Packing a hurricane go-bag with your ex's old sweatshirt","The last cigarette shared on a fire escape","A search-and-rescue dog retiring after one mission too many","Two strangers stuck in an elevator during a proposal","The graffiti that outlives the building","A wedding dress found at a thrift store still tagged","A radio DJ who talks to no one but keeps broadcasting","Coming home to a house that sold without you knowing","A eulogy written by someone who never got along with the deceased","The last game of catch before a kid grows up","A power outage that reunites an estranged family for one candlelit night"],
-  twist: ["No drums until the final chorus","Vocals must whisper for the first verse","A key change every chorus","The song must end mid-sentence","Only one instrument besides vocals","The chorus can't repeat the same melody twice","Must include a spoken-word bridge","Under 90 seconds total","Start with the chorus, no intro","The bassline never repeats","A time-signature change in the bridge","No metaphors — only literal images","The title must be the song's last line","Must include a false ending","Backing vocals answer the lead like a conversation","The tempo doubles in the final third","Only five chords total, no more","Percussion made entirely of non-drum sounds","Must reference the weather at least twice","Verse and chorus melodies share no notes","The song fades in already mid-performance","No repeated words across the entire lyric","A one-line callback to verse one at the very end","The bridge is entirely instrumental","Harmony only on the last word of each line","Opens a cappella","The key must feel unresolved until the final chord","Must include a crowd or field-recording texture","The second verse flips the meaning of the first","A duet between two opposing perspectives","No cymbals anywhere in the mix","The chorus lyric is a single repeated phrase","Must include a count-in or studio chatter at the start","The outro strips back to a single instrument","The rhyme scheme breaks on purpose in the final verse","Must name a real or invented street","Tempo matches a resting heartbeat, 60–100 bpm","Addressed to a 'you' who never speaks back","Must include a full bar of near-silence","The melody fits a two-note vocal range","The rhythm is borrowed from something non-musical","The chorus arrives before the first verse ends","Must include a question that's never answered","The final chorus drops the drums entirely","Must include a whispered aside not meant for the listener","Works as both a lullaby and a warning","Uses call-and-response between two vocal characters","Each verse gets shorter than the last","Ends on a deliberately unresolved chord","No chorus at all — only evolving verses","The song seems to end, then doesn't","Instrumentation thins out with every verse until just voice remains","Includes a spoken date, time, or place, like a report","Written as a message left on an answering machine","The melody moves mostly in half-steps","Includes a line borrowed from an overheard conversation"]
-};
+/* ---------------- data ----------------
+   Phase 1 ships two categories only (Music, Characters), per the phased
+   rollout plan — see PHASING.md. More categories + a real database backing
+   the reel content are Phase 2. Twist list for Music is curated so every
+   entry is a lyric-writing/vocal-delivery constraint achievable in Suno
+   without burning many regenerations (see PHASING.md + generate.js). */
+const MUSIC_TWIST_ITEMS = ["Vocals must whisper for the first verse","The song must end mid-sentence","Must include a spoken-word bridge","Under 90 seconds total","Start with the chorus, no intro","No metaphors — only literal images","The title must be the song's last line","Must include a false ending","Backing vocals answer the lead like a conversation","Must reference the weather at least twice","No repeated words across the entire lyric","A one-line callback to verse one at the very end","Harmony only on the last word of each line","Opens a cappella","The second verse flips the meaning of the first","A duet between two opposing perspectives","The chorus lyric is a single repeated phrase","The rhyme scheme breaks on purpose in the final verse","Must name a real or invented street","Addressed to a 'you' who never speaks back","The chorus arrives before the first verse ends","Must include a question that's never answered","Must include a whispered aside not meant for the listener","Works as both a lullaby and a warning","Uses call-and-response between two vocal characters","Each verse gets shorter than the last","No chorus at all — only evolving verses","The song seems to end, then doesn't","Includes a spoken date, time, or place, like a report","Written as a message left on an answering machine","Includes a line borrowed from an overheard conversation"];
 
-const LABELS = {genre:"Genre",genre2:"Genre 2",mood:"Mood",subject:"Subject",twist:"Twist"};
-const ORDER = ["genre","genre2","mood","subject","twist"];
-// genre2 is a second independent pull from the same genre list, for fusion pairings.
-const DATA_KEY = {genre:"genre",genre2:"genre",mood:"mood",subject:"subject",twist:"twist"};
-const STORE_KEY = "sunoChallengeMachine.v1";
+const CATEGORIES = [
+  {
+    id:"music", name:"Music", blurb:"Songs, scores & sonic ideas", accent:"royal",
+    reels:[
+      {label:"Genre 1", key:"genre1", items:["Dream Pop","Trip-Hop","Afrobeat","Baroque Pop","Drum & Bass","Neo-Soul","Shoegaze","Bolero","City Pop","Math Rock","Zydeco","Vaporwave","Highlife","Post-Punk","Bedroom Pop","Cumbia","Grime","Dungeon Synth","Emo Rap","J-Pop","Dub","Country Noir","Krautrock","Bachata"]},
+      {label:"Genre 2", key:"genre2", items:["Synthwave","Flamenco","Ambient Jazz","Trap","Bossa Nova","Industrial","Gospel","Chiptune","Reggaeton","Doom Metal","Folktronica","Baile Funk","Lo-fi Hip-Hop","Bluegrass","Witch House","Disco","Tuareg Blues","Ska","Balearic House","Opera","Nu-Disco","Highlife","Grunge","Salsa"]},
+      {label:"Mood", key:"mood", items:["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"]},
+      {label:"Subject", key:"subject", items:["A lighthouse keeper's last night","Two rivals falling in love","A city that forgets itself","An astronaut coming home","A letter never sent","The last dance of summer","A machine learning to grieve","A ghost who pays rent","A thief who only steals memories","The last payphone in town","A wedding that never happens","A stranger who knows your name","The house that keeps changing rooms","A war fought over a song","Someone rehearsing an apology forever","A town built on a lie","The year the ocean rose","A twin who was never born","A radio station only the lonely find","Falling in love during a blackout"]},
+      {label:"Twist", key:"twist", items:MUSIC_TWIST_ITEMS}
+    ]
+  },
+  {
+    id:"characters", name:"Characters", blurb:"Personas, arcs & motivations", accent:"crimson",
+    reels:[
+      {label:"Genre", key:"genre", items:["Space Opera","Urban Fantasy","Noir Mystery","High Fantasy","Cyberpunk","Slice of Life","Post-Apocalyptic","Gothic Horror","Steampunk","Historical Drama","Fairy Tale","Heist Thriller","Superhero","Western","Mythic Retelling","Political Thriller","Survival Drama","Time-Travel Saga"]},
+      {label:"Theme", key:"theme", items:["Redemption","Betrayal","Coming of Age","Found Family","Power & Corruption","Identity & Memory","Sacrifice","Revenge","Forgiveness","Legacy & Inheritance","Isolation","Rebellion","Grief & Letting Go","Obsession","Duty vs. Desire","Second Chances"]},
+      {label:"Archetype", key:"archetype", items:["Reluctant Hero","Fallen Mentor","Trickster","Guardian","Outcast","Chosen One","Antihero","Rival Turned Ally","Broken King","Wandering Sage","Loyal Second-in-Command","Con Artist With a Code","Last of Their Kind","Double Agent"]},
+      {label:"Trait", key:"trait", items:["Never forgets a debt","Speaks only in questions","Collects other people's memories","Refuses to be touched","Always arrives late to save someone","Can't lie without flinching","Names everything they own","Only trusts strangers, never friends","Keeps a list of people to apologize to","Talks to the dead as if they're listening","Can't stay in one place more than a year","Remembers every promise ever made to them"]},
+      {label:"Flaw", key:"flaw", items:["Addicted to being needed","Terrified of silence","Trusts too easily","Cannot forgive himself","Obsessed with control","Haunted by a broken promise","Runs from every good thing","Mistakes control for safety","Can't accept help from anyone","Sabotages happiness before it's real","Needs to be the one who suffers most","Confuses loyalty with self-erasure"]},
+      {label:"Mood", key:"mood", items:["Quietly tragic","Reluctantly heroic","Charismatically dangerous","Wounded but hopeful","Coldly composed","Chaotically loyal","Weary but unbroken","Magnetically unstable","Gently ruthless","Defiantly tender"]}
+    ]
+  }
+];
+const CATEGORY_BY_ID = {};
+CATEGORIES.forEach(c=>{ CATEGORY_BY_ID[c.id] = c; });
+
+const STORE_KEY = "promptRoyale.v1";
 
 /* ---------------- state ---------------- */
 let state = loadState();
 
+function defaultActiveFor(cat){
+  const active = {};
+  cat.reels.forEach(r=>{ active[r.key] = true; });
+  return active;
+}
+function defaultLocksFor(cat){
+  const locks = {};
+  cat.reels.forEach(r=>{ locks[r.key] = false; });
+  return locks;
+}
+
 function loadState(){
   let saved = {};
   try{ saved = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ saved = {}; }
+  const defaultCatId = CATEGORIES[0].id;
   const merged = Object.assign({
     ticketNo: 0,
     aiSource: "off",
     byokKeys: {anthropic:"", openai:""},
     byokModels: {anthropic:"", openai:""},
-    active: {genre:true, genre2:false, mood:true, subject:true, twist:true},
-    locks: {genre:false,genre2:false,mood:false,subject:false,twist:false},
+    categoryId: defaultCatId,
+    active: {},
+    locks: {},
     current: null,
     history: [],
     favorites: []
   }, saved);
-  if(saved.aiMode === true && !saved.aiSource){ merged.aiSource = "groq"; }
-  delete merged.aiMode;
+  if(!CATEGORY_BY_ID[merged.categoryId]) merged.categoryId = defaultCatId;
   merged.byokKeys = Object.assign({anthropic:"", openai:""}, merged.byokKeys);
   merged.byokModels = Object.assign({anthropic:"", openai:""}, merged.byokModels);
+  // active/locks are namespaced per category so switching categories doesn't clobber the other's settings
+  merged.active = merged.active || {};
+  merged.locks = merged.locks || {};
+  CATEGORIES.forEach(cat=>{
+    merged.active[cat.id] = Object.assign(defaultActiveFor(cat), merged.active[cat.id] || {});
+    merged.locks[cat.id] = Object.assign(defaultLocksFor(cat), merged.locks[cat.id] || {});
+  });
   return merged;
 }
 function saveState(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){/* storage unavailable */}
   debouncedPushAccountData();
 }
+
+function currentCategory(){ return CATEGORY_BY_ID[state.categoryId]; }
+function currentActive(){ return state.active[state.categoryId]; }
+function currentLocks(){ return state.locks[state.categoryId]; }
 
 /* ---------------- account sync (Phase 2) ---------------- */
 const account = { signedIn:false, provider:null, name:null };
@@ -896,13 +964,12 @@ async function pullAccountData(){
   state.favorites = mergeTicketLists(state.favorites, remote.favorites || []);
   state.history = mergeTicketLists(state.history, remote.history || []).slice(-100);
   if(remote.settings){
-    if(remote.settings.active) state.active = remote.settings.active;
-    if(remote.settings.locks) state.locks = remote.settings.locks;
+    if(remote.settings.active) Object.assign(state.active, remote.settings.active);
+    if(remote.settings.locks) Object.assign(state.locks, remote.settings.locks);
   }
   saveState();
-  ORDER.forEach(cat=>{ activeToggleInput(cat).checked = !!state.active[cat]; });
-  applyActiveClasses();
-  renderLocks();
+  buildReelsDOM();
+  syncReelControlsFromState();
   renderHistory();
   renderFavorites();
 }
@@ -948,27 +1015,60 @@ async function checkAccount(){
   if(account.signedIn) await pullAccountData();
 }
 
-function pick(cat){
-  const list = DATA[DATA_KEY[cat]];
+function reelDef(cat, key){ return cat.reels.find(r=>r.key===key); }
+
+function pick(cat, key){
+  const list = reelDef(cat, key).items;
   return list[Math.floor(Math.random()*list.length)];
 }
 
 /* ---------------- DOM build ---------------- */
 const reelsEl = document.getElementById("reels");
-ORDER.forEach(cat=>{
-  const unit = document.createElement("div");
-  unit.className = "reel-unit";
-  unit.dataset.cat = cat;
-  unit.innerHTML =
-    '<button class="lock-toggle" data-cat="'+cat+'" aria-pressed="false" title="Lock this reel" aria-label="Lock '+LABELS[cat]+' reel">&#128274;</button>'+
-    '<div class="reel-window" data-cat="'+cat+'" tabindex="0" role="button" aria-label="Reroll '+LABELS[cat]+'"><span class="reel-value">—</span></div>'+
-    '<div class="reel-label">'+LABELS[cat].toUpperCase()+'</div>'+
-    '<label class="reel-switch" title="Turn the '+LABELS[cat]+' reel on or off">'+
-      '<input type="checkbox" class="active-toggle" data-cat="'+cat+'" checked>'+
-      '<span class="reel-switch-track"><span class="reel-switch-thumb"></span></span>'+
-    '</label>';
-  reelsEl.appendChild(unit);
-});
+const categoryPickerEl = document.getElementById("categoryPicker");
+const categoryBlurbEl = document.getElementById("categoryBlurb");
+
+function buildCategoryPickerDOM(){
+  categoryPickerEl.innerHTML = "";
+  CATEGORIES.forEach(cat=>{
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "category-chip";
+    chip.dataset.cat = cat.id;
+    chip.dataset.accent = cat.accent;
+    chip.setAttribute("role","tab");
+    chip.setAttribute("aria-pressed", String(cat.id === state.categoryId));
+    chip.textContent = cat.name;
+    chip.addEventListener("click", ()=>switchCategory(cat.id));
+    categoryPickerEl.appendChild(chip);
+  });
+  updateCategoryBlurb();
+}
+function updateCategoryBlurb(){
+  categoryBlurbEl.textContent = currentCategory().blurb;
+  categoryPickerEl.querySelectorAll(".category-chip").forEach(chip=>{
+    chip.setAttribute("aria-pressed", String(chip.dataset.cat === state.categoryId));
+  });
+}
+
+function buildReelsDOM(){
+  const cat = currentCategory();
+  reelsEl.innerHTML = "";
+  cat.reels.forEach(r=>{
+    const unit = document.createElement("div");
+    unit.className = "reel-unit";
+    unit.dataset.key = r.key;
+    unit.innerHTML =
+      '<button class="lock-toggle" data-key="'+r.key+'" aria-pressed="false" title="Lock this reel" aria-label="Lock '+r.label+' reel">&#128274;</button>'+
+      '<div class="reel-window" data-key="'+r.key+'" tabindex="0" role="button" aria-label="Reroll '+r.label+'"><span class="reel-value">—</span></div>'+
+      '<div class="reel-label">'+r.label.toUpperCase()+'</div>'+
+      '<label class="reel-switch" title="Turn the '+r.label+' reel on or off">'+
+        '<input type="checkbox" class="active-toggle" data-key="'+r.key+'" checked>'+
+        '<span class="reel-switch-track"><span class="reel-switch-thumb"></span></span>'+
+      '</label>';
+    reelsEl.appendChild(unit);
+  });
+  bindReelEvents();
+}
 
 const els = {
   ticket: document.getElementById("ticket"),
@@ -1000,36 +1100,41 @@ const els = {
 };
 
 /* ---------------- rendering ---------------- */
-function reelUnit(cat){ return reelsEl.querySelector('.reel-unit[data-cat="'+cat+'"]'); }
-function reelWindow(cat){ return reelsEl.querySelector('.reel-window[data-cat="'+cat+'"]'); }
-function reelValueEl(cat){ return reelWindow(cat).querySelector(".reel-value"); }
-function lockBtn(cat){ return reelsEl.querySelector('.lock-toggle[data-cat="'+cat+'"]'); }
+function reelUnit(key){ return reelsEl.querySelector('.reel-unit[data-key="'+key+'"]'); }
+function reelWindow(key){ return reelsEl.querySelector('.reel-window[data-key="'+key+'"]'); }
+function reelValueEl(key){ return reelWindow(key).querySelector(".reel-value"); }
+function lockBtn(key){ return reelsEl.querySelector('.lock-toggle[data-key="'+key+'"]'); }
+function activeToggleInput(key){ return reelsEl.querySelector('.active-toggle[data-key="'+key+'"]'); }
 
-function isActive(cat){
-  return !!state.active[cat];
-}
+function isActive(key){ return !!currentActive()[key]; }
 
 function activeCount(){
-  return ORDER.reduce((n,cat)=>n + (isActive(cat) ? 1 : 0), 0);
+  const cat = currentCategory();
+  return cat.reels.reduce((n,r)=>n + (isActive(r.key) ? 1 : 0), 0);
 }
 
 function applyActiveClasses(){
-  ORDER.forEach(cat=>{
-    const unit = reelUnit(cat);
-    unit.classList.toggle("disabled", !isActive(cat));
+  currentCategory().reels.forEach(r=>{
+    reelUnit(r.key).classList.toggle("disabled", !isActive(r.key));
   });
 }
 
 function renderReelValues(vals){
-  ORDER.forEach(cat=>{
-    reelValueEl(cat).textContent = isActive(cat) ? (vals[cat] || "—") : "OFF";
+  currentCategory().reels.forEach(r=>{
+    reelValueEl(r.key).textContent = isActive(r.key) ? (vals[r.key] || "—") : "OFF";
   });
 }
 
 function renderLocks(){
-  ORDER.forEach(cat=>{
-    lockBtn(cat).setAttribute("aria-pressed", String(!!state.locks[cat]));
+  currentCategory().reels.forEach(r=>{
+    lockBtn(r.key).setAttribute("aria-pressed", String(!!currentLocks()[r.key]));
   });
+}
+
+function syncReelControlsFromState(){
+  currentCategory().reels.forEach(r=>{ activeToggleInput(r.key).checked = !!currentActive()[r.key]; });
+  applyActiveClasses();
+  renderLocks();
 }
 
 // Strips trailing sentence punctuation so fragments read cleanly once stitched
@@ -1038,20 +1143,25 @@ function renderLocks(){
 function stripTrailingPunct(s){
   return String(s).trim().replace(/[.!?,;:]+$/,"").trim();
 }
+// Strips a leading "Haunted by "/"haunted by " prefix so Flaw values don't
+// double up when the Characters template already supplies that phrasing.
+function stripHauntedByPrefix(s){
+  return String(s).trim().replace(/^haunted by\s+/i,"").trim();
+}
 
-// Combines the two genre reels into one descriptor. If both are active and
-// differ, that's a fusion pairing ("Shoegaze x Cumbia"); if they land on the
-// same genre, or only one is active, it just reads as that single genre.
-function genreDescriptor(vals){
-  const g1 = isActive("genre") && vals.genre ? stripTrailingPunct(vals.genre) : "";
+// Combines the two Music genre reels into one descriptor. If both are active
+// and differ, that's a fusion pairing ("Shoegaze x Cumbia"); if they land on
+// the same genre, or only one is active, it just reads as that single genre.
+function genreFusionDescriptor(vals){
+  const g1 = isActive("genre1") && vals.genre1 ? stripTrailingPunct(vals.genre1) : "";
   const g2 = isActive("genre2") && vals.genre2 ? stripTrailingPunct(vals.genre2) : "";
   if(g1 && g2 && g1.toLowerCase() !== g2.toLowerCase()) return g1+" x "+g2+" fusion";
   return g1 || g2 || "";
 }
 
-function buildMission(vals){
+function buildMusicMission(vals){
   const useMood = isActive("mood") && vals.mood;
-  const genreLabel = genreDescriptor(vals);
+  const genreLabel = genreFusionDescriptor(vals);
   const useSubject = isActive("subject") && vals.subject;
   const useTwist = isActive("twist") && vals.twist;
 
@@ -1066,11 +1176,48 @@ function buildMission(vals){
   return mission;
 }
 
+function buildCharactersMission(vals){
+  const useMood = isActive("mood") && vals.mood;
+  const useArchetype = isActive("archetype") && vals.archetype;
+  const useGenre = isActive("genre") && vals.genre;
+  const useTrait = isActive("trait") && vals.trait;
+  const useFlaw = isActive("flaw") && vals.flaw;
+  const useTheme = isActive("theme") && vals.theme;
+
+  let mission = "Create a";
+  if(useMood) mission += " "+stripTrailingPunct(vals.mood).toLowerCase();
+  mission += useArchetype ? " "+stripTrailingPunct(vals.archetype).toLowerCase()+" character" : " character";
+  if(useGenre) mission += " in a "+stripTrailingPunct(vals.genre).toLowerCase()+" setting";
+  if(useTrait) mission += " defined by "+stripTrailingPunct(vals.trait).toLowerCase();
+  if(useFlaw) mission += ", haunted by "+stripHauntedByPrefix(stripTrailingPunct(vals.flaw)).toLowerCase();
+  if(useTheme) mission += ", exploring "+stripTrailingPunct(vals.theme).toLowerCase();
+  mission += ".";
+  return mission;
+}
+
+// Generic fallback for any future category without a hand-written template:
+// labels every active reel explicitly so the sentence still reads clearly.
+function buildGenericMission(cat, vals){
+  const parts = [];
+  cat.reels.forEach(r=>{
+    if(isActive(r.key) && vals[r.key]) parts.push(r.label+": "+stripTrailingPunct(vals[r.key]));
+  });
+  if(!parts.length) return "Create something — pull the lever to get started.";
+  return "Create a piece exploring — "+parts.join(", ")+".";
+}
+
+function buildMission(vals){
+  const cat = currentCategory();
+  if(cat.id === "music") return buildMusicMission(vals);
+  if(cat.id === "characters") return buildCharactersMission(vals);
+  return buildGenericMission(cat, vals);
+}
+
 function ticketLinesHTML(vals){
   let html = "";
-  ORDER.forEach(cat=>{
-    if(!isActive(cat)) return;
-    html += '<div class="ticket-line"><span class="tag">'+LABELS[cat].toUpperCase()+'</span><span class="val">'+escapeHTML(vals[cat])+'</span></div>';
+  currentCategory().reels.forEach(r=>{
+    if(!isActive(r.key)) return;
+    html += '<div class="ticket-line"><span class="tag">'+r.label.toUpperCase()+'</span><span class="val">'+escapeHTML(vals[r.key])+'</span></div>';
   });
   return html;
 }
@@ -1090,7 +1237,15 @@ function nowLabel(){
 
 function renderTicket(){
   const c = state.current;
-  if(!c) return;
+  if(!c || c.categoryId !== state.categoryId){
+    els.ticketBody.innerHTML = '<div class="ticket-line"><span class="val">Pull the lever to get your first '+currentCategory().name.toLowerCase()+' challenge.</span></div>';
+    els.ticketMission.textContent = "";
+    els.ticketNo.textContent = padTicketNo(state.ticketNo);
+    els.ticketTime.textContent = "";
+    els.favBtn.classList.remove("favd");
+    els.favBtn.textContent = "☆ Save to favorites";
+    return;
+  }
   els.ticketNo.textContent = padTicketNo(c.no);
   els.ticketTime.textContent = c.time;
   els.ticketBody.innerHTML = ticketLinesHTML(c.vals);
@@ -1128,7 +1283,10 @@ function renderHistory(){
   renderList(els.historyList, state.history, {
     emptyText:"No challenges pulled yet — hit the lever above.",
     actionLabel:"Restore",
-    onAction:(item)=>{ state.current = item; renderTicket(); saveState(); }
+    onAction:(item)=>{
+      if(item.categoryId && item.categoryId !== state.categoryId){ switchCategory(item.categoryId, {skipReset:true}); }
+      state.current = item; renderTicket(); saveState();
+    }
   });
   renderRecentPulls();
 }
@@ -1177,16 +1335,12 @@ function renderFavorites(){
 //  - "openai":    OpenAI's API blocks direct browser calls, so the visitor's
 //                 own key is relayed through this site's /api/openai-generate
 //                 function for a single request and is never stored server-side.
+// Descriptions are no longer hardcoded per reel — with multiple categories
+// each having their own reel labels, the server builds the AI prompt from
+// the categoryName + reel label + example items sent in the request body.
 const AI_ENDPOINT = "/api/generate";
 const OPENAI_RELAY_ENDPOINT = "/api/openai-generate";
 const DEFAULT_BYOK_MODEL = { anthropic: "claude-haiku-4-5-20251001", openai: "gpt-4o-mini" };
-const AI_CAT_DESC = {
-  genre: "a music genre or micro-genre name, 1-4 words, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
-  genre2: "a second, different music genre or micro-genre name (1-4 words) meant to be fused with another genre, in the spirit of names like 'Shoegaze' or 'Baile Funk'",
-  mood: "a short emotional mood or vibe for a song, 2-4 words, adjective + noun (like 'Bittersweet nostalgia')",
-  subject: "a single vivid, specific lyrical premise for a song, written as a short story pitch, one sentence",
-  twist: "one short production or songwriting constraint or dare for a song, one sentence, in the spirit of 'no drums until the final chorus'"
-};
 
 function setAIStatus(text, isError){
   if(!els.aiStatus) return;
@@ -1200,13 +1354,21 @@ function shuffle(arr){
   return a;
 }
 
-function buildAIPrompt(cat, examples){
-  const desc = AI_CAT_DESC[cat];
+// Same Suno-feasibility rule enforced server-side: the Music category's
+// Twist reel should stay a lyric/vocal-delivery constraint, not a precise
+// audio-production/music-theory one AI music generators rarely nail.
+function buildAIPrompt(cat, r, examples){
   const exampleText = examples.join("; ");
-  return "You generate entries for a songwriting-challenge generator. Category: "+LABELS[cat]+" — "+desc+
-    ". Examples already in use: "+exampleText+". Give ONE brand-new "+LABELS[cat].toLowerCase()+
-    " entry, different from the examples, matching the same style and length. This entry gets stitched together"+
-    " with the other categories into one sentence, so do not end it with a period or any other trailing punctuation."+
+  const isMusicTwist = cat.id === "music" && r.key === "twist";
+  const feasibilityNote = isMusicTwist
+    ? " This entry must be a lyric-writing or vocal-delivery constraint achievable just by how the words are written or sung — not a precise audio-production or music-theory instruction, since AI music generators like Suno rarely execute those reliably."
+    : "";
+  return "You generate entries for a creative-prompt slot machine. Category: "+cat.name+
+    " — reel: '"+r.label+"'. Examples already in use for this reel: "+exampleText+
+    ". Give ONE brand-new entry for the '"+r.label+"' reel, 1-6 words, different from the examples,"+
+    " matching their tone, style, and length."+feasibilityNote+
+    " This entry gets stitched together with other reels into"+
+    " one sentence, so do not end it with a period or any other trailing punctuation."+
     " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 
@@ -1218,13 +1380,13 @@ function sanitizeAIText(text){
   return t;
 }
 
-async function groqGenerate(cat, examples){
+async function groqGenerate(cat, r, examples){
   let res;
   try{
     res = await fetch(AI_ENDPOINT, {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({category: cat, examples: examples})
+      body: JSON.stringify({categoryName: cat.name, label: r.label, examples: examples})
     });
   }catch(networkErr){
     throw new Error("Couldn't reach the AI endpoint");
@@ -1242,11 +1404,11 @@ async function groqGenerate(cat, examples){
   return text;
 }
 
-async function anthropicGenerate(cat, examples){
+async function anthropicGenerate(cat, r, examples){
   const key = (state.byokKeys.anthropic || "").trim();
   if(!key) throw new Error("Add your Claude API key in Settings");
   const model = (state.byokModels.anthropic || "").trim() || DEFAULT_BYOK_MODEL.anthropic;
-  const prompt = buildAIPrompt(cat, examples);
+  const prompt = buildAIPrompt(cat, r, examples);
 
   let res;
   try{
@@ -1279,7 +1441,7 @@ async function anthropicGenerate(cat, examples){
   return text;
 }
 
-async function openaiGenerate(cat, examples){
+async function openaiGenerate(cat, r, examples){
   const key = (state.byokKeys.openai || "").trim();
   if(!key) throw new Error("Add your ChatGPT (OpenAI) API key in Settings");
   const model = (state.byokModels.openai || "").trim() || DEFAULT_BYOK_MODEL.openai;
@@ -1289,7 +1451,7 @@ async function openaiGenerate(cat, examples){
     res = await fetch(OPENAI_RELAY_ENDPOINT, {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({apiKey: key, model: model, category: cat, examples: examples})
+      body: JSON.stringify({apiKey: key, model: model, categoryName: cat.name, label: r.label, examples: examples})
     });
   }catch(networkErr){
     throw new Error("Couldn't reach this site's OpenAI relay endpoint");
@@ -1307,11 +1469,13 @@ async function openaiGenerate(cat, examples){
   return text;
 }
 
-async function aiGenerate(cat){
-  const examples = shuffle(DATA[DATA_KEY[cat]]).slice(0,5);
-  if(state.aiSource === "anthropic") return anthropicGenerate(cat, examples);
-  if(state.aiSource === "openai") return openaiGenerate(cat, examples);
-  return groqGenerate(cat, examples);
+async function aiGenerate(key){
+  const cat = currentCategory();
+  const r = reelDef(cat, key);
+  const examples = shuffle(r.items).slice(0,5);
+  if(state.aiSource === "anthropic") return anthropicGenerate(cat, r, examples);
+  if(state.aiSource === "openai") return openaiGenerate(cat, r, examples);
+  return groqGenerate(cat, r, examples);
 }
 
 function aiSourceLabel(src){
@@ -1321,9 +1485,10 @@ function aiSourceLabel(src){
 async function testAIEndpoint(){
   if(!state.aiSource || state.aiSource === "off"){ setAIStatus(""); return false; }
   setAIStatus("Checking AI connection…");
-  const probeCat = ORDER.find(isActive) || "genre";
+  const cat = currentCategory();
+  const probeKey = (cat.reels.find(r=>isActive(r.key)) || cat.reels[0]).key;
   try{
-    await aiGenerate(probeCat);
+    await aiGenerate(probeKey);
     setAIStatus(aiSourceLabel(state.aiSource)+" ready — fresh entries generate on every pull.");
     return true;
   }catch(err){
@@ -1332,32 +1497,32 @@ async function testAIEndpoint(){
   }
 }
 
-async function getValue(cat){
+async function getValue(key){
   if(state.aiSource && state.aiSource !== "off"){
     try{
       const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
-      const value = await Promise.race([aiGenerate(cat), timeout]);
+      const value = await Promise.race([aiGenerate(key), timeout]);
       if(value) return value;
     }catch(e){ /* fall through to the built-in list below */ }
   }
-  return pick(cat);
+  return pick(currentCategory(), key);
 }
 
 /* ---------------- spin logic ---------------- */
 function sleep(ms){ return new Promise(resolve=>setTimeout(resolve, ms)); }
-const SPIN_DURATIONS = {genre:520, genre2:600, mood:680, subject:840, twist:1000};
+const DEFAULT_SPIN_DURATION = 700;
 let spinning = false;
 
 // valuePromise resolves to the final string this reel should land on (may take a while in AI mode).
-async function spinReel(cat, valuePromise){
-  const win = reelWindow(cat);
-  const valEl = reelValueEl(cat);
+async function spinReel(key, valuePromise){
+  const win = reelWindow(key);
+  const valEl = reelValueEl(key);
 
-  if(!isActive(cat)){
+  if(!isActive(key)){
     valEl.textContent = "OFF";
     return null;
   }
-  if(state.locks[cat]){
+  if(currentLocks()[key]){
     const v = await valuePromise;
     valEl.textContent = v;
     return v;
@@ -1370,16 +1535,16 @@ async function spinReel(cat, valuePromise){
   }
 
   win.classList.add("spinning");
-  const minDuration = SPIN_DURATIONS[cat];
+  const minDuration = DEFAULT_SPIN_DURATION;
   const start = performance.now();
   let finalValue = null;
-  valuePromise.then(v=>{ finalValue = v; }).catch(()=>{ finalValue = pick(cat); });
+  valuePromise.then(v=>{ finalValue = v; }).catch(()=>{ finalValue = pick(currentCategory(), key); });
 
   while(true){
     const elapsed = performance.now() - start;
     if(finalValue !== null && elapsed >= minDuration) break;
     // once minDuration has passed and we're still waiting (AI mode), show a "thinking" cue instead of noise
-    valEl.textContent = (elapsed > minDuration) ? "…" : pick(cat);
+    valEl.textContent = (elapsed > minDuration) ? "…" : pick(currentCategory(), key);
     await sleep(Math.min(40 + (elapsed/minDuration)*140, 220));
   }
 
@@ -1397,18 +1562,21 @@ async function pullLever(){
   els.lever.classList.add("pressed");
   setTimeout(()=>els.lever.classList.remove("pressed"), 140);
 
-  const results = await Promise.all(ORDER.map(cat=>{
-    if(!isActive(cat)) return spinReel(cat, Promise.resolve(null));
-    const valuePromise = (state.locks[cat] && state.current) ? Promise.resolve(state.current.vals[cat]) : getValue(cat);
-    return spinReel(cat, valuePromise);
+  const cat = currentCategory();
+  const keys = cat.reels.map(r=>r.key);
+  const results = await Promise.all(keys.map(key=>{
+    if(!isActive(key)) return spinReel(key, Promise.resolve(null));
+    const valuePromise = (currentLocks()[key] && state.current && state.current.categoryId===cat.id) ? Promise.resolve(state.current.vals[key]) : getValue(key);
+    return spinReel(key, valuePromise);
   }));
   const vals = {};
-  ORDER.forEach((cat,i)=>{ vals[cat] = results[i]; });
+  keys.forEach((key,i)=>{ vals[key] = results[i]; });
 
   state.ticketNo += 1;
   const ticket = {
     no: state.ticketNo,
     time: nowLabel(),
+    categoryId: cat.id,
     vals: vals,
     mission: buildMission(vals)
   };
@@ -1425,20 +1593,62 @@ async function pullLever(){
   els.lever.disabled = false;
 }
 
-async function rerollSingle(cat){
-  if(spinning || state.locks[cat] || !isActive(cat)) return;
-  if(!state.current){ pullLever(); return; }
+async function rerollSingle(key){
+  if(spinning || currentLocks()[key] || !isActive(key)) return;
+  if(!state.current || state.current.categoryId !== state.categoryId){ pullLever(); return; }
   spinning = true;
-  const value = await spinReel(cat, getValue(cat));
-  state.current.vals[cat] = value;
+  const value = await spinReel(key, getValue(key));
+  state.current.vals[key] = value;
   state.current.mission = buildMission(state.current.vals);
   renderTicket();
   saveState();
-  els.announcer.textContent = "Updated "+LABELS[cat]+": "+value;
+  els.announcer.textContent = "Updated "+reelDef(currentCategory(),key).label+": "+value;
   spinning = false;
 }
 
-/* ---------------- events ---------------- */
+/* ---------------- category switching ---------------- */
+function switchCategory(catId){
+  if(catId === state.categoryId) return;
+  state.categoryId = catId;
+  updateCategoryBlurb();
+  buildReelsDOM();
+  syncReelControlsFromState();
+  const placeholder = {};
+  currentCategory().reels.forEach(r=>{ placeholder[r.key] = "—"; });
+  renderReelValues(placeholder);
+  renderTicket();
+  if(state.aiSource && state.aiSource !== "off") testAIEndpoint();
+  saveState();
+}
+
+/* ---------------- events (delegated + rebound per category) ---------------- */
+function bindReelEvents(){
+  currentCategory().reels.forEach(r=>{
+    reelWindow(r.key).addEventListener("click", ()=>rerollSingle(r.key));
+    reelWindow(r.key).addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); rerollSingle(r.key); }
+    });
+    lockBtn(r.key).addEventListener("click", (e)=>{
+      e.stopPropagation();
+      currentLocks()[r.key] = !currentLocks()[r.key];
+      renderLocks();
+      saveState();
+    });
+    activeToggleInput(r.key).addEventListener("change", ()=>{
+      const input = activeToggleInput(r.key);
+      if(!input.checked && activeCount() <= 1 && isActive(r.key)){
+        // don't allow turning off the last remaining active reel
+        input.checked = true;
+        return;
+      }
+      currentActive()[r.key] = input.checked;
+      applyActiveClasses();
+      if(state.current && state.current.categoryId === state.categoryId){ state.current.mission = buildMission(state.current.vals); renderTicket(); }
+      saveState();
+    });
+  });
+}
+
 els.lever.addEventListener("click", pullLever);
 
 document.addEventListener("keydown", (e)=>{
@@ -1446,19 +1656,6 @@ document.addEventListener("keydown", (e)=>{
     e.preventDefault();
     pullLever();
   }
-});
-
-ORDER.forEach(cat=>{
-  reelWindow(cat).addEventListener("click", ()=>rerollSingle(cat));
-  reelWindow(cat).addEventListener("keydown", (e)=>{
-    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); rerollSingle(cat); }
-  });
-  lockBtn(cat).addEventListener("click", (e)=>{
-    e.stopPropagation();
-    state.locks[cat] = !state.locks[cat];
-    renderLocks();
-    saveState();
-  });
 });
 
 els.copyBtn.addEventListener("click", ()=>{
@@ -1504,22 +1701,6 @@ els.closeSettings.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = tr
 els.drawerBackdrop.addEventListener("click", (e)=>{ if(e.target===els.drawerBackdrop) els.drawerBackdrop.hidden = true; });
 document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && !els.drawerBackdrop.hidden) els.drawerBackdrop.hidden = true; });
 
-function activeToggleInput(cat){ return reelsEl.querySelector('.active-toggle[data-cat="'+cat+'"]'); }
-ORDER.forEach(cat=>{
-  const input = activeToggleInput(cat);
-  input.addEventListener("change", ()=>{
-    if(!input.checked && activeCount() <= 1 && isActive(cat)){
-      // don't allow turning off the last remaining active reel
-      input.checked = true;
-      return;
-    }
-    state.active[cat] = input.checked;
-    applyActiveClasses();
-    if(state.current){ state.current.mission = buildMission(state.current.vals); renderTicket(); }
-    saveState();
-  });
-});
-
 function updateByokFieldsVisibility(){
   const src = state.aiSource;
   const show = (src === "anthropic" || src === "openai");
@@ -1542,7 +1723,7 @@ els.aiSource.addEventListener("change", async ()=>{
   if(state.aiSource === "groq" || (state.byokKeys[state.aiSource] || "").trim()){
     await testAIEndpoint();
   } else {
-    setAIStatus("Add your API key above, then hit \u201cTest connection.\u201d");
+    setAIStatus("Add your API key above, then hit “Test connection.”");
   }
 });
 
@@ -1572,23 +1753,22 @@ els.signOutBtn.addEventListener("click", async ()=>{
 
 /* ---------------- init ---------------- */
 function init(){
-  ORDER.forEach(cat=>{ activeToggleInput(cat).checked = !!state.active[cat]; });
-  applyActiveClasses();
-  renderLocks();
+  buildCategoryPickerDOM();
+  buildReelsDOM();
+  syncReelControlsFromState();
 
   els.aiSource.value = state.aiSource || "off";
   updateByokFieldsVisibility();
   if(state.aiSource && state.aiSource !== "off") testAIEndpoint();
 
-  if(state.current){
+  if(state.current && state.current.categoryId === state.categoryId){
     renderReelValues(state.current.vals);
     renderTicket();
   } else {
-    const placeholder = {genre:"—",genre2:"—",mood:"—",subject:"—",twist:"—"};
+    const placeholder = {};
+    currentCategory().reels.forEach(r=>{ placeholder[r.key] = "—"; });
     renderReelValues(placeholder);
-    els.ticketBody.innerHTML = '<div class="ticket-line"><span class="val">Pull the lever to get your first challenge.</span></div>';
-    els.ticketNo.textContent = padTicketNo(0);
-    els.ticketTime.textContent = "";
+    renderTicket();
   }
   renderHistory();
   renderFavorites();
