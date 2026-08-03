@@ -124,6 +124,33 @@ Netlify Blobs needs no separate setup or database to provision — it's availabl
 - On first sign-in, this browser's local favorites/history are merged with whatever's already on the account (de-duplicated by challenge text) rather than one side overwriting the other.
 - After that, favorites/history/settings changes are still saved to `localStorage` immediately (so nothing is lost if a request fails) and pushed to the account in the background, debounced.
 
+## AI credits (Netlify only, requires Accounts)
+
+This site's own Groq key ("This site's AI" in Settings) is metered at 50 free rolls per day per signed-in account, since that key is the site's cost. A visitor's own Claude/OpenAI key (BYOK) is never metered — that's their API cost, not the site's.
+
+- Requires sign-in — anonymous visitors are prompted to sign in or use their own key instead.
+- Tracked in the same Netlify Blobs record as favorites/history (see `_lib/store.js`: `consumeAICredit`, `DAILY_AI_CREDIT_LIMIT`), resetting daily (UTC).
+- `auth-me.js` returns the live balance so Settings can show "N / 50 free AI rolls left today" without an extra request.
+- No purchase/top-up flow yet — a "Get More Credits" option to extend the daily limit after a paid transaction is a planned future addition, not built.
+
+## Contact form (Resend)
+
+The footer's "Contact Us" modal sends submissions to `jpbb.uiux@gmail.com` via [Resend](https://resend.com)'s API — works identically on Netlify and Vercel.
+
+1. Sign up at [resend.com](https://resend.com) and create an API key (no domain verification needed — this uses Resend's shared sandbox sender `onboarding@resend.dev`).
+2. Set `RESEND_API_KEY` in your site's environment variables (Netlify: Site configuration → Environment variables; Vercel: Project settings → Environment Variables).
+3. That's it — `netlify/functions/contact.js` / `api/contact.js` handle the rest. No storage involved; if the email fails to send, the visitor sees an error and can retry.
+
+## Public profile & gamification (Netlify only, requires Accounts)
+
+Signed-in visitors can opt into a public profile page showing total rolls, a daily streak, and milestone badges — no favorites or history are ever exposed publicly.
+
+- In Settings, a signed-in visitor sets a public **handle** (3-20 chars, letters/numbers/`-`/`_`) and toggles **"Make my stats profile public"**. Handles are unique across all accounts.
+- The public page is `profile.html?u=<handle>` — a static page that fetches `/api/profile?handle=...` (no auth needed for the read; returns 404 if the handle doesn't exist or isn't public).
+- Stats tracked: `totalRolls`, `categoryRolls` (per category), and a daily streak (`current`/`longest`). Badges (`First Roll`, `10/50/100 Rolls`, `Music Fan`/`Character Fan` at 20+ rolls in that category, `3-Day`/`7-Day Streak`) are computed from those numbers on read — no separate badge storage.
+- **These stats start at zero for every account, including accounts that existed before this feature shipped** — there's no historical roll data to backfill into them, so profiles reflect activity from this point forward only.
+- Files: `netlify/functions/profile.js` (GET public read / PUT set handle+visibility), `_lib/store.js` (`setProfileHandle`, `getPublicProfileByHandle`, `computeBadges`), `profile.html` (the public page itself).
+
 ## Customizing the prompt lists
 
 All the content lives in one place near the top of the `<script>` block, in the `DATA` object:

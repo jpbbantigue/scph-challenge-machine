@@ -522,6 +522,8 @@ details[open] summary::before{content:"▾ ";}
       <a href="https://github.com/jpbbantigue/scph-challenge-machine" target="_blank" rel="noopener" aria-label="GitHub">GH</a>
     </div>
     <div class="footer-meta">
+      <button type="button" id="contactBtn">Contact Us</button>
+      <span class="sep">·</span>
       <a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join Discord</a>
       <span class="sep">·</span>
       <a href="#how-it-works">How it works</a>
@@ -550,6 +552,16 @@ details[open] summary::before{content:"▾ ";}
       <p class="hint">Signing in syncs your favorites, history, and settings to your account, so they follow you across devices and browsers.</p>
       <p class="hint discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord community →</a></p>
     </div>
+    <div id="profileSection" hidden>
+      <hr>
+      <label class="field-label" for="profileHandle">Public profile</label>
+      <input type="text" id="profileHandle" placeholder="your-handle" maxlength="20">
+      <label style="padding:8px 0 2px;"><input type="checkbox" id="profilePublic"> Make my stats profile public</label>
+      <p class="hint">Sharing a public link shows your total rolls, streak, and badges — not your favorites or history.</p>
+      <button type="button" class="done" id="profileSaveBtn" style="margin-top:8px;">Save</button>
+      <a id="profileLink" href="#" target="_blank" rel="noopener" class="hint" style="display:block;margin-top:8px;" hidden>View my public profile →</a>
+      <p class="hint" id="profileStatus"></p>
+    </div>
     <hr>
     <p class="hint">Flip reels on or off with the switch in each tile's top-left corner. At least one has to stay on.</p>
     <hr>
@@ -560,6 +572,7 @@ details[open] summary::before{content:"▾ ";}
       <option value="anthropic">My own Claude API key</option>
       <option value="openai">My own ChatGPT (OpenAI) API key</option>
     </select>
+    <p class="hint" id="aiCreditsHint"></p>
     <div class="byok-fields" id="byokFields" hidden>
       <label class="field-label" for="byokKey">API key</label>
       <input type="password" id="byokKey" placeholder="sk-ant-... / sk-...">
@@ -572,6 +585,30 @@ details[open] summary::before{content:"▾ ";}
     <div class="drawer-actions">
       <button class="done" id="closeSettings" type="button">Done</button>
     </div>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="contactBackdrop" hidden>
+  <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h2 id="contactTitle" style="margin:0;">Contact Us</h2>
+      <button type="button" id="closeContact" aria-label="Close" style="width:28px;height:28px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:var(--ink);cursor:pointer;font-size:14px;">&times;</button>
+    </div>
+    <p class="hint" style="margin-bottom:14px;">Inquiries, feedback, and suggestions all welcome.</p>
+    <form id="contactForm">
+      <label class="field-label" for="contactType">Type</label>
+      <select id="contactType">
+        <option value="Inquiry">Inquiry</option>
+        <option value="Feedback">Feedback</option>
+        <option value="Suggestion">Suggestion</option>
+      </select>
+      <label class="field-label" for="contactEmail">Your email (optional)</label>
+      <input type="email" id="contactEmail" placeholder="you@example.com">
+      <label class="field-label" for="contactMessage">Message</label>
+      <textarea id="contactMessage" rows="4" required placeholder="What's on your mind?" style="width:100%;background:rgba(255,255,255,0.04);color:var(--ink-65);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+      <button type="submit" class="done" id="contactSubmitBtn" style="margin-top:12px;width:100%;">Send Message</button>
+      <p class="hint" id="contactStatus" style="min-height:14px;"></p>
+    </form>
   </div>
 </div>
 
@@ -651,12 +688,14 @@ function loadState(){
     locks: {},
     current: null,
     history: [],
-    favorites: []
+    favorites: [],
+    stats: { totalRolls: 0, categoryRolls: {}, streak: { current: 0, longest: 0, lastActiveDate: null } }
   }, saved);
   if(!CATEGORY_BY_ID[merged.categoryId]) merged.categoryId = defaultCatId;
   merged.byokKeys = Object.assign({anthropic:"", openai:""}, merged.byokKeys);
   merged.byokModels = Object.assign({anthropic:"", openai:""}, merged.byokModels);
   merged.favoriteCategoryIds = merged.favoriteCategoryIds || [];
+  merged.stats = Object.assign({ totalRolls: 0, categoryRolls: {}, streak: { current: 0, longest: 0, lastActiveDate: null } }, merged.stats);
   // active/locks are namespaced per category so switching categories doesn't clobber the other's settings
   merged.active = merged.active || {};
   merged.locks = merged.locks || {};
@@ -676,7 +715,7 @@ function currentActive(){ return state.active[state.categoryId]; }
 function currentLocks(){ return state.locks[state.categoryId]; }
 
 /* ---------------- account sync (Phase 2) ---------------- */
-const account = { signedIn:false, provider:null, name:null };
+const account = { signedIn:false, provider:null, name:null, credits:null, profile:null };
 
 function debounce(fn, wait){
   let t;
@@ -692,12 +731,28 @@ async function pushAccountData(){
       body: JSON.stringify({
         favorites: state.favorites,
         history: state.history,
-        settings: { active: state.active, locks: state.locks }
+        settings: { active: state.active, locks: state.locks },
+        stats: state.stats
       })
     });
   }catch(e){ /* best-effort — local data is still safe either way */ }
 }
 const debouncedPushAccountData = debounce(pushAccountData, 800);
+
+// Stats are monotonic counters, not lists — merging takes the higher value
+// per field (rather than de-duplicating) so neither side's progress is lost.
+function mergeStats(a, b){
+  const catRolls = Object.assign({}, a.categoryRolls);
+  Object.keys(b.categoryRolls || {}).forEach(k=>{ catRolls[k] = Math.max(catRolls[k] || 0, b.categoryRolls[k] || 0); });
+  const aStreak = a.streak || {current:0,longest:0,lastActiveDate:null};
+  const bStreak = b.streak || {current:0,longest:0,lastActiveDate:null};
+  const newerStreak = (bStreak.lastActiveDate || "") > (aStreak.lastActiveDate || "") ? bStreak : aStreak;
+  return {
+    totalRolls: Math.max(a.totalRolls || 0, b.totalRolls || 0),
+    categoryRolls: catRolls,
+    streak: { current: newerStreak.current || 0, longest: Math.max(aStreak.longest||0, bStreak.longest||0), lastActiveDate: newerStreak.lastActiveDate || null }
+  };
+}
 
 // Combines two lists of tickets, de-duplicating by mission text, newest first.
 function mergeTicketLists(a, b){
@@ -722,6 +777,7 @@ async function pullAccountData(){
     if(remote.settings.active) Object.assign(state.active, remote.settings.active);
     if(remote.settings.locks) Object.assign(state.locks, remote.settings.locks);
   }
+  if(remote.stats) state.stats = mergeStats(state.stats, remote.stats);
   saveState();
   buildReelsDOM();
   syncReelControlsFromState();
@@ -735,10 +791,44 @@ function renderAccountUI(){
     els.accountStatus.textContent = "Signed in with "+account.provider+" as "+account.name+". Synced across your devices.";
     els.signInButtons.hidden = true;
     els.signOutBtn.hidden = false;
+    els.profileSection.hidden = false;
+    if(els.profileHandle && document.activeElement !== els.profileHandle){
+      els.profileHandle.value = (account.profile && account.profile.handle) || "";
+    }
+    if(els.profilePublic) els.profilePublic.checked = !!(account.profile && account.profile.public);
+    updateProfileLink();
   } else {
     els.accountStatus.textContent = "Not signed in — favorites/history stay on this browser only.";
     els.signInButtons.hidden = false;
     els.signOutBtn.hidden = true;
+    els.profileSection.hidden = true;
+  }
+  updateAICreditsHint();
+}
+
+function updateProfileLink(){
+  if(!els.profileLink) return;
+  const handle = account.profile && account.profile.handle;
+  if(handle && account.profile.public){
+    els.profileLink.href = "profile.html?u="+encodeURIComponent(handle);
+    els.profileLink.hidden = false;
+  } else {
+    els.profileLink.hidden = true;
+  }
+}
+
+// This site's own Groq key ("groq" AI source) is metered per signed-in
+// account; BYOK Claude/OpenAI keys are never metered (that's the visitor's
+// own API cost). Shows the live balance, or a nudge to sign in / use BYOK.
+function updateAICreditsHint(){
+  if(!els.aiCreditsHint) return;
+  if(state.aiSource !== "groq"){ els.aiCreditsHint.textContent = ""; return; }
+  if(!account.signedIn){
+    els.aiCreditsHint.textContent = "Sign in above to use this site's AI — free daily credits per account.";
+  } else if(account.credits){
+    els.aiCreditsHint.textContent = account.credits.remaining+" / "+account.credits.limit+" free AI rolls left today.";
+  } else {
+    els.aiCreditsHint.textContent = "";
   }
 }
 
@@ -766,8 +856,40 @@ async function checkAccount(){
   account.signedIn = !!data.signedIn;
   account.provider = data.provider || null;
   account.name = data.name || null;
+  account.credits = data.credits || null;
+  account.profile = data.profile || null;
   renderAccountUI();
   if(account.signedIn) await pullAccountData();
+}
+
+async function saveProfileSettings(){
+  const handleInput = (els.profileHandle.value || "").trim();
+  const isPublic = !!els.profilePublic.checked;
+  setProfileStatus("Saving…");
+  let res, data;
+  try{
+    res = await fetch("/api/profile", {
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ handle: handleInput || null, public: isPublic })
+    });
+    data = await res.json();
+  }catch(e){
+    setProfileStatus("Couldn't reach the server — try again.", true);
+    return;
+  }
+  if(!res.ok){
+    setProfileStatus(data.error || "Couldn't save profile settings.", true);
+    return;
+  }
+  account.profile = data.profile;
+  updateProfileLink();
+  setProfileStatus(data.profile.handle ? "Saved." : "Handle cleared.");
+}
+function setProfileStatus(text, isError){
+  if(!els.profileStatus) return;
+  els.profileStatus.textContent = text || "";
+  els.profileStatus.classList.toggle("ai-error", !!isError);
 }
 
 function reelDef(cat, key){ return cat.reels.find(r=>r.key===key); }
@@ -864,9 +986,25 @@ const els = {
   byokDestNote: document.getElementById("byokDestNote"),
   testAIBtn: document.getElementById("testAIBtn"),
   aiStatus: document.getElementById("aiStatus"),
+  aiCreditsHint: document.getElementById("aiCreditsHint"),
   accountStatus: document.getElementById("accountStatus"),
   signInButtons: document.getElementById("signInButtons"),
   signOutBtn: document.getElementById("signOutBtn"),
+  profileSection: document.getElementById("profileSection"),
+  profileHandle: document.getElementById("profileHandle"),
+  profilePublic: document.getElementById("profilePublic"),
+  profileSaveBtn: document.getElementById("profileSaveBtn"),
+  profileStatus: document.getElementById("profileStatus"),
+  profileLink: document.getElementById("profileLink"),
+  contactBtn: document.getElementById("contactBtn"),
+  contactBackdrop: document.getElementById("contactBackdrop"),
+  closeContact: document.getElementById("closeContact"),
+  contactForm: document.getElementById("contactForm"),
+  contactType: document.getElementById("contactType"),
+  contactEmail: document.getElementById("contactEmail"),
+  contactMessage: document.getElementById("contactMessage"),
+  contactSubmitBtn: document.getElementById("contactSubmitBtn"),
+  contactStatus: document.getElementById("contactStatus"),
   announcer: document.getElementById("announcer")
 };
 
@@ -1167,6 +1305,10 @@ async function groqGenerate(cat, r, examples){
   const data = await res.json();
   const text = (data && data.text) ? String(data.text).trim() : "";
   if(!text) throw new Error("Empty AI response");
+  // This site's own Groq key is metered per signed-in account (see
+  // generate.js) — reflect the updated balance in the account object so
+  // Settings shows a live count without an extra round trip.
+  if(typeof data.creditsRemaining === "number" && account.credits){ account.credits.remaining = data.creditsRemaining; renderAccountUI(); }
   return text;
 }
 
@@ -1321,6 +1463,27 @@ async function spinReel(key, valuePromise){
   return finalValue;
 }
 
+// Total rolls / per-category rolls / daily streak — powers the public
+// profile's stats and badges. Every account (new or pre-existing) starts
+// these at zero as of this feature shipping; there's no historical data to
+// backfill into them.
+function recordRollStats(categoryId){
+  const s = state.stats;
+  s.totalRolls = (s.totalRolls || 0) + 1;
+  s.categoryRolls = s.categoryRolls || {};
+  s.categoryRolls[categoryId] = (s.categoryRolls[categoryId] || 0) + 1;
+
+  const today = new Date().toISOString().slice(0,10);
+  const streak = s.streak || { current:0, longest:0, lastActiveDate:null };
+  if(streak.lastActiveDate !== today){
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+    streak.current = (streak.lastActiveDate === yesterday) ? (streak.current || 0) + 1 : 1;
+    streak.lastActiveDate = today;
+    streak.longest = Math.max(streak.longest || 0, streak.current);
+  }
+  s.streak = streak;
+}
+
 async function pullLever(){
   if(spinning) return;
   spinning = true;
@@ -1349,6 +1512,7 @@ async function pullLever(){
   state.current = ticket;
   state.history.push(ticket);
   if(state.history.length > 100) state.history.shift();
+  recordRollStats(cat.id);
 
   renderTicket();
   renderHistory();
@@ -1498,6 +1662,7 @@ function updateByokFieldsVisibility(){
 els.aiSource.addEventListener("change", async ()=>{
   state.aiSource = els.aiSource.value;
   updateByokFieldsVisibility();
+  updateAICreditsHint();
   saveState();
   if(state.aiSource === "off"){ setAIStatus(""); return; }
   if(state.aiSource === "groq" || (state.byokKeys[state.aiSource] || "").trim()){
@@ -1531,6 +1696,47 @@ els.signOutBtn.addEventListener("click", async ()=>{
   window.location.reload();
 });
 
+els.profileSaveBtn.addEventListener("click", saveProfileSettings);
+
+/* ---------------- contact modal ---------------- */
+els.contactBtn.addEventListener("click", ()=>{ els.contactBackdrop.hidden = false; els.closeContact.focus(); });
+els.closeContact.addEventListener("click", ()=>{ els.contactBackdrop.hidden = true; els.contactBtn.focus(); });
+els.contactBackdrop.addEventListener("click", (e)=>{ if(e.target===els.contactBackdrop) els.contactBackdrop.hidden = true; });
+document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && !els.contactBackdrop.hidden) els.contactBackdrop.hidden = true; });
+
+els.contactForm.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const message = els.contactMessage.value.trim();
+  if(!message) return;
+  els.contactSubmitBtn.disabled = true;
+  els.contactStatus.classList.remove("ai-error");
+  els.contactStatus.textContent = "Sending…";
+  let res, data;
+  try{
+    res = await fetch("/api/contact", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ type: els.contactType.value, email: els.contactEmail.value.trim(), message: message })
+    });
+    data = await res.json();
+  }catch(networkErr){
+    els.contactStatus.textContent = "Couldn't reach the server — try again.";
+    els.contactStatus.classList.add("ai-error");
+    els.contactSubmitBtn.disabled = false;
+    return;
+  }
+  if(!res.ok){
+    els.contactStatus.textContent = data.error || "Something went wrong — try again.";
+    els.contactStatus.classList.add("ai-error");
+    els.contactSubmitBtn.disabled = false;
+    return;
+  }
+  els.contactStatus.textContent = "Thanks — your message is in.";
+  els.contactMessage.value = "";
+  els.contactEmail.value = "";
+  els.contactSubmitBtn.disabled = false;
+});
+
 /* ---------------- init ---------------- */
 function init(){
   buildCategorySelectDOM();
@@ -1541,6 +1747,7 @@ function init(){
 
   els.aiSource.value = state.aiSource || "off";
   updateByokFieldsVisibility();
+  updateAICreditsHint();
   if(state.aiSource && state.aiSource !== "off") testAIEndpoint();
 
   if(state.current && state.current.categoryId === state.categoryId){

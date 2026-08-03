@@ -15,17 +15,24 @@ This branch (`prompt-royale`) reworks the SCPH Challenge Machine into "Prompt Ro
 - Prompt Royale visual identity: near-black background, royal blue / crimson / gold palette, Space Grotesk (display) + Inter (body) fonts — replacing the brass/amber and later near-black/neon-red-cyan SCPH looks.
 - Reused as-is from the prior app: favorites/history/local persistence, Groq/Anthropic/OpenAI AI-source settings, Google/Discord/Facebook account sync (Netlify only). Local storage key changed to `promptRoyale.v1` (schema-incompatible with the old `sunoChallengeMachine.v1`, since reel keys are now per-category rather than fixed).
 
+## Deferred items shipped without a database
+
+These were originally deferred pending Phase 2, but turned out not to need a database — they reuse the existing Netlify Blobs account store instead:
+
+- **Contact modal**, wired to actually send email (via Resend) rather than just being UI. See README's "Contact form" section.
+- **Credits system** — 50/day free-AI-roll limit per signed-in account, gating only this site's own Groq key (not BYOK keys). See README's "AI credits" section.
+- **Public Profile page + gamification** — opt-in public handle, stats (total rolls, per-category rolls, streak), and milestone badges computed on read. Stats start at zero for every account (new and pre-existing) as of this feature — no historical data is backfilled. See README's "Public profile & gamification" section.
+
 ## Phase 2 — not started
 
 - **A real database backing reel content**, replacing the static in-file arrays — needed both to grow "Free mode" item pools further without bloating `index.html`, and as groundwork for adding more categories from the design doc without every category living in client-side JS.
 - Additional categories from the design doc beyond Music + Characters.
-- Netlify Blobs currently backs accounts (favorites/history/settings) — Phase 2's database work should evaluate whether the same store extends to reel content, or a separate DB (e.g. a hosted Postgres/SQLite) makes more sense.
+- Netlify Blobs currently backs accounts, credits, and profiles — Phase 2's database work should evaluate whether the same store extends to reel content, or a separate DB (e.g. a hosted Postgres/SQLite) makes more sense.
+- **"Get More Credits" purchase flow** — extending the daily AI-credit limit after a paid transaction. Noted as a future direction when the credits system shipped, not built.
 
 ## Deferred (from the original design handoff, no timeline yet)
 
-- Account page overhaul (the handoff's dedicated account/profile UI, beyond the current Settings drawer).
-- Public Profile page.
-- Credits system.
+- Account page overhaul (the handoff's dedicated account/profile UI, beyond the current Settings drawer — profile/credits/handle controls currently live in the Settings drawer, not a dedicated page).
 - Reel-landing / UI animation polish beyond the current spin/settle effect.
-- Contact modal.
+- "Now Rolling" sticky status bar and the "Example Results" section from the mockup.
 - SEO rebrand (meta tags, `robots.txt`, `sitemap.xml`, `README.md`) fully to "Prompt Royale" — the in-app copy/branding is updated on this branch, but the repo's SEO/README surface still reflects the old SCPH Challenge Machine name pending a decision on final domain/branding before this leaves staging.

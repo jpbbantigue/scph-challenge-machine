@@ -1,5 +1,5 @@
-// GET  /api/data  — returns the signed-in visitor's stored favorites/history/settings
-// PUT  /api/data  — replaces them with the given body: { favorites, history, settings }
+// GET  /api/data  — returns the signed-in visitor's stored favorites/history/settings/stats
+// PUT  /api/data  — replaces them with the given body: { favorites, history, settings, stats }
 // Requires a valid session cookie (set by auth-callback after sign-in).
 
 const { getSessionUser } = require("./_lib/session");

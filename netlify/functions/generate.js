@@ -2,7 +2,7 @@
 // (reachable at /api/generate via the redirect in netlify.toml)
 //
 // Body: { categoryName: string, label: string, examples: string[] }
-// Returns: { text: string }  or  { error: string }
+// Returns: { text: string, creditsRemaining: number }  or  { error: string }
 //
 // Requires the GROQ_API_KEY environment variable to be set in the Netlify
 // site's dashboard (Site settings > Environment variables). Get a free key
@@ -12,9 +12,16 @@
 // reel labels, so instead of a hardcoded description per category+label
 // (which doesn't scale), the description is built from the category name
 // and reel label the client sends, plus a handful of example items from
-// that reel's own list — same trust boundary as before (this is a public,
-// unauthenticated, zero-stakes creative-prompt endpoint; the output is
-// only ever shown back to the requester).
+// that reel's own list.
+//
+// This endpoint calls a site-wide key (this site's own cost), so unlike the
+// BYOK relay it requires sign-in and is metered by a daily credit allowance
+// per account (see _lib/store.js: consumeAICredit / DAILY_AI_CREDIT_LIMIT).
+// A visitor's own Claude/OpenAI key is never metered — that's their cost,
+// not the site's.
+
+const { getSessionUser } = require("./_lib/session");
+const { consumeAICredit } = require("./_lib/store");
 
 const MODEL = "llama-3.1-8b-instant";
 const MAX_FIELD_LEN = 60;
@@ -22,6 +29,11 @@ const MAX_FIELD_LEN = 60;
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return json(405, { error: "Method not allowed" });
+  }
+
+  const user = getSessionUser(event);
+  if (!user) {
+    return json(401, { error: "Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead." });
   }
 
   let body;
@@ -41,6 +53,11 @@ exports.handler = async (event) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return json(500, { error: "Server is missing GROQ_API_KEY — set it in the Netlify site's environment variables." });
+  }
+
+  const credit = await consumeAICredit(user);
+  if (!credit.ok) {
+    return json(429, { error: "Daily AI limit reached (" + credit.limit + "/day) — try again tomorrow, or add your own Claude/ChatGPT key in Settings." });
   }
 
   const prompt = buildPrompt(categoryName, label, examples);
@@ -76,7 +93,7 @@ exports.handler = async (event) => {
     return json(502, { error: "AI returned an unusable response" });
   }
 
-  return json(200, { text: text });
+  return json(200, { text: text, creditsRemaining: credit.remaining });
 };
 
 function buildPrompt(categoryName, label, examples) {

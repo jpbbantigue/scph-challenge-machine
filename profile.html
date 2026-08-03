@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Profile — Prompt Royale</title>
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+:root{
+  --bg-0:#05070d;
+  --ink:#F3F5FC;
+  --ink-65:rgba(243,245,252,0.65);
+  --ink-50:rgba(243,245,252,0.5);
+  --ink-40:rgba(243,245,252,0.4);
+  --royal:#295BFF;
+  --royal-hi:#4D7CFF;
+  --royal-deep:#1836B2;
+  --gold:#F4BF3A;
+  --gold-hi:#FFD978;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg-0);
+  color:var(--ink-65);
+  font-family:var(--font-body);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+a{color:var(--royal-hi);}
+.card{
+  width:100%;max-width:440px;border-radius:28px;padding:clamp(28px,5vw,40px);
+  background:linear-gradient(180deg, rgba(20,26,46,0.85), rgba(9,12,22,0.9));
+  border:1px solid rgba(77,124,255,0.25);
+  box-shadow:0 30px 70px rgba(0,0,0,0.55);
+}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink);margin-bottom:24px;}
+.brand-mark{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));display:block;}
+.handle{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--ink);margin:0 0 6px;}
+.subtitle{font-size:13px;color:var(--ink-40);margin:0 0 28px;}
+.stat-row{display:flex;gap:12px;margin-bottom:24px;}
+.stat-cell{flex:1;text-align:center;padding:16px 8px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);}
+.stat-cell .num{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--gold-hi);}
+.stat-cell .label{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);margin-top:4px;}
+.badges-title{font-family:var(--font-display);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;}
+.badges{display:flex;flex-wrap:wrap;gap:8px;}
+.badge{padding:7px 13px;border-radius:999px;background:rgba(244,191,58,0.1);border:1px solid rgba(244,191,58,0.3);color:var(--gold-hi);font-size:12.5px;font-weight:600;}
+.empty-badges{font-size:13px;color:var(--ink-40);}
+.state-msg{text-align:center;font-size:14px;color:var(--ink-50);padding:20px 0;}
+.back-link{display:block;text-align:center;margin-top:24px;font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</div>
+  <div id="content">
+    <p class="state-msg">Loading profile…</p>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function params(){
+  return new URLSearchParams(window.location.search);
+}
+
+async function load(){
+  const content = document.getElementById("content");
+  const handle = (params().get("u") || "").trim();
+  if(!handle){
+    content.innerHTML = '<p class="state-msg">No profile specified.</p>';
+    return;
+  }
+  let res, data;
+  try{
+    res = await fetch("/api/profile?handle="+encodeURIComponent(handle));
+    data = await res.json();
+  }catch(e){
+    content.innerHTML = '<p class="state-msg">Couldn’t reach the server.</p>';
+    return;
+  }
+  if(!res.ok){
+    content.innerHTML = '<p class="state-msg">This profile doesn’t exist or isn’t public.</p>';
+    return;
+  }
+  render(data);
+}
+
+function render(data){
+  const content = document.getElementById("content");
+  const stats = data.stats || {};
+  const streak = stats.streak || {};
+  const catRolls = stats.categoryRolls || {};
+  const catLine = Object.keys(catRolls).length
+    ? Object.keys(catRolls).map(k=>escapeHTML(k)+": "+catRolls[k]).join(" · ")
+    : "";
+  const badgesHTML = (data.badges && data.badges.length)
+    ? data.badges.map(b=>'<span class="badge">'+escapeHTML(b.label)+'</span>').join("")
+    : '<span class="empty-badges">No badges yet — keep rolling.</span>';
+
+  content.innerHTML =
+    '<h1 class="handle">@'+escapeHTML(data.handle)+'</h1>'+
+    '<p class="subtitle">'+(catLine || "Prompt Royale player")+'</p>'+
+    '<div class="stat-row">'+
+      '<div class="stat-cell"><div class="num">'+(stats.totalRolls||0)+'</div><div class="label">Total Rolls</div></div>'+
+      '<div class="stat-cell"><div class="num">'+(streak.current||0)+'</div><div class="label">Day Streak</div></div>'+
+      '<div class="stat-cell"><div class="num">'+(streak.longest||0)+'</div><div class="label">Best Streak</div></div>'+
+    '</div>'+
+    '<div class="badges-title">Badges</div>'+
+    '<div class="badges">'+badgesHTML+'</div>'+
+    '<a class="back-link" href="index.html">← Back to Prompt Royale</a>';
+}
+
+load();
+})();
+</script>
+</body>
+</html>
