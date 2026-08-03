@@ -49,6 +49,7 @@ module.exports = async (req, res) => {
   const examples = Array.isArray(body.examples) ? body.examples.slice(0, 5).map(String) : [];
   const model = (body.model || "").trim() || DEFAULT_MODEL;
 
+  const isTwistReel = /twist/i.test(label);
   const prompt = buildPrompt(categoryName, label, examples);
 
   let upstream;
@@ -62,7 +63,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         model: model,
         messages: [{ role: "user", content: prompt }],
-        temperature: 1.05,
+        temperature: isTwistReel ? 0.8 : 1.05,
         max_tokens: 60
       })
     });
@@ -81,7 +82,7 @@ module.exports = async (req, res) => {
 
   const data = await upstream.json();
   const raw = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-  const text = sanitize(raw || "");
+  const text = sanitize(raw || "", isTwistReel);
   if (!text) {
     res.status(502).json({ error: "OpenAI returned an unusable response" });
     return;
@@ -90,23 +91,36 @@ module.exports = async (req, res) => {
   res.status(200).json({ text: text });
 };
 
+// Twist reels need the output to be a followable RULE, not a mood/lyric
+// fragment — otherwise a model free-associates on the examples' vocabulary
+// ("whisper", "echo") into vague poetic phrases that aren't actionable.
+const TWIST_DIRECTIVE_NOTE =
+  " Phrase it as a short, followable RULE or DIRECTIVE the creator applies while making the" +
+  " piece — never a lyric, scene, mood, or image. It must describe something they DO (a structural," +
+  " point-of-view, repetition, or delivery choice), in the same imperative style as the examples" +
+  " (e.g. 'Vocals must whisper for the first verse', 'The song must end mid-sentence'). If it" +
+  " doesn't read as an instruction someone could follow, it's wrong.";
+
 function buildPrompt(categoryName, label, examples) {
   const exampleText = examples.join("; ");
-  const isMusicTwist = /music/i.test(categoryName) && /twist/i.test(label);
+  const isTwistReel = /twist/i.test(label);
+  const isMusicTwist = /music/i.test(categoryName) && isTwistReel;
   return "You generate entries for a creative-prompt slot machine. Category: " + categoryName +
     " — reel: '" + label + "'. Examples already in use for this reel: " + exampleText +
     ". Give ONE brand-new entry for the '" + label + "' reel, 1-6 words, different from the examples," +
-    " matching their tone, style, and length." + (isMusicTwist ? TWIST_FEASIBILITY_NOTE : "") +
+    " matching their tone, style, and length." +
+    (isTwistReel ? TWIST_DIRECTIVE_NOTE : "") + (isMusicTwist ? TWIST_FEASIBILITY_NOTE : "") +
     " This entry gets stitched together with other reels into" +
     " one sentence, so do not end it with a period or any other trailing punctuation." +
     " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 
-function sanitize(text) {
+function sanitize(text, isTwistReel) {
   let t = String(text).trim().split("\n")[0].trim();
   t = t.replace(/^["'“”\-\s\d.]+/, "").replace(/["'“”]+$/, "").trim();
   t = t.replace(/[.!?,;:]+$/, "").trim();
   if (!t || t.length > 140) return "";
+  if (isTwistReel && t.split(/\s+/).length > 14) return "";
   return t;
 }
 
