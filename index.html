@@ -587,7 +587,7 @@ details[open] summary::before{content:"▾ ";}
    the reel content are Phase 2. Twist list for Music is curated so every
    entry is a lyric-writing/vocal-delivery constraint achievable in Suno
    without burning many regenerations (see PHASING.md + generate.js). */
-const MUSIC_TWIST_ITEMS = ["Vocals must whisper for the first verse","The song must end mid-sentence","Must include a spoken-word bridge","Under 90 seconds total","Start with the chorus, no intro","No metaphors — only literal images","The title must be the song's last line","Must include a false ending","Backing vocals answer the lead like a conversation","Must reference the weather at least twice","No repeated words across the entire lyric","A one-line callback to verse one at the very end","Harmony only on the last word of each line","Opens a cappella","The second verse flips the meaning of the first","A duet between two opposing perspectives","The chorus lyric is a single repeated phrase","The rhyme scheme breaks on purpose in the final verse","Must name a real or invented street","Addressed to a 'you' who never speaks back","The chorus arrives before the first verse ends","Must include a question that's never answered","Must include a whispered aside not meant for the listener","Works as both a lullaby and a warning","Uses call-and-response between two vocal characters","Each verse gets shorter than the last","No chorus at all — only evolving verses","The song seems to end, then doesn't","Includes a spoken date, time, or place, like a report","Written as a message left on an answering machine","Includes a line borrowed from an overheard conversation"];
+const MUSIC_TWIST_ITEMS = ["No drums until the final chorus","Vocals must whisper for the first verse","A key change every chorus","The song must end mid-sentence","Only one instrument besides vocals","The chorus can't repeat the same melody twice","Must include a spoken-word bridge","Under 90 seconds total","Start with the chorus, no intro","The bassline never repeats","A time-signature change in the bridge","No metaphors — only literal images","The title must be the song's last line","Must include a false ending","Backing vocals answer the lead like a conversation","The tempo doubles in the final third","Only five chords total, no more","Percussion made entirely of non-drum sounds","Must reference the weather at least twice","Verse and chorus melodies share no notes","The song fades in already mid-performance","No repeated words across the entire lyric","A one-line callback to verse one at the very end","The bridge is entirely instrumental","Harmony only on the last word of each line","Opens a cappella","The key must feel unresolved until the final chord","Must include a crowd or field-recording texture","The second verse flips the meaning of the first","A duet between two opposing perspectives","No cymbals anywhere in the mix","The chorus lyric is a single repeated phrase","Must include a count-in or studio chatter at the start","The outro strips back to a single instrument","The rhyme scheme breaks on purpose in the final verse","Must name a real or invented street","Tempo matches a resting heartbeat, 60–100 bpm","Addressed to a 'you' who never speaks back","Must include a full bar of near-silence","The melody fits a two-note vocal range","The rhythm is borrowed from something non-musical","The chorus arrives before the first verse ends","Must include a question that's never answered","The final chorus drops the drums entirely","Must include a whispered aside not meant for the listener","Works as both a lullaby and a warning","Uses call-and-response between two vocal characters","Each verse gets shorter than the last","Ends on a deliberately unresolved chord","No chorus at all — only evolving verses","The song seems to end, then doesn't","Instrumentation thins out with every verse until just voice remains","Includes a spoken date, time, or place, like a report","Written as a message left on an answering machine","The melody moves mostly in half-steps","Includes a line borrowed from an overheard conversation"];
 
 const ACCENTS = {
   royal:{ border:"rgba(77,124,255,0.35)", glyph:"linear-gradient(135deg,#4D7CFF,#1836B2)" },
@@ -1127,37 +1127,22 @@ function shuffle(arr){
   return a;
 }
 
-// Same Suno-feasibility rule enforced server-side: the Music category's
-// Twist reel should stay a lyric/vocal-delivery constraint, not a precise
-// audio-production/music-theory one AI music generators rarely nail.
-// Twist reels also need TWIST_DIRECTIVE_NOTE: without it, a model free-
-// associates on the examples' vocabulary ("whisper", "echo") into vague
-// poetic lyric fragments instead of an actual followable rule.
 function buildAIPrompt(cat, r, examples){
   const exampleText = examples.join("; ");
-  const isTwistReel = r.key === "twist";
-  const isMusicTwist = cat.id === "music" && isTwistReel;
-  const directiveNote = isTwistReel
-    ? " Phrase it as a short, followable rule or directive the creator applies while making the piece — never a lyric, scene, mood, or image. It must describe something they DO (a structural, point-of-view, repetition, or delivery choice), in the same imperative style as the examples (e.g. 'Vocals must whisper for the first verse', 'The song must end mid-sentence'). If it doesn't read as an instruction someone could follow, it's wrong."
-    : "";
-  const feasibilityNote = isMusicTwist
-    ? " This entry must be a lyric-writing or vocal-delivery constraint achievable just by how the words are written or sung — not a precise audio-production or music-theory instruction, since AI music generators like Suno rarely execute those reliably."
-    : "";
   return "You generate entries for a creative-prompt slot machine. Category: "+cat.name+
     " — reel: '"+r.label+"'. Examples already in use for this reel: "+exampleText+
     ". Give ONE brand-new entry for the '"+r.label+"' reel, 1-6 words, different from the examples,"+
-    " matching their tone, style, and length."+directiveNote+feasibilityNote+
+    " matching their tone, style, and length."+
     " This entry gets stitched together with other reels into"+
     " one sentence, so do not end it with a period or any other trailing punctuation."+
     " Reply with only the entry text — no quotes, no numbering, no explanation, no trailing punctuation.";
 }
 
-function sanitizeAIText(text, isTwistReel){
+function sanitizeAIText(text){
   let t = String(text).trim().split("\n")[0].trim();
   t = t.replace(/^["'“”\-\s\d.]+/,"").replace(/["'“”]+$/,"").trim();
   t = t.replace(/[.!?,;:]+$/,"").trim();
   if(!t || t.length > 140) return "";
-  if(isTwistReel && t.split(/\s+/).length > 14) return "";
   return t;
 }
 
@@ -1189,7 +1174,6 @@ async function anthropicGenerate(cat, r, examples){
   const key = (state.byokKeys.anthropic || "").trim();
   if(!key) throw new Error("Add your Claude API key in Settings");
   const model = (state.byokModels.anthropic || "").trim() || DEFAULT_BYOK_MODEL.anthropic;
-  const isTwistReel = r.key === "twist";
   const prompt = buildAIPrompt(cat, r, examples);
 
   let res;
@@ -1205,7 +1189,6 @@ async function anthropicGenerate(cat, r, examples){
       body: JSON.stringify({
         model: model,
         max_tokens: 60,
-        temperature: isTwistReel ? 0.8 : 1,
         messages: [{role:"user", content: prompt}]
       })
     });
@@ -1219,7 +1202,7 @@ async function anthropicGenerate(cat, r, examples){
   }
   const data = await res.json();
   const raw = data && data.content && data.content[0] && data.content[0].text;
-  const text = sanitizeAIText(raw || "", isTwistReel);
+  const text = sanitizeAIText(raw || "");
   if(!text) throw new Error("Claude returned an unusable response");
   return text;
 }

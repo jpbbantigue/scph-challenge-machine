@@ -1,53 +1,67 @@
 // Phase 1 seed data for Prompt Royale — Music + Characters categories only.
-// Curated per Suno-feasibility rule: Music "Twist" reel keeps only
-// lyric-writing / vocal-delivery constraints (cheap, human-controlled) and
-// drops precise audio-production / music-theory constraints (unreliable,
-// costly in regenerations for AI music generators). Same rule is enforced
-// server-side in generate.js / openai-generate.js via TWIST_FEASIBILITY_NOTE.
+// Music's "Twist" reel is the full original list (56 items), including
+// audio-production/music-theory constraints — an earlier revision curated
+// this down to a Suno-feasibility-only subset, but that was reverted at the
+// user's request (the fuller variety was preferred over strict achievability).
 
 const MUSIC_TWIST_ITEMS = [
+  "No drums until the final chorus",
   "Vocals must whisper for the first verse",
+  "A key change every chorus",
   "The song must end mid-sentence",
+  "Only one instrument besides vocals",
+  "The chorus can't repeat the same melody twice",
   "Must include a spoken-word bridge",
   "Under 90 seconds total",
   "Start with the chorus, no intro",
+  "The bassline never repeats",
+  "A time-signature change in the bridge",
   "No metaphors — only literal images",
   "The title must be the song's last line",
   "Must include a false ending",
   "Backing vocals answer the lead like a conversation",
+  "The tempo doubles in the final third",
+  "Only five chords total, no more",
+  "Percussion made entirely of non-drum sounds",
   "Must reference the weather at least twice",
+  "Verse and chorus melodies share no notes",
+  "The song fades in already mid-performance",
   "No repeated words across the entire lyric",
   "A one-line callback to verse one at the very end",
+  "The bridge is entirely instrumental",
   "Harmony only on the last word of each line",
   "Opens a cappella",
+  "The key must feel unresolved until the final chord",
+  "Must include a crowd or field-recording texture",
   "The second verse flips the meaning of the first",
   "A duet between two opposing perspectives",
+  "No cymbals anywhere in the mix",
   "The chorus lyric is a single repeated phrase",
+  "Must include a count-in or studio chatter at the start",
+  "The outro strips back to a single instrument",
   "The rhyme scheme breaks on purpose in the final verse",
   "Must name a real or invented street",
+  "Tempo matches a resting heartbeat, 60–100 bpm",
   "Addressed to a 'you' who never speaks back",
+  "Must include a full bar of near-silence",
+  "The melody fits a two-note vocal range",
+  "The rhythm is borrowed from something non-musical",
   "The chorus arrives before the first verse ends",
   "Must include a question that's never answered",
+  "The final chorus drops the drums entirely",
   "Must include a whispered aside not meant for the listener",
   "Works as both a lullaby and a warning",
   "Uses call-and-response between two vocal characters",
   "Each verse gets shorter than the last",
+  "Ends on a deliberately unresolved chord",
   "No chorus at all — only evolving verses",
   "The song seems to end, then doesn't",
+  "Instrumentation thins out with every verse until just voice remains",
   "Includes a spoken date, time, or place, like a report",
   "Written as a message left on an answering machine",
+  "The melody moves mostly in half-steps",
   "Includes a line borrowed from an overheard conversation"
 ];
-// 31 items. Dropped (audio-production / music-theory, unreliable in Suno):
-// no-drums-until-chorus, key-change-every-chorus, one-instrument-only,
-// melody-never-repeats, bassline-never-repeats, time-signature-change,
-// tempo-doubles, five-chords-only, non-drum-percussion,
-// verse/chorus-share-no-notes, fade-in-mid-performance, bridge-instrumental,
-// key-unresolved-until-final-chord, field-recording-texture, no-cymbals,
-// count-in/studio-chatter, outro-strips-to-one-instrument,
-// tempo-matches-heartbeat-bpm, full-bar-of-silence, two-note-vocal-range,
-// non-musical-rhythm-source, final-chorus-drops-drums,
-// unresolved-final-chord, instrumentation-thins-out, half-step-melody.
 
 const CATEGORIES_PHASE1 = [
   {
