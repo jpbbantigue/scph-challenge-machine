@@ -824,6 +824,7 @@ function updateProfileLink(){
 // own API cost). Shows the live balance, or a nudge to sign in / use BYOK.
 function updateAICreditsHint(){
   updateCreditsExhaustedState();
+  updateSignInNotice();
   if(!els.aiCreditsHint) return;
   if(state.aiSource !== "groq"){ els.aiCreditsHint.textContent = ""; return; }
   if(!account.signedIn){
@@ -1414,12 +1415,30 @@ function aiSourceLabel(src){
 }
 
 let aiFallbackNoticeTimer = null;
-function showAIFallbackNotice(msg){
+let persistentBannerActive = false;
+function showAIFallbackNotice(msg, persistent){
   if(!els.aiFallbackNotice) return;
   els.aiFallbackNotice.textContent = msg;
   els.aiFallbackNotice.hidden = false;
   clearTimeout(aiFallbackNoticeTimer);
-  aiFallbackNoticeTimer = setTimeout(()=>{ els.aiFallbackNotice.hidden = true; }, 6000);
+  persistentBannerActive = !!persistent;
+  if(!persistent){
+    aiFallbackNoticeTimer = setTimeout(()=>{ els.aiFallbackNotice.hidden = true; }, 6000);
+  }
+}
+function hidePersistentBannerIfActive(){
+  if(persistentBannerActive){ els.aiFallbackNotice.hidden = true; persistentBannerActive = false; }
+}
+// Shown for as long as groq is selected but the visitor isn't signed in —
+// unlike the transient fallback banner, this doesn't auto-hide, since the
+// condition (and the silent built-in-list fallback it explains) persists
+// until they sign in, switch AI off, or add their own key.
+function updateSignInNotice(){
+  if(state.aiSource === "groq" && !account.signedIn){
+    showAIFallbackNotice("Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead. — showing built-in results instead.", true);
+  } else {
+    hidePersistentBannerIfActive();
+  }
 }
 
 async function testAIEndpoint(){
@@ -1452,7 +1471,11 @@ async function getFreshValuesForPull(keys){
       const batch = await Promise.race([groqGenerateBatch(currentCategory(), keys), timeout]);
       keys.forEach(key=>{ map[key] = batch[key] || pick(currentCategory(), key); });
     }catch(err){
-      showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead.");
+      // Not-signed-in always routes through the persistent sign-in banner
+      // (same underlying reason every time) rather than the transient one,
+      // so it doesn't flash and then vanish after 6s mid-session.
+      if(!account.signedIn){ updateSignInNotice(); }
+      else { showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead."); }
       keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
     }
     return map;
