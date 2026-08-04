@@ -133,6 +133,22 @@ const CATEGORIES = [
 
 function catName(id){ const c = CATEGORIES.find(c=>c.id===id); return c ? c.name : id; }
 function escapeHTML(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// Handles are stored bare (no URL) — build a deep link only for platforms
+// with a well-known, unambiguous profile URL scheme. Unknown/"Other"
+// platforms render as a plain (non-clickable) chip instead of guessing.
+function socialProfileUrl(platform, handle){
+  const h = String(handle||"").trim().replace(/^@/, "");
+  if(!h) return null;
+  switch(platform){
+    case "YouTube": return "https://youtube.com/@"+h;
+    case "Instagram": return "https://instagram.com/"+h;
+    case "Facebook": return "https://facebook.com/"+h;
+    case "X (Twitter)": return "https://x.com/"+h;
+    case "TikTok": return "https://tiktok.com/@"+h;
+    default: return null;
+  }
+}
 function initials(name){ return String(name||"?").trim().slice(0,1).toUpperCase(); }
 
 function params(){ return new URLSearchParams(window.location.search); }
@@ -177,10 +193,14 @@ function tierClassFor(tier){ return tier ? tier.toLowerCase() : "bronze"; }
 function render(data){
   const content = document.getElementById("content");
 
-  const socialChips = (data.socials||[]).map(s=>
-    '<a class="social-chip" href="'+escapeHTML(s.value)+'" target="_blank" rel="noopener"><span class="social-dot" aria-hidden="true"></span>'+escapeHTML(s.platform)+'</a>'
-  ).join("");
-  const linkedBadges = (data.linkedAccounts||[]).filter(a=>a.connected).map(a=>
+  const socialChips = (data.socials||[]).map(s=>{
+    const url = socialProfileUrl(s.platform, s.value);
+    const inner = '<span class="social-dot" aria-hidden="true"></span>'+escapeHTML(s.platform);
+    return url
+      ? '<a class="social-chip" href="'+escapeHTML(url)+'" target="_blank" rel="noopener">'+inner+'</a>'
+      : '<span class="social-chip">'+inner+'</span>';
+  }).join("");
+  const linkedBadges = (data.linkedAccounts||[]).map(a=>
     '<span class="linked-badge"><span class="linked-dot" aria-hidden="true"></span>Also on '+escapeHTML(a.platform)+'</span>'
   ).join("");
 

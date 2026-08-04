@@ -112,7 +112,6 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 
 .row-list{display:flex;flex-direction:column;gap:10px;}
 .row-item{display:grid;grid-template-columns:130px 1fr 34px;gap:10px;align-items:center;}
-.row-item.linked-row{grid-template-columns:120px 1fr auto 34px;}
 .row-remove{width:34px;height:34px;border-radius:8px;border:1px solid rgba(230,58,70,0.3);background:rgba(230,58,70,0.08);color:#FF9AA5;cursor:pointer;font-size:14px;}
 .row-remove:hover{color:#fff;border-color:rgba(230,58,70,0.5);}
 .add-row-btn{align-self:flex-start;background:none;border:1px dashed rgba(255,255,255,0.2);color:var(--ink-58);border-radius:10px;padding:8px 14px;font-size:12.5px;cursor:pointer;margin-top:4px;}
@@ -327,7 +326,7 @@ function renderProfileTab(el){
       '<p class="sub">Links shown on your public profile.</p>' +
       '<div class="row-list" id="socialsList"></div>' +
       '<button class="add-row-btn" id="addSocial">+ Add social</button>' +
-      '<div><button class="btn small" id="saveSocials" style="margin-top:12px;">Save socials</button></div>' +
+      '<div><button class="btn small" id="saveSocials" style="margin-top:12px;">Save</button></div>' +
       '<p class="status-msg" id="socialsStatus"></p>' +
     '</div>' +
 
@@ -336,7 +335,7 @@ function renderProfileTab(el){
       '<p class="sub">Shows as "Also on {platform}" badges on your public profile.</p>' +
       '<div class="row-list" id="linkedList"></div>' +
       '<button class="add-row-btn" id="addLinked">+ Add account</button>' +
-      '<div><button class="btn small" id="saveLinked" style="margin-top:12px;">Save accounts</button></div>' +
+      '<div><button class="btn small" id="saveLinked" style="margin-top:12px;">Save</button></div>' +
       '<p class="status-msg" id="linkedStatus"></p>' +
     '</div>';
 
@@ -379,8 +378,10 @@ function renderProfileTab(el){
   });
   document.getElementById("saveSocials").addEventListener("click", async ()=>{
     const rows = collectRows("socialsList");
-    const bad = rows.find(r=>!isValidUrlLike(r.value));
-    if(bad){ setStatus("socialsStatus", '"'+bad.value+'" doesn\'t look like a valid link (needs http:// or https://).', true); return; }
+    const empty = rows.find(r=>!String(r.value||"").trim());
+    if(empty){ setStatus("socialsStatus", "Handle can't be empty — remove the row or fill it in.", true); return; }
+    const bad = rows.find(r=>!isValidHandle(r.value));
+    if(bad){ setStatus("socialsStatus", '"'+bad.value+'" doesn\'t look like a valid handle (letters, numbers, dots, underscores, hyphens only).', true); return; }
     try{
       const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ socials: rows }) });
       myData.profile = r.profile; setStatus("socialsStatus","Saved.");
@@ -389,13 +390,15 @@ function renderProfileTab(el){
 
   renderRowList("linkedList", p.linkedAccounts||[], "linked");
   document.getElementById("addLinked").addEventListener("click", ()=>{
-    p.linkedAccounts = p.linkedAccounts || []; p.linkedAccounts.push({platform:CREATIVE_PLATFORMS[0], handle:"", connected:false});
+    p.linkedAccounts = p.linkedAccounts || []; p.linkedAccounts.push({platform:CREATIVE_PLATFORMS[0], handle:""});
     renderRowList("linkedList", p.linkedAccounts, "linked");
   });
   document.getElementById("saveLinked").addEventListener("click", async ()=>{
     const rows = collectRows("linkedList", true);
-    const bad = rows.find(r=>!isValidUrlLike(r.handle));
-    if(bad){ setStatus("linkedStatus", '"'+bad.handle+'" doesn\'t look like a valid link (needs http:// or https://).', true); return; }
+    const empty = rows.find(r=>!String(r.handle||"").trim());
+    if(empty){ setStatus("linkedStatus", "Handle can't be empty — remove the row or fill it in.", true); return; }
+    const bad = rows.find(r=>!isValidHandle(r.handle));
+    if(bad){ setStatus("linkedStatus", '"'+bad.handle+'" doesn\'t look like a valid handle (letters, numbers, dots, underscores, hyphens only).', true); return; }
     try{
       const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ linkedAccounts: rows }) });
       myData.profile = r.profile; setStatus("linkedStatus","Saved.");
@@ -403,21 +406,15 @@ function renderProfileTab(el){
   });
 }
 
-// Socials/linked-account fields accept either a full URL or a bare @handle
-// (the input placeholders say so). We only gate values that *look like*
-// an attempted URL (start with http:// or https://) — those must parse as
-// valid absolute URLs via the URL constructor; plain handles pass through
-// untouched. Server-side sanitizeSocials/sanitizeLinkedAccounts apply the
-// same check as a safety net (see api/_lib/store.js).
-function isValidUrlLike(v){
+// Socials/linked-account fields ask for just the unique handle/username on
+// each platform (not a full URL) — simpler to validate and cleaner to
+// display. Letters, numbers, dots, underscores, hyphens, and an optional
+// leading @; no spaces or "://" (so a pasted URL is rejected outright).
+// Server-side sanitizeSocials/sanitizeLinkedAccounts apply the same check
+// as a safety net (see api/_lib/store.js).
+function isValidHandle(v){
   const val = String(v||"").trim();
-  if(!/^https?:\/\//i.test(val)) return true;
-  try{
-    const u = new URL(val);
-    return u.protocol === "http:" || u.protocol === "https:";
-  }catch(e){
-    return false;
-  }
+  return /^@?[a-zA-Z0-9._-]{1,40}$/.test(val);
 }
 
 function renderRowList(containerId, rows, kind){
@@ -425,24 +422,13 @@ function renderRowList(containerId, rows, kind){
   const platforms = kind === "social" ? SOCIAL_PLATFORMS : CREATIVE_PLATFORMS;
   container.innerHTML = rows.map((row,i)=>{
     const opts = platforms.map(p=>'<option value="'+p+'" '+(row.platform===p?"selected":"")+'>'+p+'</option>').join("");
-    if(kind === "social"){
-      return '<div class="row-item" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="URL or @handle" value="'+escapeHTML(row.value||"")+'"><button class="row-remove" data-remove="'+i+'">&times;</button></div>';
-    }
-    return '<div class="row-item linked-row" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="handle" value="'+escapeHTML(row.handle||"")+'">'+
-      '<button class="connect-toggle '+(row.connected?"connected":"not-connected")+'" data-toggle-connect="'+i+'">'+(row.connected?"Connected":"Connect")+'</button>' +
-      '<button class="row-remove" data-remove="'+i+'">&times;</button></div>';
+    const val = kind === "social" ? (row.value||"") : (row.handle||"");
+    return '<div class="row-item" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="@handle" value="'+escapeHTML(val)+'"><button class="row-remove" data-remove="'+i+'">&times;</button></div>';
   }).join("") || '<p class="empty-note">Nothing added yet.</p>';
 
   container.querySelectorAll("[data-remove]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       rows.splice(Number(btn.dataset.remove), 1);
-      renderRowList(containerId, rows, kind);
-    });
-  });
-  container.querySelectorAll("[data-toggle-connect]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const i = Number(btn.dataset.toggleConnect);
-      rows[i].connected = !rows[i].connected;
       renderRowList(containerId, rows, kind);
     });
   });
@@ -454,8 +440,7 @@ function collectRows(containerId, isLinked){
     const platform = row.querySelector(".row-platform").value;
     const value = row.querySelector(".row-value").value;
     if(isLinked){
-      const connected = row.querySelector(".connect-toggle").classList.contains("connected");
-      return { platform, handle: value, connected };
+      return { platform, handle: value };
     }
     return { platform, value };
   }).filter(r => isLinked ? r.handle : r.value);

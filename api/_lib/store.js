@@ -219,20 +219,12 @@ async function setUsername(user, handle) {
   return { ok: true, profile: data.profile };
 }
 
-// Client-side (account.html) is the primary UX gate for URL validity; this
-// is a safety net that silently drops entries whose value looks like an
-// attempted URL (starts with http:// or https://) but doesn't parse as one.
-// Bare handles (no http(s):// prefix) are left alone — both fields accept
-// either a full link or a handle.
-function isValidUrlLike(v) {
+// Client-side (account.html) is the primary UX gate; this is a safety net.
+// Both fields ask for just the platform handle/username (not a full URL) —
+// letters, numbers, dots, underscores, hyphens, optional leading @.
+function isValidHandle(v) {
   const val = String(v || "").trim();
-  if (!/^https?:\/\//i.test(val)) return true;
-  try {
-    const u = new URL(val);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch (e) {
-    return false;
-  }
+  return /^@?[a-zA-Z0-9._-]{1,40}$/.test(val);
 }
 
 function sanitizeSocials(list) {
@@ -240,16 +232,15 @@ function sanitizeSocials(list) {
   return list.slice(0, MAX_SOCIALS).map((s) => ({
     platform: String((s && s.platform) || "").trim().slice(0, 40),
     value: String((s && s.value) || "").trim().slice(0, 200)
-  })).filter((s) => s.platform && s.value && isValidUrlLike(s.value));
+  })).filter((s) => s.platform && s.value && isValidHandle(s.value));
 }
 
 function sanitizeLinkedAccounts(list) {
   if (!Array.isArray(list)) return [];
   return list.slice(0, MAX_LINKED_ACCOUNTS).map((a) => ({
     platform: String((a && a.platform) || "").trim().slice(0, 40),
-    handle: String((a && a.handle) || "").trim().slice(0, 100),
-    connected: !!(a && a.connected)
-  })).filter((a) => a.platform && a.handle && isValidUrlLike(a.handle));
+    handle: String((a && a.handle) || "").trim().slice(0, 100)
+  })).filter((a) => a.platform && a.handle && isValidHandle(a.handle));
 }
 
 // Updates the editable profile fields (everything except the write-once
