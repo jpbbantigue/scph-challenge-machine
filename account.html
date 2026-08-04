@@ -52,6 +52,7 @@ button{font-family:inherit;}
 .side-name{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink);}
 .side-handle{font-size:12.5px;color:var(--ink-50);margin-top:2px;}
 .side-credits{font-size:11.5px;color:var(--gold);font-weight:600;margin-top:8px;}
+.tier-badge{display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(244,191,58,0.16);border:1px solid rgba(244,191,58,0.35);color:var(--gold-hi);font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:middle;}
 .side-nav{display:flex;flex-direction:column;gap:2px;margin-top:20px;}
 .side-nav button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:10px;border:none;background:none;color:var(--ink-65);font-size:13.5px;font-weight:500;cursor:pointer;}
 .side-nav button:hover{background:rgba(255,255,255,0.05);color:var(--ink);}
@@ -209,7 +210,7 @@ function render(){
         '<div class="avatar-big">'+initials(myData.profile.displayName || me.name)+'</div>' +
         '<div class="side-name">'+escapeHTML(myData.profile.displayName || me.name)+'</div>' +
         '<div class="side-handle">'+(myData.profile.handle ? "@"+escapeHTML(myData.profile.handle) : "No username set")+'</div>' +
-        '<div class="side-credits">'+(me.credits ? me.credits.remaining+" / "+me.credits.limit+" AI rolls left today" : "")+'</div>' +
+        '<div class="side-credits">'+(me.credits ? me.credits.remaining+" / "+me.credits.limit+" AI rolls left today" : "")+(me.tier==="scph" ? ' <span class="tier-badge">SCPH</span>' : '')+'</div>' +
         '<nav class="side-nav">' +
           tabBtn("profile","Profile") + tabBtn("history","History") + tabBtn("favorites","Favorites") + tabBtn("results","Results") + tabBtn("settings","Settings") +
         '</nav>' +

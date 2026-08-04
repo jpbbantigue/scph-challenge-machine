@@ -25,7 +25,10 @@ const PROVIDERS = {
     clientIdEnv: "DISCORD_CLIENT_ID",
     clientSecretEnv: "DISCORD_CLIENT_SECRET",
     authorizeUrl: "https://discord.com/api/oauth2/authorize",
-    scope: "identify email",
+    // "guilds" lets auth-callback.js check server membership (via
+    // /users/@me/guilds) to see if the visitor is in the SCPH server, for
+    // the 100/day credit tier — see _lib/store.js CREDIT_LIMITS.
+    scope: "identify email guilds",
     tokenUrl: "https://discord.com/api/oauth2/token",
     userInfoUrl: "https://discord.com/api/users/@me",
     extraAuthorizeParams: {},

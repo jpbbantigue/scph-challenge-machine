@@ -124,17 +124,20 @@ Netlify Blobs needs no separate setup or database to provision — it's availabl
 - On first sign-in, this browser's local favorites/history are merged with whatever's already on the account (de-duplicated by challenge text) rather than one side overwriting the other.
 - After that, favorites/history/settings changes are still saved to `localStorage` immediately (so nothing is lost if a request fails) and pushed to the account in the background, debounced.
 
-## AI credits (Netlify only, requires Accounts)
+## AI credits (requires Accounts)
 
-This site's own Groq key ("This site's AI" in Settings) is metered at 50 free **pulls** per day per signed-in account, since that key is the site's cost. A visitor's own Claude/OpenAI key (BYOK) is never metered — that's their API cost, not the site's.
+This site's own Groq key ("This site's AI" in Settings) is metered per signed-in account, since that key is the site's cost. A visitor's own Claude/OpenAI key (BYOK) is never metered — that's their API cost, not the site's.
 
+- **Three tiers**, resolved once at sign-in and stamped onto the session (`api/_lib/store.js`: `CREDIT_LIMITS`):
+  - **Basic — 50/day** — any Google or Discord sign-in.
+  - **SCPH member — 100/day** — Discord sign-in + verified membership in the Suno Creatives PH server. Verified automatically via Discord's `guilds` OAuth scope and `/users/@me/guilds` at sign-in time (`api/auth-callback.js`: `computeDiscordTier`) — no manual approval step. Requires `SCPH_GUILD_ID` set as an env var (Discord → enable Developer Mode → right-click the server icon → Copy Server ID); without it, everyone gets the basic tier.
+  - **Affiliate — 75/day** — planned, not built yet. See `PHASING.md`.
 - **1 credit per pull, not per reel.** `generate.js` accepts a batched request — every reel needed for one "Pull" (or one single-reel reroll, as a one-item batch) goes out as a single request and spends exactly 1 credit, regardless of whether that category has 1 active reel or 6.
 - Requires sign-in — anonymous visitors are prompted to sign in or use their own key instead.
-- Tracked in the same Netlify Blobs record as favorites/history (see `_lib/store.js`: `consumeAICredit`, `DAILY_AI_CREDIT_LIMIT`), resetting daily (UTC).
-- `auth-me.js` returns the live balance so Settings can show "N / 50 free AI rolls left today" without an extra request.
+- Tracked in the same Postgres `accounts` record as favorites/history (see `_lib/store.js`: `consumeAICredit`), resetting daily (UTC).
+- `auth-me.js` returns the live balance and tier so the UI can show "N / limit free AI rolls left today" without an extra request.
 - **Once the daily limit is reached, the Pull button itself disables** (with an explanatory tooltip and a note under the AI dropdown in Settings) rather than letting the visitor keep clicking into silent built-in-list fallbacks — they have to switch AI off in Settings, or add their own key, to keep rolling for free. If a request fails for another reason (network error, timeout, etc.) the pull still falls back to the built-in list for that attempt, with a visible banner above the ticket explaining why.
 - No purchase/top-up flow yet — a "Get More Credits" option to extend the daily limit after a paid transaction is a planned future addition, not built.
-- **Suno Creatives PH Discord members getting a 100/day limit is planned but deferred** — the plan is to request Discord's `guilds` OAuth scope at sign-in and check server membership automatically via `/users/@me/guilds` (no manual verification step), refreshed each time someone signs in. Not built yet; needs the Discord server's guild ID once picked back up.
 
 ## Contact form (Resend)
 

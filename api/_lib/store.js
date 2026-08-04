@@ -7,7 +7,17 @@
 
 const { getSql } = require("./db");
 
-const DAILY_AI_CREDIT_LIMIT = 50;
+// Tiered daily AI-credit limits. "scph" is verified automatically at
+// Discord sign-in (see auth-callback.js, which checks the visitor's guild
+// list against SCPH_GUILD_ID and stamps the tier onto the session). A third
+// "affiliate" tier (75/day, for approved partner Discord servers) is
+// planned but deferred — see PHASING.md.
+const CREDIT_LIMITS = { basic: 50, scph: 100 };
+const DEFAULT_TIER = "basic";
+function creditLimitForTier(tier) {
+  return CREDIT_LIMITS[tier] || CREDIT_LIMITS[DEFAULT_TIER];
+}
+const DAILY_AI_CREDIT_LIMIT = CREDIT_LIMITS[DEFAULT_TIER]; // kept for back-compat reference
 const MAX_SOCIALS = 8;
 const MAX_LINKED_ACCOUNTS = 8;
 const MAX_BIO_LEN = 200;
@@ -87,27 +97,29 @@ async function saveUserData(user, data) {
 // that's their own API cost, not the site's.
 async function consumeAICredit(user) {
   const key = userKey(user);
+  const limit = creditLimitForTier(user.tier);
   const data = await loadUserData(user);
   const today = todayStr();
   let credits = data.credits;
   if (credits.date !== today) credits = { date: today, used: 0 };
-  if (credits.used >= DAILY_AI_CREDIT_LIMIT) {
+  if (credits.used >= limit) {
     data.credits = credits;
     await writeAccount(key, data);
-    return { ok: false, remaining: 0, limit: DAILY_AI_CREDIT_LIMIT };
+    return { ok: false, remaining: 0, limit };
   }
   credits.used += 1;
   data.credits = credits;
   data.updatedAt = Date.now();
   await writeAccount(key, data);
-  return { ok: true, remaining: DAILY_AI_CREDIT_LIMIT - credits.used, limit: DAILY_AI_CREDIT_LIMIT };
+  return { ok: true, remaining: limit - credits.used, limit };
 }
 
 async function getCreditsStatus(user) {
+  const limit = creditLimitForTier(user.tier);
   const data = await loadUserData(user);
   const today = todayStr();
   const credits = data.credits.date === today ? data.credits : { date: today, used: 0 };
-  return { remaining: DAILY_AI_CREDIT_LIMIT - credits.used, limit: DAILY_AI_CREDIT_LIMIT };
+  return { remaining: limit - credits.used, limit };
 }
 
 function normalizeHandle(handle) {
@@ -415,5 +427,7 @@ module.exports = {
   isFollowingHandle,
   getPublicProfileByHandle,
   deleteAccount,
+  CREDIT_LIMITS,
+  creditLimitForTier,
   DAILY_AI_CREDIT_LIMIT
 };

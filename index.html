@@ -134,6 +134,7 @@ a:hover{color:var(--gold-hi);}
 .dd-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:15px;color:#fff;flex:none;}
 .dd-name{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .dd-credits{font-size:11.5px;color:var(--gold-hi);font-weight:600;margin-top:2px;}
+.dd-tier-badge{display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(244,191,58,0.16);border:1px solid rgba(244,191,58,0.35);color:var(--gold-hi);font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:middle;}
 .dd-links{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}
 .dd-links a{display:block;padding:9px 10px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:500;}
 .dd-links a:hover{background:rgba(255,255,255,0.06);}
@@ -775,7 +776,7 @@ function renderAccountUI(){
     avatarInitial.textContent = initial;
     dd.innerHTML =
       '<div class="dd-user-row"><span class="dd-avatar">'+initial+'</span><div>'+
-        '<div class="dd-name">'+escapeHTML(account.name)+'</div>'+
+        '<div class="dd-name">'+escapeHTML(account.name)+(account.tier==="scph" ? ' <span class="dd-tier-badge">SCPH</span>' : '')+'</div>'+
         (account.credits ? '<div class="dd-credits">'+account.credits.remaining+' / '+account.credits.limit+' AI rolls left</div>' : '')+
       '</div></div>'+
       '<div class="dd-links">'+
@@ -849,9 +850,21 @@ const categoryCardsEl = document.getElementById("categoryCards");
 const favCatBtnEl = document.getElementById("favCatBtn");
 const rollCountEl = document.getElementById("rollCount");
 
+// Starred categories first (alphabetical among themselves), then everything
+// else (also alphabetical) — matches the mockup's star-to-reorder behavior.
+function sortedCategoriesForDropdown(){
+  const starred = [];
+  const rest = [];
+  CATEGORIES.forEach(cat=>{
+    (state.favoriteCategoryIds.includes(cat.id) ? starred : rest).push(cat);
+  });
+  const byName = (a,b)=>a.name.localeCompare(b.name);
+  return starred.sort(byName).concat(rest.sort(byName));
+}
+
 function buildCategorySelectDOM(){
   categorySelectEl.innerHTML = "";
-  CATEGORIES.forEach(cat=>{
+  sortedCategoriesForDropdown().forEach(cat=>{
     const opt = document.createElement("option");
     opt.value = cat.id;
     opt.textContent = cat.name;
@@ -1539,6 +1552,7 @@ favCatBtnEl.addEventListener("click", ()=>{
   const idx = state.favoriteCategoryIds.indexOf(id);
   if(idx === -1) state.favoriteCategoryIds.push(id); else state.favoriteCategoryIds.splice(idx,1);
   updateFavCatBtn();
+  buildCategorySelectDOM();
   saveState();
 });
 

@@ -58,7 +58,13 @@ module.exports = async (req, res) => {
   const mapped = cfg.mapProfile(profile);
   if (!mapped.sub) { res.status(502).send("Provider profile was missing an id"); return; }
 
-  const token = createSessionToken({ provider, sub: String(mapped.sub), name: mapped.name });
+  // Credit tier is decided once, here, at sign-in — not re-checked on every
+  // request — so it stays fixed for the life of the session (up to 30 days).
+  // Signing out and back in re-evaluates it. Only Discord can be checked
+  // (via the "guilds" scope); Google/Facebook sign-ins are always "basic".
+  const tier = provider === "discord" ? await computeDiscordTier(accessToken) : "basic";
+
+  const token = createSessionToken({ provider, sub: String(mapped.sub), name: mapped.name, tier });
 
   res.setHeader("Set-Cookie", [
     sessionCookie(token),
@@ -71,4 +77,25 @@ module.exports = async (req, res) => {
 
 async function safeText(res) {
   try { return await res.text(); } catch (e) { return ""; }
+}
+
+// Checks whether the visitor is a member of the Suno Creatives PH Discord
+// server, for the 100/day credit tier. SCPH_GUILD_ID must be set as an env
+// var (Discord: enable Developer Mode, right-click the server icon, Copy
+// Server ID). Fails safe to "basic" on any error — a broken guild check
+// should never block sign-in.
+async function computeDiscordTier(accessToken) {
+  const scphGuildId = process.env.SCPH_GUILD_ID;
+  if (!scphGuildId) return "basic";
+  try {
+    const res = await fetch("https://discord.com/api/users/@me/guilds", {
+      headers: { Authorization: "Bearer " + accessToken }
+    });
+    if (!res.ok) return "basic";
+    const guilds = await res.json();
+    const isMember = Array.isArray(guilds) && guilds.some((g) => g.id === scphGuildId);
+    return isMember ? "scph" : "basic";
+  } catch (e) {
+    return "basic";
+  }
 }

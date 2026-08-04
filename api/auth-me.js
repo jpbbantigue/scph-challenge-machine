@@ -23,6 +23,7 @@ module.exports = async (req, res) => {
     signedIn: true,
     provider: user.provider,
     name: user.name,
+    tier: user.tier || "basic",
     providers,
     credits,
     profile: data.profile,
