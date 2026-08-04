@@ -15,86 +15,140 @@
   --bg-0:#05070d;
   --ink:#F3F5FC;
   --ink-65:rgba(243,245,252,0.65);
+  --ink-58:rgba(243,245,252,0.58);
   --ink-50:rgba(243,245,252,0.5);
   --ink-40:rgba(243,245,252,0.4);
+  --royal-deep:#1836B2;
   --royal:#295BFF;
   --royal-hi:#4D7CFF;
-  --royal-deep:#1836B2;
+  --crimson-deep:#74182D;
+  --crimson:#B51F3E;
+  --crimson-hi:#E63A46;
+  --gold-deep:#C68B24;
   --gold:#F4BF3A;
   --gold-hi:#FFD978;
   --font-display:'Space Grotesk',sans-serif;
   --font-body:'Inter',sans-serif;
 }
 html,body{margin:0;padding:0;}
-body{
-  background:var(--bg-0);
-  color:var(--ink-65);
-  font-family:var(--font-body);
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-}
-a{color:var(--royal-hi);}
-.card{
-  width:100%;max-width:440px;border-radius:28px;padding:clamp(28px,5vw,40px);
-  background:linear-gradient(180deg, rgba(20,26,46,0.85), rgba(9,12,22,0.9));
-  border:1px solid rgba(77,124,255,0.25);
-  box-shadow:0 30px 70px rgba(0,0,0,0.55);
-}
-.brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink);margin-bottom:24px;}
+body{background:var(--bg-0);color:var(--ink-65);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{color:var(--royal-hi);text-decoration:none;}
+a:hover{color:var(--gold-hi);}
+button{font-family:inherit;}
+
+.wrap{max-width:720px;margin:0 auto;padding:0 20px 80px;}
+.topbar{max-width:720px;margin:0 auto;padding:20px 20px 0;}
+.brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink);}
 .brand-mark{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));display:block;}
-.handle{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--ink);margin:0 0 6px;}
-.subtitle{font-size:13px;color:var(--ink-40);margin:0 0 28px;}
-.stat-row{display:flex;gap:12px;margin-bottom:24px;}
-.stat-cell{flex:1;text-align:center;padding:16px 8px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);}
-.stat-cell .num{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--gold-hi);}
-.stat-cell .label{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);margin-top:4px;}
-.badges-title{font-family:var(--font-display);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;}
+
+.banner{height:140px;border-radius:20px;margin-top:20px;background:radial-gradient(120% 160% at 30% 0%, rgba(41,91,255,0.35), rgba(9,12,22,0.6) 60%), radial-gradient(100% 140% at 90% 100%, rgba(230,58,70,0.25), transparent 55%);}
+.profile-head{display:flex;align-items:flex-end;gap:16px;margin-top:-40px;padding-left:20px;}
+.avatar{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));border:4px solid var(--bg-0);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:32px;color:#fff;flex:none;}
+.head-actions{margin-left:auto;padding-bottom:8px;}
+.follow-btn{padding:9px 22px;border-radius:999px;border:none;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;}
+.follow-btn.following{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);color:var(--ink);}
+.follow-btn:disabled{opacity:.6;cursor:default;}
+
+.name-block{margin:16px 0 0 4px;}
+.display-name{font-family:var(--font-display);font-weight:700;font-size:24px;color:var(--ink);}
+.handle{font-size:13.5px;color:var(--ink-40);margin-top:2px;}
+.bio{font-size:14px;line-height:1.6;color:var(--ink-65);margin:14px 4px 0;max-width:560px;}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 4px 0;}
+.chip{padding:7px 14px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);font-size:12.5px;color:var(--ink-65);}
+.chip.social{color:var(--royal-hi);}
+.chip.creative{color:var(--gold);border-color:rgba(244,191,58,0.3);background:rgba(244,191,58,0.08);}
+
+.section{margin-top:36px;}
+.section-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.cat-filter{background:rgba(255,255,255,0.04);color:var(--ink-65);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:6px 10px;font-size:12.5px;}
+
+.result-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.result-top{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-40);margin-bottom:6px;}
+.cat-badge{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+.cat-badge.music{background:rgba(41,91,255,0.14);color:var(--royal-hi);}
+.cat-badge.characters{background:rgba(230,58,70,0.14);color:var(--crimson-hi);}
+.result-text{font-size:13.5px;color:var(--ink);line-height:1.5;}
+.result-link{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;}
+
+.achv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
+.achv-tile{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;}
+.achv-top{display:flex;align-items:center;gap:10px;}
+.tier-diamond{width:12px;height:12px;transform:rotate(45deg);border-radius:2px;flex:none;}
+.tier-diamond.bronze{background:#B08D57;}
+.tier-diamond.silver{background:#C7CDD6;}
+.tier-diamond.gold{background:var(--gold);}
+.tier-diamond.platinum{background:#8FE3E0;}
+.achv-cat{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--ink);}
+.achv-tier{font-size:11.5px;color:var(--ink-50);margin-top:2px;}
+.achv-count{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);margin-top:10px;}
+.achv-divider{border-top:1px solid rgba(255,255,255,0.08);margin:10px 0;}
+.achv-conv{font-size:12px;color:var(--ink-50);}
+
 .badges{display:flex;flex-wrap:wrap;gap:8px;}
 .badge{padding:7px 13px;border-radius:999px;background:rgba(244,191,58,0.1);border:1px solid rgba(244,191,58,0.3);color:var(--gold-hi);font-size:12.5px;font-weight:600;}
-.empty-badges{font-size:13px;color:var(--ink-40);}
-.state-msg{text-align:center;font-size:14px;color:var(--ink-50);padding:20px 0;}
-.back-link{display:block;text-align:center;margin-top:24px;font-size:13px;}
+
+.stat-row{display:flex;gap:12px;}
+.stat-cell{flex:1;text-align:center;padding:16px 8px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);}
+.stat-cell .num{font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--gold-hi);}
+.stat-cell .label{font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);margin-top:4px;}
+
+.empty-note{font-size:13px;color:var(--ink-40);}
+.state-msg{text-align:center;font-size:14px;color:var(--ink-50);padding:80px 20px;}
 </style>
 </head>
 <body>
 
-<div class="card" id="card">
-  <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</div>
-  <div id="content">
-    <p class="state-msg">Loading profile…</p>
-  </div>
+<div class="topbar"><a href="index.html" class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</a></div>
+
+<div class="wrap" id="content">
+  <p class="state-msg">Loading profile…</p>
 </div>
 
 <script>
 (function(){
 "use strict";
-function escapeHTML(s){
-  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
 
-function params(){
-  return new URLSearchParams(window.location.search);
+const CATEGORIES = [
+  { id:"music", name:"Music" },
+  { id:"characters", name:"Characters" }
+];
+
+function catName(id){ const c = CATEGORIES.find(c=>c.id===id); return c ? c.name : id; }
+function escapeHTML(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function initials(name){ return String(name||"?").trim().slice(0,1).toUpperCase(); }
+
+function params(){ return new URLSearchParams(window.location.search); }
+function handleFromQuery(){ return (params().get("u") || "").trim(); }
+
+let currentHandle = "";
+let currentCategoryFilter = "";
+let isSignedIn = false;
+
+async function api(path, opts){
+  const res = await fetch(path, Object.assign({ headers: { "Content-Type": "application/json" } }, opts || {}));
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(!res.ok) throw new Error(data.error || "Request failed");
+  return data;
 }
 
 async function load(){
   const content = document.getElementById("content");
-  const handle = (params().get("u") || "").trim();
-  if(!handle){
+  currentHandle = handleFromQuery();
+  if(!currentHandle){
     content.innerHTML = '<p class="state-msg">No profile specified.</p>';
     return;
   }
-  let res, data;
   try{
-    res = await fetch("/api/profile?handle="+encodeURIComponent(handle));
-    data = await res.json();
+    const me = await fetch("/api/auth-me").then(r=>r.json());
+    isSignedIn = !!me.signedIn;
+  }catch(e){ isSignedIn = false; }
+
+  let data;
+  try{
+    data = await api("/api/profile?handle="+encodeURIComponent(currentHandle) + (currentCategoryFilter ? "&category="+encodeURIComponent(currentCategoryFilter) : ""));
   }catch(e){
-    content.innerHTML = '<p class="state-msg">Couldn’t reach the server.</p>';
-    return;
-  }
-  if(!res.ok){
     content.innerHTML = '<p class="state-msg">This profile doesn’t exist or isn’t public.</p>';
     return;
   }
@@ -103,27 +157,109 @@ async function load(){
 
 function render(data){
   const content = document.getElementById("content");
-  const stats = data.stats || {};
-  const streak = stats.streak || {};
-  const catRolls = stats.categoryRolls || {};
-  const catLine = Object.keys(catRolls).length
-    ? Object.keys(catRolls).map(k=>escapeHTML(k)+": "+catRolls[k]).join(" · ")
-    : "";
+  const streak = (data.stats && data.stats.streak) || {};
+
+  const socialChips = (data.socials||[]).map(s=>'<a class="chip social" href="'+escapeHTML(s.value)+'" target="_blank" rel="noopener">'+escapeHTML(s.platform)+'</a>').join("");
+  const creativeChips = (data.linkedAccounts||[]).filter(a=>a.connected).map(a=>'<span class="chip creative">Also on '+escapeHTML(a.platform)+'</span>').join("");
+
+  const catOptions = '<option value="">All categories</option>' + CATEGORIES.map(c=>'<option value="'+c.id+'" '+(currentCategoryFilter===c.id?"selected":"")+'>'+c.name+'</option>').join("");
+
+  const resultsHTML = (data.results && data.results.length)
+    ? data.results.map(r=>
+        '<div class="result-card">' +
+          '<div class="result-top"><span class="cat-badge '+r.category_id+'">'+catName(r.category_id)+'</span><span>'+new Date(r.created_at).toLocaleDateString()+'</span></div>' +
+          '<div class="result-text">'+escapeHTML(r.prompt_text)+'</div>' +
+          (r.result_url ? '<a class="result-link" href="'+escapeHTML(r.result_url)+'" target="_blank" rel="noopener">View Result ↗</a>' : '') +
+          ' <a class="result-link" href="index.html?category='+encodeURIComponent(r.category_id)+'">Try It Yourself</a>' +
+        '</div>'
+      ).join("")
+    : '<p class="empty-note">No results linked yet.</p>';
+
+  const tierClass = (t)=> t ? t.toLowerCase() : "bronze";
+  const achvHTML = (data.achievements && data.achievements.length)
+    ? data.achievements.map(a=>
+        '<div class="achv-tile">' +
+          '<div class="achv-top"><span class="tier-diamond '+tierClass(a.tier)+'"></span><div><div class="achv-cat">'+catName(a.categoryId)+'</div><div class="achv-tier">'+(a.tier||"—")+'</div></div></div>' +
+          '<div class="achv-count">'+a.count+'</div>' +
+          '<div class="achv-divider"></div>' +
+          '<div class="achv-conv">'+(a.conversionPct!=null ? a.conversionPct+"% of prompts turned into results" : "—")+'</div>' +
+        '</div>'
+      ).join("")
+    : '<p class="empty-note">No achievements yet.</p>';
+
   const badgesHTML = (data.badges && data.badges.length)
     ? data.badges.map(b=>'<span class="badge">'+escapeHTML(b.label)+'</span>').join("")
-    : '<span class="empty-badges">No badges yet — keep rolling.</span>';
+    : '<span class="empty-note">No badges yet.</span>';
 
   content.innerHTML =
-    '<h1 class="handle">@'+escapeHTML(data.handle)+'</h1>'+
-    '<p class="subtitle">'+(catLine || "Prompt Royale player")+'</p>'+
-    '<div class="stat-row">'+
-      '<div class="stat-cell"><div class="num">'+(stats.totalRolls||0)+'</div><div class="label">Total Rolls</div></div>'+
-      '<div class="stat-cell"><div class="num">'+(streak.current||0)+'</div><div class="label">Day Streak</div></div>'+
-      '<div class="stat-cell"><div class="num">'+(streak.longest||0)+'</div><div class="label">Best Streak</div></div>'+
-    '</div>'+
-    '<div class="badges-title">Badges</div>'+
-    '<div class="badges">'+badgesHTML+'</div>'+
-    '<a class="back-link" href="index.html">← Back to Prompt Royale</a>';
+    '<div class="banner"></div>' +
+    '<div class="profile-head">' +
+      '<div class="avatar">'+initials(data.displayName)+'</div>' +
+      '<div class="head-actions" id="followWrap"></div>' +
+    '</div>' +
+    '<div class="name-block">' +
+      '<div class="display-name">'+escapeHTML(data.displayName)+'</div>' +
+      '<div class="handle">@'+escapeHTML(data.handle)+'</div>' +
+    '</div>' +
+    (data.bio ? '<p class="bio">'+escapeHTML(data.bio)+'</p>' : '') +
+    (socialChips || creativeChips ? '<div class="chips">'+socialChips+creativeChips+'</div>' : '') +
+
+    '<div class="section">' +
+      '<div class="stat-row">' +
+        '<div class="stat-cell"><div class="num">'+(data.stats.totalRolls||0)+'</div><div class="label">Total Rolls</div></div>' +
+        '<div class="stat-cell"><div class="num">'+(streak.current||0)+'</div><div class="label">Day Streak</div></div>' +
+        '<div class="stat-cell"><div class="num">'+(streak.longest||0)+'</div><div class="label">Best Streak</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section">' +
+      '<div class="section-title">Badges</div>' +
+      '<div class="badges">'+badgesHTML+'</div>' +
+    '</div>' +
+
+    '<div class="section">' +
+      '<div class="section-title">Achievements</div>' +
+      '<div class="achv-grid">'+achvHTML+'</div>' +
+    '</div>' +
+
+    '<div class="section">' +
+      '<div class="section-title">Results <select class="cat-filter" id="catFilter">'+catOptions+'</select></div>' +
+      '<div id="resultsWrap">'+resultsHTML+'</div>' +
+    '</div>' +
+
+    '<p class="empty-note" style="margin-top:40px;text-align:center;"><a href="index.html">← Back to Prompt Royale</a></p>';
+
+  document.getElementById("catFilter").addEventListener("change", (e)=>{
+    currentCategoryFilter = e.target.value;
+    load();
+  });
+
+  renderFollowButton(data.isFollowing);
+}
+
+function renderFollowButton(isFollowing){
+  const wrap = document.getElementById("followWrap");
+  if(!isSignedIn){
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = '<button class="follow-btn '+(isFollowing?"following":"")+'" id="followBtn">'+(isFollowing?"Following":"Follow")+'</button>';
+  document.getElementById("followBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("followBtn");
+    btn.disabled = true;
+    try{
+      if(isFollowing){
+        await api("/api/follow?handle="+encodeURIComponent(currentHandle), { method:"DELETE" });
+      } else {
+        await api("/api/follow", { method:"POST", body: JSON.stringify({ handle: currentHandle }) });
+      }
+      isFollowing = !isFollowing;
+      renderFollowButton(isFollowing);
+    }catch(e){
+      alert(e.message);
+      btn.disabled = false;
+    }
+  });
 }
 
 load();

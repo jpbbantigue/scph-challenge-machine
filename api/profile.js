@@ -1,10 +1,14 @@
 // Vercel Serverless Function:
-// GET /api/profile?handle=xxx — public read of a public profile (no auth needed)
-// PUT /api/profile — signed-in visitor sets/clears their own handle + visibility
-//   body: { handle: string|null, public: boolean }
+// GET /api/profile?handle=xxx&category=music — public read of a public
+//     profile (no auth needed; category filters the Results list)
+// PUT /api/profile — signed-in visitor updates their own profile.
+//     body can include any of:
+//       { username: string }        — write-once, only works if not already set
+//       { public: boolean }         — visibility toggle, always editable
+//       { displayName, bio, socials, linkedAccounts } — editable profile fields
 
 const { getSessionUser } = require("./_lib/session");
-const { setProfileHandle, getPublicProfileByHandle } = require("./_lib/store");
+const { setUsername, setProfilePublic, updateProfileFields, getPublicProfileByHandle, loadUserData } = require("./_lib/store");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -12,7 +16,9 @@ module.exports = async (req, res) => {
   if (req.method === "GET") {
     const handle = req.query && req.query.handle;
     if (!handle) { res.status(400).json({ error: "Missing handle" }); return; }
-    const profile = await getPublicProfileByHandle(handle);
+    const categoryId = (req.query && req.query.category) || null;
+    const viewerUser = getSessionUser(req); // optional — only used for isFollowing
+    const profile = await getPublicProfileByHandle(handle, { categoryId, viewerUser });
     if (!profile) { res.status(404).json({ error: "Profile not found or not public" }); return; }
     res.status(200).json(profile);
     return;
@@ -22,9 +28,19 @@ module.exports = async (req, res) => {
     const user = getSessionUser(req);
     if (!user) { res.status(401).json({ error: "Not signed in" }); return; }
     const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {});
-    const result = await setProfileHandle(user, body.handle, !!body.public);
-    if (!result.ok) { res.status(400).json({ error: result.error }); return; }
-    res.status(200).json({ profile: result.profile });
+
+    if (typeof body.username === "string") {
+      const result = await setUsername(user, body.username);
+      if (!result.ok) { res.status(400).json({ error: result.error }); return; }
+    }
+    if (typeof body.public === "boolean") {
+      await setProfilePublic(user, body.public);
+    }
+    if (body.displayName !== undefined || body.bio !== undefined || body.socials !== undefined || body.linkedAccounts !== undefined) {
+      await updateProfileFields(user, body);
+    }
+    const data = await loadUserData(user);
+    res.status(200).json({ profile: data.profile });
     return;
   }
 

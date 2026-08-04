@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account — Prompt Royale</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+:root{
+  --bg-0:#05070d;
+  --ink:#F3F5FC;
+  --ink-75:rgba(243,245,252,0.75);
+  --ink-65:rgba(243,245,252,0.65);
+  --ink-58:rgba(243,245,252,0.58);
+  --ink-50:rgba(243,245,252,0.5);
+  --ink-40:rgba(243,245,252,0.4);
+  --royal-deep:#1836B2;
+  --royal:#295BFF;
+  --royal-hi:#4D7CFF;
+  --crimson-deep:#74182D;
+  --crimson:#B51F3E;
+  --crimson-hi:#E63A46;
+  --gold-deep:#C68B24;
+  --gold:#F4BF3A;
+  --gold-hi:#FFD978;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --font-body:'Inter',sans-serif;
+}
+html,body{margin:0;padding:0;}
+body{background:var(--bg-0);color:var(--ink-65);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{color:var(--royal-hi);text-decoration:none;}
+a:hover{color:var(--gold-hi);}
+button{font-family:inherit;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);}
+.brand-mark{width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));display:block;}
+.back-link{font-size:13.5px;color:var(--ink-58);}
+.back-link:hover{color:var(--ink);}
+
+.layout{max-width:1100px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:240px 1fr;gap:32px;}
+@media (max-width:800px){.layout{grid-template-columns:1fr;}}
+
+.sidebar{position:sticky;top:24px;align-self:start;}
+.avatar-big{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:24px;color:#fff;margin-bottom:12px;}
+.side-name{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink);}
+.side-handle{font-size:12.5px;color:var(--ink-50);margin-top:2px;}
+.side-credits{font-size:11.5px;color:var(--gold);font-weight:600;margin-top:8px;}
+.side-nav{display:flex;flex-direction:column;gap:2px;margin-top:20px;}
+.side-nav button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:10px;border:none;background:none;color:var(--ink-65);font-size:13.5px;font-weight:500;cursor:pointer;}
+.side-nav button:hover{background:rgba(255,255,255,0.05);color:var(--ink);}
+.side-nav button.active{background:rgba(41,91,255,0.14);color:var(--ink);}
+.side-nav hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:10px 0;}
+.signout-btn{width:100%;padding:9px 12px;border-radius:10px;border:none;background:none;color:#FF9AA5;font-size:13px;font-weight:600;text-align:left;cursor:pointer;}
+.signout-btn:hover{background:rgba(230,58,70,0.08);}
+
+.panel{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:26px;margin-bottom:20px;}
+.panel h2{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--ink);margin:0 0 4px;}
+.panel .sub{font-size:12.5px;color:var(--ink-50);margin:0 0 18px;}
+.field-label{display:block;font-family:var(--font-display);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin:14px 0 5px;}
+.field-label:first-of-type{margin-top:0;}
+input[type=text],input[type=url],textarea,select{
+  width:100%;background:rgba(255,255,255,0.04);color:var(--ink);border:1px solid rgba(255,255,255,0.14);border-radius:10px;
+  padding:10px 12px;font-family:inherit;font-size:13.5px;
+}
+textarea{resize:vertical;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi);}
+.hint{font-size:11.5px;color:var(--ink-40);margin-top:5px;}
+.char-count{font-size:11px;color:var(--ink-40);text-align:right;margin-top:3px;}
+.btn{padding:9px 18px;border-radius:999px;border:none;background:var(--gold);color:#241a02;font-size:13px;font-weight:600;cursor:pointer;margin-top:12px;}
+.btn:hover{background:var(--gold-hi);}
+.btn.secondary{background:rgba(255,255,255,0.06);color:var(--ink);border:1px solid rgba(255,255,255,0.14);}
+.btn.danger{background:rgba(230,58,70,0.12);color:#FF9AA5;border:1px solid rgba(230,58,70,0.35);}
+.btn.small{padding:6px 12px;font-size:12px;margin-top:0;}
+.status-msg{font-size:12px;color:var(--ink-50);min-height:16px;margin-top:8px;}
+.status-msg.error{color:#FF9AA5;}
+
+.username-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:var(--font-mono);font-size:13px;color:var(--ink);}
+.followers-link{background:none;border:none;color:var(--ink-58);font-size:12.5px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;}
+.followers-link:hover{color:var(--ink);}
+
+.row-list{display:flex;flex-direction:column;gap:10px;}
+.row-item{display:flex;align-items:center;gap:8px;}
+.row-item select{flex:0 0 130px;}
+.row-item input{flex:1;}
+.row-remove{flex:0 0 auto;width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:var(--ink-50);cursor:pointer;font-size:14px;}
+.row-remove:hover{color:#FF9AA5;border-color:rgba(230,58,70,0.3);}
+.add-row-btn{align-self:flex-start;background:none;border:1px dashed rgba(255,255,255,0.2);color:var(--ink-58);border-radius:10px;padding:8px 14px;font-size:12.5px;cursor:pointer;margin-top:4px;}
+.add-row-btn:hover{color:var(--ink);border-color:rgba(77,124,255,0.4);}
+.connect-toggle{padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid;cursor:pointer;}
+.connect-toggle.connected{background:rgba(41,91,255,0.14);border-color:rgba(77,124,255,0.4);color:var(--royal-hi);}
+.connect-toggle.not-connected{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.14);color:var(--ink-58);}
+
+.list-item{padding:14px 0;border-top:1px solid rgba(255,255,255,0.06);}
+.list-item:first-child{border-top:none;}
+.list-item-top{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-40);margin-bottom:6px;flex-wrap:wrap;}
+.cat-badge{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+.cat-badge.music{background:rgba(41,91,255,0.14);color:var(--royal-hi);}
+.cat-badge.characters{background:rgba(230,58,70,0.14);color:var(--crimson-hi);}
+.list-item-text{font-size:13.5px;color:var(--ink);line-height:1.5;}
+.list-item-actions{display:flex;gap:10px;margin-top:8px;}
+.list-item-actions button,.list-item-actions a{background:none;border:none;color:var(--royal-hi);font-size:12px;font-weight:600;cursor:pointer;padding:0;}
+.list-item-actions .remove{color:#FF9AA5;}
+.empty-note{font-size:13px;color:var(--ink-40);padding:8px 0;}
+
+.results-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.results-form .full{grid-column:1 / -1;}
+@media (max-width:600px){.results-form{grid-template-columns:1fr;}}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.modal-backdrop.open{display:flex;}
+.modal{background:rgba(12,16,28,0.98);border:1px solid rgba(77,124,255,0.25);border-radius:20px;padding:22px;width:100%;max-width:360px;max-height:70vh;overflow-y:auto;}
+.modal h3{font-family:var(--font-display);font-size:15px;margin:0 0 14px;color:var(--ink);}
+.follower-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.06);}
+.follower-row:first-child{border-top:none;}
+.follower-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:12px;color:#fff;flex:none;}
+.follower-name{font-size:13px;color:var(--ink);}
+.follower-handle{font-size:11.5px;color:var(--ink-40);}
+.modal-close{width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.14);background:none;color:var(--ink);font-size:12.5px;cursor:pointer;margin-top:14px;}
+
+.confirm-box{background:rgba(230,58,70,0.08);border:1px solid rgba(230,58,70,0.3);border-radius:14px;padding:16px;margin-top:14px;}
+.confirm-box p{font-size:13px;color:var(--ink);margin:0 0 12px;}
+.confirm-actions{display:flex;gap:10px;}
+
+.state-msg{text-align:center;font-size:14px;color:var(--ink-50);padding:60px 20px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</a>
+  <a href="index.html" class="back-link">← Back to the machine</a>
+</div>
+
+<div id="root">
+  <p class="state-msg">Loading account…</p>
+</div>
+
+<div class="modal-backdrop" id="followersModal">
+  <div class="modal">
+    <h3>Followers</h3>
+    <div id="followersList"></div>
+    <button class="modal-close" id="closeFollowersModal">Close</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const CATEGORIES = [
+  { id:"music", name:"Music" },
+  { id:"characters", name:"Characters" }
+];
+const SOCIAL_PLATFORMS = ["X / Twitter","Instagram","TikTok","YouTube","Bluesky","Website","Other"];
+const CREATIVE_PLATFORMS = ["Suno","Emochi","DreamGen","Other"];
+
+const root = document.getElementById("root");
+let me = null; // /api/auth-me response
+let myData = null; // /api/data response (favorites/history/profile fields via loadUserData shape)
+let activeTab = (location.hash || "#profile").slice(1);
+
+function escapeHTML(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function initials(name){
+  return String(name||"?").trim().slice(0,1).toUpperCase();
+}
+function catName(id){
+  const c = CATEGORIES.find(c=>c.id===id);
+  return c ? c.name : id;
+}
+
+async function api(path, opts){
+  const res = await fetch(path, Object.assign({ headers: { "Content-Type": "application/json" } }, opts || {}));
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(!res.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+async function init(){
+  try{
+    me = await api("/api/auth-me");
+  }catch(e){
+    root.innerHTML = '<p class="state-msg">Couldn’t reach the server.</p>';
+    return;
+  }
+  if(!me.signedIn){
+    root.innerHTML = '<p class="state-msg">You need to sign in first. <a href="index.html">Go back and sign in →</a></p>';
+    return;
+  }
+  myData = await api("/api/data");
+  render();
+}
+
+function render(){
+  root.innerHTML =
+    '<div class="layout">' +
+      '<div class="sidebar">' +
+        '<div class="avatar-big">'+initials(myData.profile.displayName || me.name)+'</div>' +
+        '<div class="side-name">'+escapeHTML(myData.profile.displayName || me.name)+'</div>' +
+        '<div class="side-handle">'+(myData.profile.handle ? "@"+escapeHTML(myData.profile.handle) : "No username set")+'</div>' +
+        '<div class="side-credits">'+(me.credits ? me.credits.remaining+" / "+me.credits.limit+" AI rolls left today" : "")+'</div>' +
+        '<nav class="side-nav">' +
+          tabBtn("profile","Profile") + tabBtn("history","History") + tabBtn("favorites","Favorites") + tabBtn("results","Results") + tabBtn("settings","Settings") +
+        '</nav>' +
+        '<hr>' +
+        '<button class="signout-btn" id="signOutBtn">Sign out</button>' +
+      '</div>' +
+      '<div class="content" id="tabContent"></div>' +
+    '</div>';
+
+  document.querySelectorAll(".side-nav button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ activeTab = btn.dataset.tab; location.hash = "#"+activeTab; renderTab(); });
+  });
+  document.getElementById("signOutBtn").addEventListener("click", async ()=>{
+    try{ await fetch("/api/auth-logout", {method:"POST"}); }catch(e){}
+    location.href = "index.html";
+  });
+
+  renderTab();
+}
+
+function tabBtn(id, label){
+  return '<button class="'+(activeTab===id?"active":"")+'" data-tab="'+id+'">'+label+'</button>';
+}
+
+function renderTab(){
+  document.querySelectorAll(".side-nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===activeTab));
+  const el = document.getElementById("tabContent");
+  if(activeTab === "history") return renderHistoryTab(el);
+  if(activeTab === "favorites") return renderFavoritesTab(el);
+  if(activeTab === "results") return renderResultsTab(el);
+  if(activeTab === "settings") return renderSettingsTab(el);
+  return renderProfileTab(el);
+}
+
+/* ---------------- Profile tab ---------------- */
+function renderProfileTab(el){
+  const p = myData.profile;
+  el.innerHTML =
+    '<div class="panel">' +
+      '<h2>Profile</h2>' +
+      '<p class="sub">This is what shows on your public profile, if you make it public.</p>' +
+
+      '<label class="field-label" for="fDisplayName">Display name</label>' +
+      '<input type="text" id="fDisplayName" maxlength="60" value="'+escapeHTML(p.displayName||"")+'">' +
+      '<button class="btn small secondary" id="saveDisplayName" style="margin-top:8px;">Save name</button>' +
+
+      '<label class="field-label">Username</label>' +
+      (p.handle
+        ? '<div class="username-row">🔒 @'+escapeHTML(p.handle)+'</div><p class="hint">Usernames can only be set once.</p>'
+        : '<div style="display:flex;gap:8px;"><input type="text" id="fUsername" maxlength="20" placeholder="your-username"><button class="btn small" id="saveUsername">Set</button></div><p class="hint">Choose wisely — this can only be set once.</p>'
+      ) +
+      '<p class="status-msg" id="usernameStatus"></p>' +
+
+      '<label class="field-label">Visibility</label>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-65);">' +
+        '<input type="checkbox" id="fPublic" '+(p.public?"checked":"")+'> Make my profile public' +
+      '</label>' +
+      '<button class="btn small secondary" id="savePublic" style="margin-top:8px;">Save</button>' +
+      '<p class="status-msg" id="publicStatus"></p>' +
+
+      '<label class="field-label" for="fBio">Bio</label>' +
+      '<textarea id="fBio" rows="3" maxlength="200">'+escapeHTML(p.bio||"")+'</textarea>' +
+      '<div class="char-count"><span id="bioCount">'+((p.bio||"").length)+'</span> / 200</div>' +
+      '<button class="btn small secondary" id="saveBio" style="margin-top:8px;">Save bio</button>' +
+
+      '<button class="followers-link" id="followersBtn">'+(me.followerCount||0)+' followers · only visible to you</button>' +
+      '<p class="status-msg" id="profileStatus"></p>' +
+    '</div>' +
+
+    '<div class="panel">' +
+      '<h2>Socials</h2>' +
+      '<p class="sub">Links shown on your public profile.</p>' +
+      '<div class="row-list" id="socialsList"></div>' +
+      '<button class="add-row-btn" id="addSocial">+ Add social</button>' +
+      '<div><button class="btn small" id="saveSocials" style="margin-top:12px;">Save socials</button></div>' +
+      '<p class="status-msg" id="socialsStatus"></p>' +
+    '</div>' +
+
+    '<div class="panel">' +
+      '<h2>Linked Creative Accounts</h2>' +
+      '<p class="sub">Shows as "Also on {platform}" badges on your public profile.</p>' +
+      '<div class="row-list" id="linkedList"></div>' +
+      '<button class="add-row-btn" id="addLinked">+ Add account</button>' +
+      '<div><button class="btn small" id="saveLinked" style="margin-top:12px;">Save accounts</button></div>' +
+      '<p class="status-msg" id="linkedStatus"></p>' +
+    '</div>';
+
+  document.getElementById("fBio").addEventListener("input", (e)=>{
+    document.getElementById("bioCount").textContent = e.target.value.length;
+  });
+
+  document.getElementById("saveDisplayName").addEventListener("click", async ()=>{
+    try{
+      const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ displayName: document.getElementById("fDisplayName").value }) });
+      myData.profile = r.profile; setStatus("profileStatus","Saved.");
+      render();
+    }catch(e){ setStatus("profileStatus", e.message, true); }
+  });
+
+  const usernameBtn = document.getElementById("saveUsername");
+  if(usernameBtn){
+    usernameBtn.addEventListener("click", async ()=>{
+      try{
+        const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ username: document.getElementById("fUsername").value }) });
+        myData.profile = r.profile; setStatus("usernameStatus","Username set.");
+        render();
+      }catch(e){ setStatus("usernameStatus", e.message, true); }
+    });
+  }
+
+  document.getElementById("savePublic").addEventListener("click", async ()=>{
+    try{
+      const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ public: document.getElementById("fPublic").checked }) });
+      myData.profile = r.profile; setStatus("publicStatus","Saved.");
+    }catch(e){ setStatus("publicStatus", e.message, true); }
+  });
+
+  document.getElementById("saveBio").addEventListener("click", async ()=>{
+    try{
+      const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ bio: document.getElementById("fBio").value }) });
+      myData.profile = r.profile; setStatus("profileStatus","Bio saved.");
+    }catch(e){ setStatus("profileStatus", e.message, true); }
+  });
+
+  document.getElementById("followersBtn").addEventListener("click", openFollowersModal);
+
+  renderRowList("socialsList", p.socials||[], "social");
+  document.getElementById("addSocial").addEventListener("click", ()=>{
+    p.socials = p.socials || []; p.socials.push({platform:SOCIAL_PLATFORMS[0], value:""});
+    renderRowList("socialsList", p.socials, "social");
+  });
+  document.getElementById("saveSocials").addEventListener("click", async ()=>{
+    const rows = collectRows("socialsList");
+    try{
+      const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ socials: rows }) });
+      myData.profile = r.profile; setStatus("socialsStatus","Saved.");
+    }catch(e){ setStatus("socialsStatus", e.message, true); }
+  });
+
+  renderRowList("linkedList", p.linkedAccounts||[], "linked");
+  document.getElementById("addLinked").addEventListener("click", ()=>{
+    p.linkedAccounts = p.linkedAccounts || []; p.linkedAccounts.push({platform:CREATIVE_PLATFORMS[0], handle:"", connected:false});
+    renderRowList("linkedList", p.linkedAccounts, "linked");
+  });
+  document.getElementById("saveLinked").addEventListener("click", async ()=>{
+    const rows = collectRows("linkedList", true);
+    try{
+      const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ linkedAccounts: rows }) });
+      myData.profile = r.profile; setStatus("linkedStatus","Saved.");
+    }catch(e){ setStatus("linkedStatus", e.message, true); }
+  });
+}
+
+function renderRowList(containerId, rows, kind){
+  const container = document.getElementById(containerId);
+  const platforms = kind === "social" ? SOCIAL_PLATFORMS : CREATIVE_PLATFORMS;
+  container.innerHTML = rows.map((row,i)=>{
+    const opts = platforms.map(p=>'<option value="'+p+'" '+(row.platform===p?"selected":"")+'>'+p+'</option>').join("");
+    if(kind === "social"){
+      return '<div class="row-item" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="URL or @handle" value="'+escapeHTML(row.value||"")+'"><button class="row-remove" data-remove="'+i+'">&times;</button></div>';
+    }
+    return '<div class="row-item" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="handle" value="'+escapeHTML(row.handle||"")+'">'+
+      '<button class="connect-toggle '+(row.connected?"connected":"not-connected")+'" data-toggle-connect="'+i+'">'+(row.connected?"Connected":"Connect")+'</button>' +
+      '<button class="row-remove" data-remove="'+i+'">&times;</button></div>';
+  }).join("") || '<p class="empty-note">Nothing added yet.</p>';
+
+  container.querySelectorAll("[data-remove]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      rows.splice(Number(btn.dataset.remove), 1);
+      renderRowList(containerId, rows, kind);
+    });
+  });
+  container.querySelectorAll("[data-toggle-connect]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const i = Number(btn.dataset.toggleConnect);
+      rows[i].connected = !rows[i].connected;
+      renderRowList(containerId, rows, kind);
+    });
+  });
+}
+
+function collectRows(containerId, isLinked){
+  const container = document.getElementById(containerId);
+  return Array.from(container.querySelectorAll(".row-item")).map(row=>{
+    const platform = row.querySelector(".row-platform").value;
+    const value = row.querySelector(".row-value").value;
+    if(isLinked){
+      const connected = row.querySelector(".connect-toggle").classList.contains("connected");
+      return { platform, handle: value, connected };
+    }
+    return { platform, value };
+  }).filter(r => isLinked ? r.handle : r.value);
+}
+
+function setStatus(id, text, isError){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = text;
+  el.classList.toggle("error", !!isError);
+  if(!isError) setTimeout(()=>{ if(el.textContent===text) el.textContent=""; }, 3000);
+}
+
+async function openFollowersModal(){
+  const modal = document.getElementById("followersModal");
+  const list = document.getElementById("followersList");
+  list.innerHTML = '<p class="empty-note">Loading…</p>';
+  modal.classList.add("open");
+  try{
+    const r = await api("/api/followers");
+    list.innerHTML = r.followers.length
+      ? r.followers.map(f=>'<div class="follower-row"><span class="follower-avatar">'+initials(f.displayName)+'</span><div><div class="follower-name">'+escapeHTML(f.displayName)+'</div><div class="follower-handle">@'+escapeHTML(f.handle)+'</div></div></div>').join("")
+      : '<p class="empty-note">No followers yet.</p>';
+  }catch(e){
+    list.innerHTML = '<p class="empty-note">Couldn’t load followers.</p>';
+  }
+}
+document.getElementById("closeFollowersModal").addEventListener("click", ()=>{
+  document.getElementById("followersModal").classList.remove("open");
+});
+
+/* ---------------- History / Favorites tabs ---------------- */
+function renderTicketList(el, title, items, opts){
+  el.innerHTML = '<div class="panel"><h2>'+title+'</h2>' +
+    (items.length ? items.slice().reverse().slice(0,50).map((item,idx)=>{
+      const realIdx = items.length-1-idx;
+      return '<div class="list-item">' +
+        '<div class="list-item-top"><span class="cat-badge '+item.categoryId+'">'+catName(item.categoryId)+'</span><span>'+escapeHTML(item.time||"")+'</span></div>' +
+        '<div class="list-item-text">'+escapeHTML(item.mission)+'</div>' +
+        '<div class="list-item-actions">' +
+          '<button data-copy="'+realIdx+'">Copy</button>' +
+          (opts.showFavorite ? '<button data-fav="'+realIdx+'">Save to favorites</button>' : '') +
+          (opts.showRemove ? '<button class="remove" data-remove="'+realIdx+'">Remove</button>' : '') +
+        '</div>' +
+      '</div>';
+    }).join("") : '<p class="empty-note">Nothing here yet.</p>') +
+  '</div>';
+
+  el.querySelectorAll("[data-copy]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const item = items[Number(btn.dataset.copy)];
+      navigator.clipboard && navigator.clipboard.writeText(item.mission).then(()=>{ btn.textContent="Copied!"; setTimeout(()=>btn.textContent="Copy",1400); });
+    });
+  });
+  el.querySelectorAll("[data-fav]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const item = items[Number(btn.dataset.fav)];
+      myData.favorites = myData.favorites || [];
+      if(!myData.favorites.some(f=>f.mission===item.mission)) myData.favorites.push(item);
+      await api("/api/data", { method:"PUT", body: JSON.stringify({ favorites: myData.favorites, history: myData.history, settings: myData.settings, stats: myData.stats }) });
+      btn.textContent = "Saved!";
+    });
+  });
+  el.querySelectorAll("[data-remove]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const item = items[Number(btn.dataset.remove)];
+      myData.favorites = (myData.favorites||[]).filter(f=>f.mission!==item.mission);
+      await api("/api/data", { method:"PUT", body: JSON.stringify({ favorites: myData.favorites, history: myData.history, settings: myData.settings, stats: myData.stats }) });
+      renderTab();
+    });
+  });
+}
+function renderHistoryTab(el){ renderTicketList(el, "History", myData.history||[], { showFavorite:true, showRemove:false }); }
+function renderFavoritesTab(el){ renderTicketList(el, "Favorites", myData.favorites||[], { showFavorite:false, showRemove:true }); }
+
+/* ---------------- Results tab ---------------- */
+async function renderResultsTab(el){
+  el.innerHTML =
+    '<div class="panel">' +
+      '<h2>Link a Result</h2>' +
+      '<p class="sub">Connect a prompt you rolled to what you actually made from it.</p>' +
+      '<div class="results-form">' +
+        '<div><label class="field-label">Category</label><select id="rCategory">'+CATEGORIES.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join("")+'</select></div>' +
+        '<div><label class="field-label">Roll type</label><select id="rRollType"><option value="free">Free</option><option value="ai">AI</option></select></div>' +
+        '<div class="full"><label class="field-label">Prompt</label><input type="text" id="rPrompt" placeholder="Paste the prompt text"></div>' +
+        '<div class="full"><label class="field-label">Result URL</label><input type="url" id="rUrl" placeholder="https://..."></div>' +
+      '</div>' +
+      '<button class="btn" id="linkResultBtn">Link It</button>' +
+      '<p class="status-msg" id="resultStatus"></p>' +
+    '</div>' +
+    '<div class="panel"><h2>Your Results</h2><div id="resultsListWrap"><p class="empty-note">Loading…</p></div></div>';
+
+  document.getElementById("linkResultBtn").addEventListener("click", async ()=>{
+    const prompt = document.getElementById("rPrompt").value.trim();
+    if(!prompt){ setStatus("resultStatus","Prompt can't be empty.", true); return; }
+    try{
+      await api("/api/results", { method:"POST", body: JSON.stringify({
+        categoryId: document.getElementById("rCategory").value,
+        rollType: document.getElementById("rRollType").value,
+        promptText: prompt,
+        resultUrl: document.getElementById("rUrl").value.trim()
+      })});
+      document.getElementById("rPrompt").value = ""; document.getElementById("rUrl").value = "";
+      setStatus("resultStatus","Linked!");
+      loadResultsList();
+    }catch(e){ setStatus("resultStatus", e.message, true); }
+  });
+
+  loadResultsList();
+}
+async function loadResultsList(){
+  const wrap = document.getElementById("resultsListWrap");
+  try{
+    const r = await api("/api/results");
+    wrap.innerHTML = r.results.length ? r.results.map(item=>
+      '<div class="list-item">' +
+        '<div class="list-item-top"><span class="cat-badge '+item.category_id+'">'+catName(item.category_id)+'</span><span>'+new Date(item.created_at).toLocaleDateString()+'</span></div>' +
+        '<div class="list-item-text">'+escapeHTML(item.prompt_text)+'</div>' +
+        '<div class="list-item-actions">' +
+          (item.result_url ? '<a href="'+escapeHTML(item.result_url)+'" target="_blank" rel="noopener">View Result ↗</a>' : '') +
+          '<button class="remove" data-remove-result="'+item.id+'">Remove</button>' +
+        '</div>' +
+      '</div>'
+    ).join("") : '<p class="empty-note">Nothing linked yet.</p>';
+    wrap.querySelectorAll("[data-remove-result]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        await api("/api/results?id="+btn.dataset.removeResult, { method:"DELETE" });
+        loadResultsList();
+      });
+    });
+  }catch(e){
+    wrap.innerHTML = '<p class="empty-note">Couldn’t load results.</p>';
+  }
+}
+
+/* ---------------- Settings tab ---------------- */
+function renderSettingsTab(el){
+  el.innerHTML =
+    '<div class="panel">' +
+      '<h2>Account</h2>' +
+      '<p class="sub">Signed in with <strong>'+escapeHTML(me.provider)+'</strong> as '+escapeHTML(me.name)+'.</p>' +
+      '<p class="hint">AI provider settings (this site’s AI, or your own Claude/ChatGPT key) live in the main page’s Settings panel — <a href="index.html">open it there</a>.</p>' +
+    '</div>' +
+    '<div class="panel">' +
+      '<h2>Delete Account</h2>' +
+      '<p class="sub">Permanently deletes your favorites, history, profile, results, and follows. This can’t be undone.</p>' +
+      '<button class="btn danger" id="deleteAccountBtn">Delete my account</button>' +
+      '<div id="deleteConfirmBox"></div>' +
+    '</div>';
+
+  document.getElementById("deleteAccountBtn").addEventListener("click", ()=>{
+    document.getElementById("deleteConfirmBox").innerHTML =
+      '<div class="confirm-box"><p>Are you sure? This permanently deletes everything and can’t be undone.</p>' +
+      '<div class="confirm-actions"><button class="btn danger small" id="confirmDelete">Yes, delete everything</button><button class="btn secondary small" id="cancelDelete">Cancel</button></div></div>';
+    document.getElementById("confirmDelete").addEventListener("click", async ()=>{
+      try{
+        await api("/api/delete-account", { method:"POST" });
+        location.href = "index.html";
+      }catch(e){ alert(e.message); }
+    });
+    document.getElementById("cancelDelete").addEventListener("click", ()=>{
+      document.getElementById("deleteConfirmBox").innerHTML = "";
+    });
+  });
+}
+
+init();
+})();
+</script>
+</body>
+</html>

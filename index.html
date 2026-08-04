@@ -392,6 +392,7 @@ details[open] summary::before{content:"▾ ";}
       <a class="navlink" href="#how-it-works">How It Works</a>
       <a class="navlink" href="#categories">Prompt Categories</a>
       <a class="navlink" href="#pulls">History</a>
+      <a class="navlink" href="account.html">Account</a>
       <button class="navlink" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">Settings</button>
     </div>
     <div class="nav-actions">
@@ -552,17 +553,8 @@ details[open] summary::before{content:"▾ ";}
       </div>
       <button type="button" class="done" id="signOutBtn" hidden>Sign out</button>
       <p class="hint">Signing in syncs your favorites, history, and settings to your account, so they follow you across devices and browsers.</p>
+      <p class="hint" id="accountLinkWrap" hidden><a href="account.html">Manage profile, history, favorites & results →</a></p>
       <p class="hint discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord community →</a></p>
-    </div>
-    <div id="profileSection" hidden>
-      <hr>
-      <label class="field-label" for="profileHandle">Public profile</label>
-      <input type="text" id="profileHandle" placeholder="your-handle" maxlength="20">
-      <label style="padding:8px 0 2px;"><input type="checkbox" id="profilePublic"> Make my stats profile public</label>
-      <p class="hint">Sharing a public link shows your total rolls, streak, and badges — not your favorites or history.</p>
-      <button type="button" class="done" id="profileSaveBtn" style="margin-top:8px;">Save</button>
-      <a id="profileLink" href="#" target="_blank" rel="noopener" class="hint" style="display:block;margin-top:8px;" hidden>View my public profile →</a>
-      <p class="hint" id="profileStatus"></p>
     </div>
     <hr>
     <p class="hint">Flip reels on or off with the switch in each tile's top-left corner. At least one has to stay on.</p>
@@ -793,30 +785,14 @@ function renderAccountUI(){
     els.accountStatus.textContent = "Signed in with "+account.provider+" as "+account.name+". Synced across your devices.";
     els.signInButtons.hidden = true;
     els.signOutBtn.hidden = false;
-    els.profileSection.hidden = false;
-    if(els.profileHandle && document.activeElement !== els.profileHandle){
-      els.profileHandle.value = (account.profile && account.profile.handle) || "";
-    }
-    if(els.profilePublic) els.profilePublic.checked = !!(account.profile && account.profile.public);
-    updateProfileLink();
+    els.accountLinkWrap.hidden = false;
   } else {
     els.accountStatus.textContent = "Not signed in — favorites/history stay on this browser only.";
     els.signInButtons.hidden = false;
     els.signOutBtn.hidden = true;
-    els.profileSection.hidden = true;
+    els.accountLinkWrap.hidden = true;
   }
   updateAICreditsHint();
-}
-
-function updateProfileLink(){
-  if(!els.profileLink) return;
-  const handle = account.profile && account.profile.handle;
-  if(handle && account.profile.public){
-    els.profileLink.href = "profile.html?u="+encodeURIComponent(handle);
-    els.profileLink.hidden = false;
-  } else {
-    els.profileLink.hidden = true;
-  }
 }
 
 // This site's own Groq key ("groq" AI source) is metered per signed-in
@@ -865,36 +841,6 @@ async function checkAccount(){
   account.profile = data.profile || null;
   renderAccountUI();
   if(account.signedIn) await pullAccountData();
-}
-
-async function saveProfileSettings(){
-  const handleInput = (els.profileHandle.value || "").trim();
-  const isPublic = !!els.profilePublic.checked;
-  setProfileStatus("Saving…");
-  let res, data;
-  try{
-    res = await fetch("/api/profile", {
-      method:"PUT",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ handle: handleInput || null, public: isPublic })
-    });
-    data = await res.json();
-  }catch(e){
-    setProfileStatus("Couldn't reach the server — try again.", true);
-    return;
-  }
-  if(!res.ok){
-    setProfileStatus(data.error || "Couldn't save profile settings.", true);
-    return;
-  }
-  account.profile = data.profile;
-  updateProfileLink();
-  setProfileStatus(data.profile.handle ? "Saved." : "Handle cleared.");
-}
-function setProfileStatus(text, isError){
-  if(!els.profileStatus) return;
-  els.profileStatus.textContent = text || "";
-  els.profileStatus.classList.toggle("ai-error", !!isError);
 }
 
 function reelDef(cat, key){ return cat.reels.find(r=>r.key===key); }
@@ -996,12 +942,7 @@ const els = {
   accountStatus: document.getElementById("accountStatus"),
   signInButtons: document.getElementById("signInButtons"),
   signOutBtn: document.getElementById("signOutBtn"),
-  profileSection: document.getElementById("profileSection"),
-  profileHandle: document.getElementById("profileHandle"),
-  profilePublic: document.getElementById("profilePublic"),
-  profileSaveBtn: document.getElementById("profileSaveBtn"),
-  profileStatus: document.getElementById("profileStatus"),
-  profileLink: document.getElementById("profileLink"),
+  accountLinkWrap: document.getElementById("accountLinkWrap"),
   contactBtn: document.getElementById("contactBtn"),
   contactBackdrop: document.getElementById("contactBackdrop"),
   closeContact: document.getElementById("closeContact"),
@@ -1793,8 +1734,6 @@ els.signOutBtn.addEventListener("click", async ()=>{
   try{ await fetch("/api/auth-logout", {method:"POST"}); }catch(e){}
   window.location.reload();
 });
-
-els.profileSaveBtn.addEventListener("click", saveProfileSettings);
 
 /* ---------------- contact modal ---------------- */
 els.contactBtn.addEventListener("click", ()=>{ els.contactBackdrop.hidden = false; els.closeContact.focus(); });

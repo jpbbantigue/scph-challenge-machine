@@ -35,7 +35,32 @@ async function main() {
       account_key TEXT NOT NULL REFERENCES accounts(account_key) ON DELETE CASCADE
     )
   `;
-  console.log("Schema ready: accounts, profile_handles");
+  // User-linked "I made this from a prompt" results — Account > Results
+  // (private, all of a user's own) and Public Profile > Results (public
+  // subset, filterable by category).
+  await sql`
+    CREATE TABLE IF NOT EXISTS results (
+      id SERIAL PRIMARY KEY,
+      account_key TEXT NOT NULL REFERENCES accounts(account_key) ON DELETE CASCADE,
+      category_id TEXT NOT NULL,
+      roll_type TEXT NOT NULL DEFAULT 'free',
+      prompt_text TEXT NOT NULL,
+      result_url TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS results_account_idx ON results(account_key)`;
+  // Bidirectional follow graph. follower_key follows followee_key.
+  await sql`
+    CREATE TABLE IF NOT EXISTS follows (
+      follower_key TEXT NOT NULL REFERENCES accounts(account_key) ON DELETE CASCADE,
+      followee_key TEXT NOT NULL REFERENCES accounts(account_key) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (follower_key, followee_key)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS follows_followee_idx ON follows(followee_key)`;
+  console.log("Schema ready: accounts, profile_handles, results, follows");
 }
 
 main().catch((err) => {
