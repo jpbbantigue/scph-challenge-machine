@@ -219,12 +219,28 @@ async function setUsername(user, handle) {
   return { ok: true, profile: data.profile };
 }
 
+// Client-side (account.html) is the primary UX gate for URL validity; this
+// is a safety net that silently drops entries whose value looks like an
+// attempted URL (starts with http:// or https://) but doesn't parse as one.
+// Bare handles (no http(s):// prefix) are left alone — both fields accept
+// either a full link or a handle.
+function isValidUrlLike(v) {
+  const val = String(v || "").trim();
+  if (!/^https?:\/\//i.test(val)) return true;
+  try {
+    const u = new URL(val);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch (e) {
+    return false;
+  }
+}
+
 function sanitizeSocials(list) {
   if (!Array.isArray(list)) return [];
   return list.slice(0, MAX_SOCIALS).map((s) => ({
     platform: String((s && s.platform) || "").trim().slice(0, 40),
     value: String((s && s.value) || "").trim().slice(0, 200)
-  })).filter((s) => s.platform && s.value);
+  })).filter((s) => s.platform && s.value && isValidUrlLike(s.value));
 }
 
 function sanitizeLinkedAccounts(list) {
@@ -233,7 +249,7 @@ function sanitizeLinkedAccounts(list) {
     platform: String((a && a.platform) || "").trim().slice(0, 40),
     handle: String((a && a.handle) || "").trim().slice(0, 100),
     connected: !!(a && a.connected)
-  })).filter((a) => a.platform && a.handle);
+  })).filter((a) => a.platform && a.handle && isValidUrlLike(a.handle));
 }
 
 // Updates the editable profile fields (everything except the write-once

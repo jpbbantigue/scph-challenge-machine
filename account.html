@@ -38,10 +38,7 @@ a{color:var(--royal-hi);text-decoration:none;}
 a:hover{color:var(--gold-hi);}
 button{font-family:inherit;}
 
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ink);}
-.brand-mark{width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));display:block;}
-.back-link{font-size:13.5px;color:var(--ink-58);}
+.back-link{font-size:13px;color:var(--ink-50);display:inline-block;margin-bottom:14px;text-decoration:none;}
 .back-link:hover{color:var(--ink);}
 
 .layout{max-width:1100px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:240px 1fr;gap:32px;}
@@ -66,10 +63,10 @@ button{font-family:inherit;}
 .signout-btn{width:100%;padding:9px 12px;border-radius:10px;border:none;background:none;color:#FF9AA5;font-size:13px;font-weight:600;text-align:left;cursor:pointer;}
 .signout-btn:hover{background:rgba(230,58,70,0.08);}
 
-.panel{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:26px;margin-bottom:20px;}
-.panel h2{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--ink);margin:0 0 4px;}
+.panel{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;margin-bottom:20px;}
+.panel h2{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink);margin:0 0 4px;}
 .panel .sub{font-size:12.5px;color:var(--ink-50);margin:0 0 18px;}
-.field-label{display:block;font-family:var(--font-display);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin:14px 0 5px;}
+.field-label{display:block;font-family:var(--font-display);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-40);margin:14px 0 5px;}
 .field-label:first-of-type{margin-top:0;}
 input[type=text],input[type=url],textarea,select{
   width:100%;background:rgba(255,255,255,0.04);color:var(--ink);border:1px solid rgba(255,255,255,0.14);border-radius:10px;
@@ -88,8 +85,23 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 .status-msg.error{color:#FF9AA5;}
 
 .username-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:var(--font-mono);font-size:13px;color:var(--ink);}
+.username-row-edit{display:flex;gap:8px;max-width:360px;}
+.username-row-edit input{flex:1 1 auto;min-width:0;}
+.username-row-edit button{white-space:nowrap;flex-shrink:0;}
 .followers-link{background:none;border:none;color:var(--ink-58);font-size:12.5px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;}
 .followers-link:hover{color:var(--ink);}
+
+.entry-list{display:flex;flex-direction:column;gap:12px;}
+.entry-card{border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:18px 20px;display:flex;flex-direction:column;gap:8px;}
+.entry-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.entry-top-left{display:flex;align-items:center;gap:10px;}
+.entry-cat{font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:#9AB4FF;}
+.entry-time{font-size:12px;color:var(--ink-40);font-family:var(--font-mono);}
+.entry-text{font-size:14.5px;line-height:1.55;color:var(--ink);margin:0;}
+.entry-actions{display:flex;gap:10px;margin-top:4px;}
+.entry-actions button,.entry-actions a{padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.03);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;}
+.entry-actions .save-btn{border-color:rgba(244,191,58,0.3);background:rgba(244,191,58,0.08);color:var(--gold-hi);}
+.entry-actions .remove-btn{border-color:rgba(230,58,70,0.3);background:rgba(230,58,70,0.08);color:#FF9AA5;}
 
 .row-list{display:flex;flex-direction:column;gap:10px;}
 .row-item{display:flex;align-items:center;gap:8px;}
@@ -145,11 +157,6 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <a href="index.html" class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</a>
-  <a href="index.html" class="back-link">← Back to the machine</a>
-</div>
 
 <div id="root">
   <p class="state-msg">Loading account…</p>
@@ -225,6 +232,7 @@ function render(){
   root.innerHTML =
     '<div class="layout">' +
       '<div class="sidebar">' +
+        '<a href="index.html" class="back-link">← Back to Prompt Royale</a>' +
         '<div class="side-head">' +
           '<span class="avatar-big">'+initials(myData.profile.displayName || me.name)+'</span>' +
           '<div class="side-head-text">' +
@@ -288,7 +296,7 @@ function renderProfileTab(el){
       '<label class="field-label">Username</label>' +
       (p.handle
         ? '<div class="username-row">🔒 @'+escapeHTML(p.handle)+'</div><p class="hint">Usernames can only be set once.</p>'
-        : '<div style="display:flex;gap:8px;"><input type="text" id="fUsername" maxlength="20" placeholder="e.g. alexrivera"><button class="btn small" id="saveUsername">Set Username</button></div><p class="hint">Can only be set once — choose wisely.</p>'
+        : '<div class="username-row-edit"><input type="text" id="fUsername" maxlength="20" placeholder="e.g. alexrivera"><button class="btn small" id="saveUsername">Set Username</button></div><p class="hint">Can only be set once — choose wisely.</p>'
       ) +
       '<p class="status-msg" id="usernameStatus"></p>' +
 
@@ -356,6 +364,8 @@ function renderProfileTab(el){
   });
   document.getElementById("saveSocials").addEventListener("click", async ()=>{
     const rows = collectRows("socialsList");
+    const bad = rows.find(r=>!isValidUrlLike(r.value));
+    if(bad){ setStatus("socialsStatus", '"'+bad.value+'" doesn\'t look like a valid link (needs http:// or https://).', true); return; }
     try{
       const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ socials: rows }) });
       myData.profile = r.profile; setStatus("socialsStatus","Saved.");
@@ -369,11 +379,30 @@ function renderProfileTab(el){
   });
   document.getElementById("saveLinked").addEventListener("click", async ()=>{
     const rows = collectRows("linkedList", true);
+    const bad = rows.find(r=>!isValidUrlLike(r.handle));
+    if(bad){ setStatus("linkedStatus", '"'+bad.handle+'" doesn\'t look like a valid link (needs http:// or https://).', true); return; }
     try{
       const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ linkedAccounts: rows }) });
       myData.profile = r.profile; setStatus("linkedStatus","Saved.");
     }catch(e){ setStatus("linkedStatus", e.message, true); }
   });
+}
+
+// Socials/linked-account fields accept either a full URL or a bare @handle
+// (the input placeholders say so). We only gate values that *look like*
+// an attempted URL (start with http:// or https://) — those must parse as
+// valid absolute URLs via the URL constructor; plain handles pass through
+// untouched. Server-side sanitizeSocials/sanitizeLinkedAccounts apply the
+// same check as a safety net (see api/_lib/store.js).
+function isValidUrlLike(v){
+  const val = String(v||"").trim();
+  if(!/^https?:\/\//i.test(val)) return true;
+  try{
+    const u = new URL(val);
+    return u.protocol === "http:" || u.protocol === "https:";
+  }catch(e){
+    return false;
+  }
 }
 
 function renderRowList(containerId, rows, kind){
@@ -447,23 +476,21 @@ document.getElementById("closeFollowersModal").addEventListener("click", ()=>{
 function renderTicketList(el, title, sub, items, opts){
   el.innerHTML = '<h1 style="font-family:var(--font-display);font-size:24px;font-weight:700;margin:0 0 4px;">'+title+'</h1>' +
     '<p class="tab-sub">'+sub+'</p>' +
-    '<div class="panel">' +
-    (items.length ? items.slice().reverse().slice(0,50).map((item,idx)=>{
+    (items.length ? '<div class="entry-list">' + items.slice().reverse().slice(0,50).map((item,idx)=>{
       const realIdx = items.length-1-idx;
       const rollType = item.rollType === "ai" ? "ai" : "free";
-      return '<div class="list-item">' +
-        '<div class="list-item-top"><span class="cat-badge '+item.categoryId+'">'+catName(item.categoryId)+'</span>'+
-        '<span class="type-badge '+rollType+'">'+(rollType==="ai"?"AI":"Free")+'</span>'+
-        '<span style="margin-left:auto;">'+escapeHTML(item.time||"")+'</span></div>' +
-        '<div class="list-item-text">'+escapeHTML(item.mission)+'</div>' +
-        '<div class="list-item-actions">' +
+      return '<div class="entry-card">' +
+        '<div class="entry-top"><div class="entry-top-left"><span class="entry-cat">'+catName(item.categoryId)+'</span>'+
+        '<span class="type-badge '+rollType+'">'+(rollType==="ai"?"AI":"Free")+'</span></div>'+
+        '<span class="entry-time">'+escapeHTML(item.time||"")+'</span></div>' +
+        '<p class="entry-text">'+escapeHTML(item.mission)+'</p>' +
+        '<div class="entry-actions">' +
           '<button data-copy="'+realIdx+'">Copy</button>' +
-          (opts.showFavorite ? '<button data-fav="'+realIdx+'">Save to favorites</button>' : '') +
-          (opts.showRemove ? '<button class="remove" data-remove="'+realIdx+'">Remove</button>' : '') +
+          (opts.showFavorite ? '<button class="save-btn" data-fav="'+realIdx+'">Save to favorites</button>' : '') +
+          (opts.showRemove ? '<button class="remove-btn" data-remove="'+realIdx+'">Remove</button>' : '') +
         '</div>' +
       '</div>';
-    }).join("") : '<p class="empty-note">Nothing here yet.</p>') +
-  '</div>';
+    }).join("") + '</div>' : '<p class="empty-note">Nothing here yet.</p>');
 
   el.querySelectorAll("[data-copy]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -508,7 +535,8 @@ async function renderResultsTab(el){
       '<button class="btn" id="linkResultBtn">Link It</button>' +
       '<p class="status-msg" id="resultStatus"></p>' +
     '</div>' +
-    '<div class="panel"><h2>Your Results</h2><div id="resultsListWrap"><p class="empty-note">Loading…</p></div></div>';
+    '<h2 style="font-family:var(--font-display);font-size:16px;font-weight:600;margin:0 0 14px;">Your Results</h2>' +
+    '<div id="resultsListWrap"><p class="empty-note">Loading…</p></div>';
 
   document.getElementById("linkResultBtn").addEventListener("click", async ()=>{
     const prompt = document.getElementById("rPrompt").value.trim();
@@ -532,19 +560,19 @@ async function loadResultsList(){
   const wrap = document.getElementById("resultsListWrap");
   try{
     const r = await api("/api/results");
-    wrap.innerHTML = r.results.length ? r.results.map(item=>{
+    wrap.innerHTML = r.results.length ? '<div class="entry-list">' + r.results.map(item=>{
       const rollType = item.roll_type === "ai" ? "ai" : "free";
-      return '<div class="list-item">' +
-        '<div class="list-item-top"><span class="cat-badge '+item.category_id+'">'+catName(item.category_id)+'</span>'+
-        '<span class="type-badge '+rollType+'">'+(rollType==="ai"?"AI":"Free")+'</span>'+
-        '<span style="margin-left:auto;">'+new Date(item.created_at).toLocaleDateString()+'</span></div>' +
-        '<div class="list-item-text">'+escapeHTML(item.prompt_text)+'</div>' +
-        '<div class="list-item-actions">' +
-          (item.result_url ? '<a href="'+escapeHTML(item.result_url)+'" target="_blank" rel="noopener">View Result ↗</a>' : '') +
-          '<button class="remove" data-remove-result="'+item.id+'">Remove</button>' +
+      return '<div class="entry-card">' +
+        '<div class="entry-top"><div class="entry-top-left"><span class="entry-cat">'+catName(item.category_id)+'</span>'+
+        '<span class="type-badge '+rollType+'">'+(rollType==="ai"?"AI":"Free")+'</span></div>'+
+        '<span class="entry-time">'+new Date(item.created_at).toLocaleDateString()+'</span></div>' +
+        '<p class="entry-text">'+escapeHTML(item.prompt_text)+'</p>' +
+        '<div class="entry-actions">' +
+          (item.result_url ? '<a href="'+escapeHTML(item.result_url)+'" target="_blank" rel="noopener" class="save-btn">View Result ↗</a>' : '') +
+          '<button class="remove-btn" data-remove-result="'+item.id+'">Remove</button>' +
         '</div>' +
       '</div>';
-    }).join("") : '<p class="empty-note">Nothing linked yet.</p>';
+    }).join("") + '</div>' : '<p class="empty-note">Nothing linked yet.</p>';
     wrap.querySelectorAll("[data-remove-result]").forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         await api("/api/results?id="+btn.dataset.removeResult, { method:"DELETE" });
@@ -625,6 +653,7 @@ function renderSettingsTab(el){
         '<input type="text" id="sByokKey" placeholder="sk-ant-... / sk-...">' +
         '<label class="field-label">Model (optional override)</label>' +
         '<input type="text" id="sByokModel">' +
+        '<button class="btn small" id="saveAiSettings" style="margin-top:10px;">Save</button>' +
         '<p class="hint">Stored only in this browser’s local storage.</p>' +
       '</div>' +
       '<p class="status-msg" id="aiSettingsStatus"></p>' +
@@ -665,20 +694,24 @@ function renderSettingsTab(el){
     syncByokFieldsVisibility();
     setStatus("aiSettingsStatus", "Saved.");
   });
-  sByokKey.addEventListener("input", ()=>{
-    const src = sAiSource.value;
-    if(src !== "anthropic" && src !== "openai") return;
-    byokKeys[src] = sByokKey.value;
-    writeSharedState({ byokKeys });
-    setStatus("aiSettingsStatus", "Saved.");
-  });
-  sByokModel.addEventListener("input", ()=>{
-    const src = sAiSource.value;
-    if(src !== "anthropic" && src !== "openai") return;
-    byokModels[src] = sByokModel.value;
-    writeSharedState({ byokModels });
-    setStatus("aiSettingsStatus", "Saved.");
-  });
+
+  // BYOK key/model are only written on explicit Save (not on every
+  // keystroke) — avoids hammering localStorage and matches the mockup's
+  // explicit "Save" affordance.
+  const saveAiSettingsBtn = document.getElementById("saveAiSettings");
+  if(saveAiSettingsBtn){
+    saveAiSettingsBtn.addEventListener("click", ()=>{
+      const src = sAiSource.value;
+      if(src !== "anthropic" && src !== "openai"){
+        setStatus("aiSettingsStatus", "Choose a provider above first.", true);
+        return;
+      }
+      byokKeys[src] = sByokKey.value;
+      byokModels[src] = sByokModel.value;
+      writeSharedState({ byokKeys, byokModels });
+      setStatus("aiSettingsStatus", "Saved.");
+    });
+  }
 
   document.getElementById("deleteAccountBtn").addEventListener("click", ()=>{
     document.getElementById("deleteConfirmBox").innerHTML =

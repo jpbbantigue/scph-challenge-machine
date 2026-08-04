@@ -261,8 +261,30 @@ a:hover{color:var(--gold-hi);}
 .roll-btn.ai-variant .diamond{background:var(--gold);}
 .roll-btn .roll-note{opacity:0.7;font-weight:500;font-size:12.5px;}
 
+/* ---------- mini roller bar ---------- */
+.mini-roller-wrap{position:sticky;top:0;z-index:49;display:flex;justify-content:center;overflow:hidden;padding:0 20px;
+  transition:max-height .32s ease, opacity .28s ease, margin-top .32s ease;
+  max-height:0;opacity:0;margin-top:0;pointer-events:none;}
+.mini-roller-wrap.show{max-height:68px;opacity:1;margin-top:8px;pointer-events:auto;}
+.mini-roller{width:100%;max-width:1180px;display:flex;align-items:stretch;border-radius:12px;overflow:hidden;
+  background:rgba(9,12,22,0.92);border:1px solid rgba(244,191,58,0.3);backdrop-filter:blur(18px);
+  box-shadow:0 14px 32px rgba(0,0,0,0.4);font-family:var(--font-mono);}
+.mini-roller-stripe{width:4px;flex:none;background:linear-gradient(180deg,var(--gold),var(--crimson-hi));}
+.mini-roller-label{display:flex;align-items:center;padding:0 4px 0 16px;border-right:1px dashed rgba(255,255,255,0.14);
+  flex:none;font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+.mini-roller-values{display:flex;align-items:center;overflow-x:auto;flex:1;min-width:0;}
+.mini-roller-value{display:flex;flex-direction:column;gap:2px;padding:8px 16px;border-right:1px dashed rgba(255,255,255,0.1);flex:none;}
+.mini-roller-value .l{font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);white-space:nowrap;}
+.mini-roller-value .v{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;}
+.mini-roller-btn{flex:none;border:none;cursor:pointer;font-family:inherit;}
+.mini-roller-btn.roll{padding:0 20px;border-left:1px solid rgba(77,124,255,0.3);background:rgba(41,91,255,0.16);
+  color:#CBD8FF;font-weight:700;font-size:12.5px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;}
+.mini-roller-btn.icon{width:42px;border-left:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--ink);font-size:14px;}
+.mini-roller-btn.icon.gold{color:var(--gold-hi);}
+
 /* ---------- ticket / result ---------- */
-.ticket-wrap{max-width:640px;margin:0 auto;padding:0 24px clamp(48px,7vw,88px);}
+.ticket-wrap{max-width:640px;margin:0 auto;padding:0 24px clamp(48px,7vw,88px);display:none;scroll-margin-top:150px;}
+.ticket-wrap.show{display:block;}
 .ticket{
   border-radius:20px;padding:28px 30px;
   background:linear-gradient(180deg, rgba(20,26,46,0.85), rgba(9,12,22,0.9));
@@ -293,6 +315,7 @@ a:hover{color:var(--gold-hi);}
 .section-eyebrow{font-size:12.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;}
 .section-eyebrow.gold{color:var(--gold);}
 .section-eyebrow.blue{color:var(--royal-hi);}
+.section-eyebrow.crimson{color:var(--crimson-hi);}
 .section-head h2{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.6vw,42px);letter-spacing:-0.01em;margin:10px 0 0;color:#F8F9FF;}
 .section-head p{font-size:14.5px;line-height:1.6;color:var(--ink-50);max-width:480px;margin:16px auto 0;}
 
@@ -321,13 +344,27 @@ a:hover{color:var(--gold-hi);}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;}
 .cat-card{
   text-align:left;padding:24px;border-radius:20px;background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-family:inherit;color:inherit;
-  transition:transform .2s ease, border-color .2s ease;
+  border:1px solid rgba(255,255,255,0.08);font-family:inherit;color:inherit;
 }
-.cat-card:hover{transform:translateY(-4px);border-color:rgba(77,124,255,0.35);}
 .cat-glyph{width:34px;height:34px;border-radius:10px;display:block;margin-bottom:16px;}
 .cat-card .cat-name{display:block;font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px;}
 .cat-card .cat-blurb{display:block;font-size:13px;line-height:1.5;color:var(--ink-50);}
+
+/* ---------- example results ---------- */
+.examples-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+.example-card{
+  border-radius:20px;padding:24px;background:linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+  border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:14px;
+  transition:transform .2s ease, border-color .2s ease;
+}
+.example-card:hover{transform:translateY(-4px);border-color:rgba(77,124,255,0.3);}
+.example-card .ex-cat{font-size:11.5px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--royal-pale);}
+.example-card .ex-text{font-family:var(--font-display);font-size:16px;font-weight:600;line-height:1.5;color:var(--ink);margin:0;flex:1;}
+.example-actions{display:flex;gap:10px;}
+.ex-copy-btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.ex-copy-btn:hover{border-color:rgba(77,124,255,0.4);background:rgba(41,91,255,0.08);}
+.ex-try-btn{flex:1;text-align:center;padding:10px 12px;border-radius:10px;border:1px solid rgba(230,58,70,0.35);background:rgba(230,58,70,0.08);color:#FF9AA5;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;}
+.ex-try-btn:hover{background:rgba(230,58,70,0.16);}
 
 /* ---------- history/favorites panels ---------- */
 .panels{display:flex;flex-direction:column;gap:10px;}
@@ -440,6 +477,16 @@ details[open] summary::before{content:"▾ ";}
       <a class="pill-cta" href="#slot-machine">Start Rolling</a>
     </div>
   </nav>
+  <div class="mini-roller-wrap" id="miniRollerWrap" aria-hidden="true">
+    <div class="mini-roller">
+      <div class="mini-roller-stripe" aria-hidden="true"></div>
+      <div class="mini-roller-label">Now Rolling</div>
+      <div class="mini-roller-values" id="miniRollerValues"></div>
+      <button class="mini-roller-btn roll" id="miniRollAgainBtn" type="button">Roll Again</button>
+      <button class="mini-roller-btn icon" id="miniCopyBtn" type="button" aria-label="Copy prompt">&#10697;</button>
+      <button class="mini-roller-btn icon gold" id="miniSaveBtn" type="button" aria-label="Save prompt">&#9734;</button>
+    </div>
+  </div>
 </div>
 
 <div id="top"></div>
@@ -481,7 +528,7 @@ details[open] summary::before{content:"▾ ";}
 
 <p class="hint" id="aiFallbackNotice" hidden style="max-width:640px;margin:0 auto 14px;padding:10px 16px;text-align:center;border-radius:12px;background:rgba(230,58,70,0.1);border:1px solid rgba(230,58,70,0.3);color:var(--crimson-hi);"></p>
 
-<div class="ticket-wrap">
+<div class="ticket-wrap" id="ticketWrap">
   <article class="ticket" id="ticket" aria-live="polite">
     <div class="ticket-head">
       <span id="ticketNo">NO. 000000</span>
@@ -528,6 +575,15 @@ details[open] summary::before{content:"▾ ";}
     <h2>Choose where the roll takes you</h2>
   </div>
   <div class="cat-grid" id="categoryCards"></div>
+</section>
+
+<section class="section wide" id="examples">
+  <div class="section-head">
+    <span class="section-eyebrow crimson">Example Results</span>
+    <h2>A few rolls, for inspiration</h2>
+    <p>Link the results you create back to your rolls to see how far you've come.</p>
+  </div>
+  <div class="examples-grid" id="examplesGrid"></div>
 </section>
 
 <div class="final-cta-wrap">
@@ -889,20 +945,68 @@ function buildCategorySelectDOM(){
   categorySelectEl.value = state.categoryId;
 }
 
+// Cards are plain non-interactive divs — clicking does nothing per the
+// design spec (an earlier version wired them to switchCategory, but that
+// was reverted; the category <select> in the slot machine is the only way
+// to change category).
 function buildCategoryCardsDOM(){
   categoryCardsEl.innerHTML = "";
   CATEGORIES.forEach(cat=>{
     const accent = ACCENTS[cat.accent] || ACCENTS.royal;
-    const card = document.createElement("button");
-    card.type = "button";
+    const card = document.createElement("div");
     card.className = "cat-card";
     card.style.borderColor = accent.border;
     card.innerHTML =
       '<span class="cat-glyph" style="background:'+accent.glyph+'"></span>'+
       '<span class="cat-name">'+cat.name+'</span>'+
       '<span class="cat-blurb">'+cat.blurb+'</span>';
-    card.addEventListener("click", ()=>{ switchCategory(cat.id); document.getElementById("slot-machine").scrollIntoView({behavior:"smooth", block:"center"}); });
     categoryCardsEl.appendChild(card);
+  });
+}
+
+/* ---------------- example results ---------------- */
+// One finalized example sentence per live category, written in the same
+// style as buildMission()'s output — not raw reel values.
+const EXAMPLES = [
+  { categoryId:"music", text:"Write a bittersweet nostalgia Dream Pop x Trip-Hop fusion song about a lighthouse keeper's last night." },
+  { categoryId:"music", text:"Write a triumphant grief City Pop song about an astronaut coming home." },
+  { categoryId:"characters", text:"Create a wounded but hopeful reluctant hero character in a cyberpunk setting defined by never forgets a debt, haunted by terrified of silence, exploring redemption." },
+  { categoryId:"characters", text:"Create a coldly composed fallen mentor character in a noir mystery setting defined by keeps a list of people to apologize to, haunted by obsessed with control, exploring betrayal." },
+  { categoryId:"album", text:"Write a grief and renewal Dream Pop x Trip-Hop album/EP centered on a concept album following a character through five stages of grief." },
+  { categoryId:"album", text:"Write a digital isolation Synthwave album/EP centered on a soundtrack for a city that no longer exists." }
+];
+function buildExamplesDOM(){
+  const el = document.getElementById("examplesGrid");
+  if(!el) return;
+  el.innerHTML = "";
+  EXAMPLES.forEach(ex=>{
+    const cat = CATEGORY_BY_ID[ex.categoryId];
+    if(!cat) return;
+    const card = document.createElement("div");
+    card.className = "example-card";
+    card.innerHTML =
+      '<span class="ex-cat">'+cat.name+'</span>'+
+      '<p class="ex-text"></p>'+
+      '<div class="example-actions">'+
+        '<button type="button" class="ex-copy-btn">Copy Prompt</button>'+
+        '<a href="#slot-machine" class="ex-try-btn">Try This</a>'+
+      '</div>';
+    card.querySelector(".ex-text").textContent = ex.text;
+    const copyBtn = card.querySelector(".ex-copy-btn");
+    copyBtn.addEventListener("click", ()=>{
+      const done = ()=>{ const original = copyBtn.textContent; copyBtn.textContent = "Copied"; setTimeout(()=>copyBtn.textContent = original, 1400); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(ex.text).then(done).catch(()=>fallbackCopy(ex.text, done));
+      } else {
+        fallbackCopy(ex.text, done);
+      }
+    });
+    card.querySelector(".ex-try-btn").addEventListener("click", (e)=>{
+      e.preventDefault();
+      switchCategory(ex.categoryId);
+      document.getElementById("slot-machine").scrollIntoView({behavior:"smooth", block:"center"});
+    });
+    el.appendChild(card);
   });
 }
 
@@ -1123,6 +1227,7 @@ function renderTicket(){
     els.ticketTime.textContent = "";
     els.favBtn.classList.remove("favd");
     els.favBtn.innerHTML = '<span aria-hidden="true">☆</span> Save to favorites';
+    renderMiniRoller();
     return;
   }
   els.ticketNo.textContent = padTicketNo(c.no);
@@ -1131,7 +1236,50 @@ function renderTicket(){
   els.ticketMission.textContent = c.mission;
   els.favBtn.classList.toggle("favd", isFavorited(c));
   els.favBtn.innerHTML = isFavorited(c) ? '<span aria-hidden="true">★</span> Saved' : '<span aria-hidden="true">☆</span> Save to favorites';
+  renderMiniRoller();
 }
+
+/* ---------------- mini roller bar (sticky "Now Rolling" strip) ---------------- */
+// Only rendered/shown once the visitor has rolled at least once (hasRolled),
+// and only visible while scrolled past the hero and before "How It Works" —
+// uses separate show/hide thresholds (hysteresis) so it doesn't flicker
+// right at the scroll boundary.
+let hasRolled = false;
+const miniRollerWrapEl = document.getElementById("miniRollerWrap");
+const miniRollerValuesEl = document.getElementById("miniRollerValues");
+
+function renderMiniRoller(){
+  if(!miniRollerValuesEl) return;
+  const c = state.current;
+  if(!c || c.categoryId !== state.categoryId){ miniRollerValuesEl.innerHTML = ""; return; }
+  const cat = currentCategory();
+  miniRollerValuesEl.innerHTML = cat.reels
+    .filter(r=>isActive(r.key))
+    .map(r=>'<div class="mini-roller-value"><span class="l">'+escapeHTML(r.label.toUpperCase())+'</span><span class="v">'+escapeHTML(c.vals[r.key]||"")+'</span></div>')
+    .join("");
+}
+
+function updateMiniRollerVisibility(){
+  if(!miniRollerWrapEl) return;
+  if(!hasRolled){ miniRollerWrapEl.classList.remove("show"); return; }
+  const hero = document.getElementById("slot-machine");
+  const howItWorks = document.getElementById("how-it-works");
+  if(!hero || !howItWorks) return;
+  const heroBottom = hero.getBoundingClientRect().bottom;
+  const nextTop = howItWorks.getBoundingClientRect().top;
+  const wasShown = miniRollerWrapEl.classList.contains("show");
+  const pastHero = wasShown ? heroBottom < 130 : heroBottom < 70;
+  const beforeNextSection = wasShown ? nextTop > 40 : nextTop > 100;
+  miniRollerWrapEl.classList.toggle("show", pastHero && beforeNextSection);
+}
+window.addEventListener("scroll", updateMiniRollerVisibility, {passive:true});
+
+const miniRollAgainBtn = document.getElementById("miniRollAgainBtn");
+const miniCopyBtn = document.getElementById("miniCopyBtn");
+const miniSaveBtn = document.getElementById("miniSaveBtn");
+if(miniRollAgainBtn) miniRollAgainBtn.addEventListener("click", ()=>pullLever(lastRollUsedAI));
+if(miniCopyBtn) miniCopyBtn.addEventListener("click", ()=>{ if(els.copyBtn) els.copyBtn.click(); });
+if(miniSaveBtn) miniSaveBtn.addEventListener("click", ()=>{ if(els.favBtn) els.favBtn.click(); });
 
 function isFavorited(ticket){
   return state.favorites.some(f=>f.mission===ticket.mission);
@@ -1516,6 +1664,21 @@ async function pullLever(useAI){
   saveState();
   els.announcer.textContent = "New challenge: "+ticket.mission;
 
+  // Only rendered/shown after the first successful roll. Once it appears,
+  // auto-scroll it into view (window.scrollTo, not scrollIntoView) with a
+  // short delay so the scroll happens after the reel-landing animation settles.
+  const ticketWrapEl = document.getElementById("ticketWrap");
+  if(!hasRolled){
+    hasRolled = true;
+    if(ticketWrapEl) ticketWrapEl.classList.add("show");
+    setTimeout(()=>{
+      if(!ticketWrapEl) return;
+      const top = ticketWrapEl.getBoundingClientRect().top + window.scrollY - 110;
+      window.scrollTo({ top: top, behavior: "smooth" });
+    }, 400);
+  }
+  updateMiniRollerVisibility();
+
   spinning = false;
   applyLeverState();
 }
@@ -1707,6 +1870,7 @@ els.contactForm.addEventListener("submit", async (e)=>{
 function init(){
   buildCategorySelectDOM();
   buildCategoryCardsDOM();
+  buildExamplesDOM();
   buildReelsDOM();
   syncReelControlsFromState();
   rollCountEl.textContent = String(state.history.length);
@@ -1716,12 +1880,18 @@ function init(){
   if(state.current && state.current.categoryId === state.categoryId){
     renderReelValues(state.current.vals);
     renderTicket();
+    // A returning visitor already has a rolled ticket from a previous
+    // session — show it immediately, no scroll animation needed.
+    hasRolled = true;
+    const ticketWrapEl = document.getElementById("ticketWrap");
+    if(ticketWrapEl) ticketWrapEl.classList.add("show");
   } else {
     const placeholder = {};
     currentCategory().reels.forEach(r=>{ placeholder[r.key] = "—"; });
     renderReelValues(placeholder);
     renderTicket();
   }
+  updateMiniRollerVisibility();
   checkAccount();
   initHowItWorksAnimation();
 }
