@@ -54,6 +54,8 @@ button{font-family:inherit;}
 .side-name{font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .side-handle{font-size:11px;color:var(--ink-50);margin-top:1px;}
 .side-credits{font-size:11px;color:var(--gold);font-weight:600;}
+.side-credits-bar{height:5px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:8px;}
+.side-credits-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-deep));border-radius:999px;}
 .tier-badge{display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(244,191,58,0.16);border:1px solid rgba(244,191,58,0.35);color:var(--gold-hi);font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:middle;}
 .side-nav{display:flex;flex-direction:column;gap:2px;}
 .side-nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:none;color:var(--ink-65);font-size:13.5px;font-weight:500;cursor:pointer;}
@@ -230,6 +232,7 @@ function render(){
             '<div class="side-credits">'+(me.credits ? me.credits.remaining+" / "+me.credits.limit+" credits today" : "")+(me.tier==="scph" ? ' <span class="tier-badge">SCPH</span>' : '')+'</div>' +
           '</div>' +
         '</div>' +
+        (me.credits ? '<div class="side-credits-bar"><div class="side-credits-bar-fill" style="width:'+Math.round(me.credits.remaining/me.credits.limit*100)+'%;"></div></div>' : '') +
         '<nav class="side-nav">' + NAV_ITEMS.map(navBtn).join("") + '</nav>' +
         '<hr>' +
         '<button class="signout-btn" id="signOutBtn">Sign out</button>' +

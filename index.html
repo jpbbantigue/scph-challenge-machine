@@ -134,6 +134,8 @@ a:hover{color:var(--gold-hi);}
 .dd-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:15px;color:#fff;flex:none;}
 .dd-name{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .dd-credits{font-size:11.5px;color:var(--gold-hi);font-weight:600;margin-top:2px;}
+.dd-credits-bar{height:5px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:8px;}
+.dd-credits-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-deep));border-radius:999px;}
 .dd-tier-badge{display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(244,191,58,0.16);border:1px solid rgba(244,191,58,0.35);color:var(--gold-hi);font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:middle;}
 .dd-links{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}
 .dd-links a{display:block;padding:9px 10px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:500;}
@@ -254,6 +256,10 @@ a:hover{color:var(--gold-hi);}
 .roll-btn:active,.roll-btn.pressed{transform:translateY(0) scale(.98);}
 .roll-btn:disabled{opacity:.6;cursor:default;}
 .roll-btn .diamond{width:13px;height:13px;background:var(--gold-hi);transform:rotate(45deg);border-radius:3px;flex:none;}
+.roll-btn.ai-variant{background:rgba(244,191,58,0.08);border:1px solid rgba(244,191,58,0.4);color:var(--gold-hi);box-shadow:none;}
+.roll-btn.ai-variant:hover:not(:disabled){background:rgba(244,191,58,0.14);}
+.roll-btn.ai-variant .diamond{background:var(--gold);}
+.roll-btn .roll-note{opacity:0.7;font-weight:500;font-size:12.5px;}
 
 /* ---------- ticket / result ---------- */
 .ticket-wrap{max-width:640px;margin:0 auto;padding:0 24px clamp(48px,7vw,88px);}
@@ -460,9 +466,13 @@ details[open] summary::before{content:"▾ ";}
       <div class="reels" id="reels" role="group" aria-label="Prompt reels"></div>
 
       <div class="roll-row">
-        <button class="roll-btn" id="pullLever" type="button">
+        <button class="roll-btn" id="pullLeverFree" type="button">
           <span class="diamond" aria-hidden="true"></span>
-          Pull
+          Roll Free <span class="roll-note">(Unlimited)</span>
+        </button>
+        <button class="roll-btn ai-variant" id="pullLeverAI" type="button">
+          <span class="diamond" aria-hidden="true"></span>
+          Use AI <span class="roll-note" id="useAiNote">(50/day)</span>
         </button>
       </div>
     </div>
@@ -777,7 +787,8 @@ function renderAccountUI(){
     dd.innerHTML =
       '<div class="dd-user-row"><span class="dd-avatar">'+initial+'</span><div>'+
         '<div class="dd-name">'+escapeHTML(account.name)+(account.tier==="scph" ? ' <span class="dd-tier-badge">SCPH</span>' : '')+'</div>'+
-        (account.credits ? '<div class="dd-credits">'+account.credits.remaining+' / '+account.credits.limit+' AI rolls left</div>' : '')+
+        (account.credits ? '<div class="dd-credits">'+account.credits.remaining+' / '+account.credits.limit+' AI rolls left</div>'+
+          '<div class="dd-credits-bar"><div class="dd-credits-bar-fill" style="width:'+Math.round(account.credits.remaining/account.credits.limit*100)+'%;"></div></div>' : '')+
       '</div></div>'+
       '<div class="dd-links">'+
         '<a href="account.html#profile">Profile</a>'+
@@ -816,6 +827,11 @@ function renderAccountUI(){
 function updateAICreditsHint(){
   updateCreditsExhaustedState();
   updateSignInNotice();
+  if(els.useAiNote){
+    els.useAiNote.textContent = account.signedIn && account.credits
+      ? "("+account.credits.remaining+"/"+account.credits.limit+" today)"
+      : "(50/day)";
+  }
 }
 
 async function checkAccount(){
@@ -928,7 +944,9 @@ const els = {
   copyBtn: document.getElementById("copyBtn"),
   favBtn: document.getElementById("favBtn"),
   aiFallbackNotice: document.getElementById("aiFallbackNotice"),
-  lever: document.getElementById("pullLever"),
+  leverFree: document.getElementById("pullLeverFree"),
+  leverAI: document.getElementById("pullLeverAI"),
+  useAiNote: document.getElementById("useAiNote"),
   contactBtn: document.getElementById("contactBtn"),
   contactBackdrop: document.getElementById("contactBackdrop"),
   closeContact: document.getElementById("closeContact"),
@@ -1313,15 +1331,29 @@ function updateSignInNotice(){
   }
 }
 
+// The mockup has two separate roll buttons (Free / Use AI) rather than a
+// persistent AI-mode setting driving a single button. AI-provider *choice*
+// (Groq vs BYOK Claude/OpenAI) still lives in Account > Settings — this
+// just decides, per click, whether to use it at all: "Roll Free" always
+// bypasses AI regardless of that setting; "Use AI" engages whatever's
+// configured there (defaulting to this site's Groq key if nothing/off is
+// selected, since "Use AI" should work without a Settings trip first).
+function effectiveSourceFor(useAI){
+  if(!useAI) return "off";
+  if(state.aiSource === "anthropic" || state.aiSource === "openai") return state.aiSource;
+  return "groq";
+}
+
 // Resolves a value for every key in `keys`, always — falls back to the
 // built-in list per key (or for the whole batch, for groq) if AI mode is
 // off, unavailable, or (for groq specifically) the daily credit limit or
 // timeout is hit. Groq is one batched request per call (1 credit total,
 // regardless of how many keys); Anthropic/OpenAI stay per-key since they're
 // BYOK and unmetered.
-async function getFreshValuesForPull(keys){
+async function getFreshValuesForPull(keys, useAI){
+  const source = effectiveSourceFor(useAI);
   const map = {};
-  if(state.aiSource === "groq"){
+  if(source === "groq"){
     try{
       const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
       const batch = await Promise.race([groqGenerateBatch(currentCategory(), keys), timeout]);
@@ -1336,7 +1368,7 @@ async function getFreshValuesForPull(keys){
     }
     return map;
   }
-  if(state.aiSource === "anthropic" || state.aiSource === "openai"){
+  if(source === "anthropic" || source === "openai"){
     await Promise.all(keys.map(async key=>{
       try{
         const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
@@ -1355,19 +1387,20 @@ const DEFAULT_SPIN_DURATION = 700;
 let spinning = false;
 let creditsExhausted = false;
 
-// Keeps the lever disabled while spinning OR while this site's own AI is
-// selected, the visitor is signed in, and today's credits are used up —
-// rather than letting them keep pulling into a silent built-in-list
-// fallback, they have to explicitly switch AI off (or add their own key)
-// to keep rolling for free.
+// "Roll Free" never touches credits, so it only disables while spinning.
+// "Use AI" additionally disables once today's Groq credits are used up
+// (only relevant when no BYOK key is configured — BYOK is never metered) —
+// rather than letting a click silently fall back to the built-in list, it
+// has to be explicit: add your own key, or wait for tomorrow.
 function applyLeverState(){
-  els.lever.disabled = spinning || creditsExhausted;
-  els.lever.title = creditsExhausted
-    ? "Daily AI limit reached — switch AI off in Settings (or add your own key) to keep rolling for free."
+  els.leverFree.disabled = spinning;
+  els.leverAI.disabled = spinning || creditsExhausted;
+  els.leverAI.title = creditsExhausted
+    ? "Daily AI limit reached — add your own key in Settings, or try again tomorrow."
     : "";
 }
 function updateCreditsExhaustedState(){
-  creditsExhausted = !!(state.aiSource === "groq" && account.signedIn && account.credits && account.credits.remaining <= 0);
+  creditsExhausted = !!(effectiveSourceFor(true) === "groq" && account.signedIn && account.credits && account.credits.remaining <= 0);
   applyLeverState();
 }
 
@@ -1434,18 +1467,24 @@ function recordRollStats(categoryId){
   s.streak = streak;
 }
 
-async function pullLever(){
-  if(spinning || creditsExhausted) return;
+// Remembered so a single-reel reroll (no separate free/AI buttons on the
+// reel tiles themselves) matches whichever button the visitor last pulled.
+let lastRollUsedAI = false;
+
+async function pullLever(useAI){
+  if(spinning || (useAI && creditsExhausted)) return;
+  lastRollUsedAI = useAI;
   spinning = true;
   applyLeverState();
-  els.lever.classList.add("pressed");
-  setTimeout(()=>els.lever.classList.remove("pressed"), 140);
+  const btn = useAI ? els.leverAI : els.leverFree;
+  btn.classList.add("pressed");
+  setTimeout(()=>btn.classList.remove("pressed"), 140);
 
   const cat = currentCategory();
   const keys = cat.reels.map(r=>r.key);
   const hasCurrentSameCat = !!(state.current && state.current.categoryId === cat.id);
   const keysNeedingFresh = keys.filter(key=>isActive(key) && !(currentLocks()[key] && hasCurrentSameCat));
-  const freshMap = keysNeedingFresh.length ? await getFreshValuesForPull(keysNeedingFresh) : {};
+  const freshMap = keysNeedingFresh.length ? await getFreshValuesForPull(keysNeedingFresh, useAI) : {};
   const results = await Promise.all(keys.map(key=>{
     if(!isActive(key)) return spinReel(key, Promise.resolve(null));
     const valuePromise = (currentLocks()[key] && hasCurrentSameCat) ? Promise.resolve(state.current.vals[key]) : Promise.resolve(freshMap[key]);
@@ -1462,10 +1501,10 @@ async function pullLever(){
     vals: vals,
     mission: buildMission(vals),
     // Free/AI badge shown in Account > History/Favorites/Results (never on
-    // the public profile — that's private, per the design). Reflects
-    // whether AI mode was engaged for this pull, not whether every reel
-    // actually got an AI value (some may have silently fallen back).
-    rollType: (state.aiSource && state.aiSource !== "off") ? "ai" : "free"
+    // the public profile — that's private, per the design). Reflects which
+    // button was pressed, not whether every reel actually got an AI value
+    // (some may have silently fallen back).
+    rollType: useAI ? "ai" : "free"
   };
   state.current = ticket;
   state.history.push(ticket);
@@ -1482,10 +1521,11 @@ async function pullLever(){
 }
 
 async function rerollSingle(key){
-  if(spinning || creditsExhausted || currentLocks()[key] || !isActive(key)) return;
-  if(!state.current || state.current.categoryId !== state.categoryId){ pullLever(); return; }
+  if(spinning || currentLocks()[key] || !isActive(key)) return;
+  if(lastRollUsedAI && creditsExhausted) return;
+  if(!state.current || state.current.categoryId !== state.categoryId){ pullLever(lastRollUsedAI); return; }
   spinning = true;
-  const freshMap = await getFreshValuesForPull([key]);
+  const freshMap = await getFreshValuesForPull([key], lastRollUsedAI);
   const value = await spinReel(key, Promise.resolve(freshMap[key]));
   state.current.vals[key] = value;
   state.current.mission = buildMission(state.current.vals);
@@ -1541,12 +1581,13 @@ function bindReelEvents(){
   });
 }
 
-els.lever.addEventListener("click", pullLever);
+els.leverFree.addEventListener("click", ()=>pullLever(false));
+els.leverAI.addEventListener("click", ()=>pullLever(true));
 
 document.addEventListener("keydown", (e)=>{
   if(e.code === "Space" && document.activeElement === document.body){
     e.preventDefault();
-    pullLever();
+    pullLever(false);
   }
 });
 
