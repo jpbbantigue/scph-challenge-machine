@@ -81,6 +81,13 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 .btn.secondary{background:rgba(255,255,255,0.06);color:var(--ink);border:1px solid rgba(255,255,255,0.14);}
 .btn.danger{background:rgba(230,58,70,0.12);color:#FF9AA5;border:1px solid rgba(230,58,70,0.35);}
 .btn.small{padding:6px 12px;font-size:12px;margin-top:0;}
+.btn-primary{padding:9px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,#295BFF,#1836B2);color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-top:12px;}
+.btn-primary:hover{background:linear-gradient(135deg,#3A6BFF,#2142C4);}
+.btn-primary.small{padding:6px 12px;font-size:12px;margin-top:0;}
+.hint-gold{font-size:11.5px;color:var(--gold-hi);margin:0 0 8px;}
+.banner-slot,.avatar-slot{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.14);color:var(--ink-40);font-size:12.5px;cursor:pointer;}
+.avatar-slot{font-size:11px;}
+.banner-slot:hover,.avatar-slot:hover{background:rgba(255,255,255,0.05);color:var(--ink-50);}
 .status-msg{font-size:12px;color:var(--ink-50);min-height:16px;margin-top:8px;}
 .status-msg.error{color:#FF9AA5;}
 
@@ -104,11 +111,10 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 .entry-actions .remove-btn{border-color:rgba(230,58,70,0.3);background:rgba(230,58,70,0.08);color:#FF9AA5;}
 
 .row-list{display:flex;flex-direction:column;gap:10px;}
-.row-item{display:flex;align-items:center;gap:8px;}
-.row-item select{flex:0 0 130px;}
-.row-item input{flex:1;}
-.row-remove{flex:0 0 auto;width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:var(--ink-50);cursor:pointer;font-size:14px;}
-.row-remove:hover{color:#FF9AA5;border-color:rgba(230,58,70,0.3);}
+.row-item{display:grid;grid-template-columns:130px 1fr 34px;gap:10px;align-items:center;}
+.row-item.linked-row{grid-template-columns:120px 1fr auto 34px;}
+.row-remove{width:34px;height:34px;border-radius:8px;border:1px solid rgba(230,58,70,0.3);background:rgba(230,58,70,0.08);color:#FF9AA5;cursor:pointer;font-size:14px;}
+.row-remove:hover{color:#fff;border-color:rgba(230,58,70,0.5);}
 .add-row-btn{align-self:flex-start;background:none;border:1px dashed rgba(255,255,255,0.2);color:var(--ink-58);border-radius:10px;padding:8px 14px;font-size:12.5px;cursor:pointer;margin-top:4px;}
 .add-row-btn:hover{color:var(--ink);border-color:rgba(77,124,255,0.4);}
 .connect-toggle{padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid;cursor:pointer;}
@@ -134,9 +140,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 .list-item-actions .remove{color:#FF9AA5;}
 .empty-note{font-size:13px;color:var(--ink-40);padding:8px 0;}
 
-.results-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-.results-form .full{grid-column:1 / -1;}
-@media (max-width:600px){.results-form{grid-template-columns:1fr;}}
+.results-form{display:grid;grid-template-columns:130px 100px 1fr 1fr auto;gap:10px;align-items:center;margin-bottom:20px;}
+@media (max-width:900px){.results-form{grid-template-columns:1fr;}}
 
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
 .modal-backdrop.open{display:flex;}
@@ -288,22 +293,32 @@ function renderProfileTab(el){
     '</div>' +
     '<p class="tab-sub">This is how creators will see you across Prompt Royale.'+(p.handle ? '' : ' Set a username below to make your profile visible.')+'</p>' +
 
+    '<div class="profile-media" style="position:relative;border-radius:20px;overflow:hidden;margin-bottom:56px;border:1px solid rgba(255,255,255,0.08);">' +
+      '<div class="banner-slot" id="bannerSlot" style="width:100%;height:180px;">' +
+        (p.bannerUrl ? '<img src="'+escapeHTML(p.bannerUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : '<span>Drop a banner image</span>') +
+      '</div>' +
+      '<div class="avatar-slot" id="avatarSlot" style="position:absolute;left:24px;bottom:-40px;width:96px;height:96px;border-radius:50%;border:4px solid #05070d;overflow:hidden;">' +
+        (p.avatarUrl ? '<img src="'+escapeHTML(p.avatarUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : '<span>Photo</span>') +
+      '</div>' +
+    '</div>' +
+
     '<div class="panel">' +
       '<label class="field-label" for="fDisplayName">Display name</label>' +
       '<input type="text" id="fDisplayName" maxlength="60" value="'+escapeHTML(p.displayName||"")+'">' +
-      '<button class="btn small secondary" id="saveDisplayName" style="margin-top:8px;">Save name</button>' +
+      '<button class="btn-primary small" id="saveDisplayName" style="margin-top:8px;">Save name</button>' +
 
       '<label class="field-label">Username</label>' +
+      '<p class="hint-gold">Can only be set once — choose wisely.</p>' +
       (p.handle
-        ? '<div class="username-row">🔒 @'+escapeHTML(p.handle)+'</div><p class="hint">Usernames can only be set once.</p>'
-        : '<div class="username-row-edit"><input type="text" id="fUsername" maxlength="20" placeholder="e.g. alexrivera"><button class="btn small" id="saveUsername">Set Username</button></div><p class="hint">Can only be set once — choose wisely.</p>'
+        ? '<div class="username-row">🔒 @'+escapeHTML(p.handle)+'</div>'
+        : '<div class="username-row-edit"><input type="text" id="fUsername" maxlength="20" placeholder="e.g. alexrivera"><button class="btn-primary small" id="saveUsername">Set Username</button></div>'
       ) +
       '<p class="status-msg" id="usernameStatus"></p>' +
 
       '<label class="field-label" for="fBio">Bio</label>' +
       '<textarea id="fBio" rows="3" maxlength="200" placeholder="Tell people what you create...">'+escapeHTML(p.bio||"")+'</textarea>' +
       '<div class="char-count"><span id="bioCount">'+((p.bio||"").length)+'</span> / 200</div>' +
-      '<button class="btn small secondary" id="saveBio" style="margin-top:8px;">Save bio</button>' +
+      '<button class="btn-primary small" id="saveBio" style="margin-top:8px;">Save bio</button>' +
       '<p class="status-msg" id="profileStatus"></p>' +
     '</div>' +
 
@@ -413,7 +428,7 @@ function renderRowList(containerId, rows, kind){
     if(kind === "social"){
       return '<div class="row-item" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="URL or @handle" value="'+escapeHTML(row.value||"")+'"><button class="row-remove" data-remove="'+i+'">&times;</button></div>';
     }
-    return '<div class="row-item" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="handle" value="'+escapeHTML(row.handle||"")+'">'+
+    return '<div class="row-item linked-row" data-i="'+i+'"><select class="row-platform">'+opts+'</select><input type="text" class="row-value" placeholder="handle" value="'+escapeHTML(row.handle||"")+'">'+
       '<button class="connect-toggle '+(row.connected?"connected":"not-connected")+'" data-toggle-connect="'+i+'">'+(row.connected?"Connected":"Connect")+'</button>' +
       '<button class="row-remove" data-remove="'+i+'">&times;</button></div>';
   }).join("") || '<p class="empty-note">Nothing added yet.</p>';
@@ -527,12 +542,12 @@ async function renderResultsTab(el){
     '<div class="panel">' +
       '<h2>Link a new result</h2>' +
       '<div class="results-form">' +
-        '<div><label class="field-label">Category</label><select id="rCategory">'+CATEGORIES.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join("")+'</select></div>' +
-        '<div><label class="field-label">Roll type</label><select id="rRollType"><option value="free">Free</option><option value="ai">AI</option></select></div>' +
-        '<div class="full"><label class="field-label">Prompt</label><input type="text" id="rPrompt" placeholder="Paste the prompt text"></div>' +
-        '<div class="full"><label class="field-label">Result URL</label><input type="url" id="rUrl" placeholder="https://..."></div>' +
+        '<select id="rCategory">'+CATEGORIES.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join("")+'</select>' +
+        '<select id="rRollType"><option value="free">Free</option><option value="ai">AI</option></select>' +
+        '<input type="text" id="rPrompt" placeholder="Paste the prompt text">' +
+        '<input type="url" id="rUrl" placeholder="Result link (e.g. Suno URL)">' +
+        '<button class="btn-primary" id="linkResultBtn">Link It</button>' +
       '</div>' +
-      '<button class="btn" id="linkResultBtn">Link It</button>' +
       '<p class="status-msg" id="resultStatus"></p>' +
     '</div>' +
     '<h2 style="font-family:var(--font-display);font-size:16px;font-weight:600;margin:0 0 14px;">Your Results</h2>' +
