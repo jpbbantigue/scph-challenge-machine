@@ -1,10 +1,10 @@
 // Vercel Serverless Function: GET /api/auth-me — returns { signedIn: false } or
-// { signedIn: true, provider, name, credits: {remaining, limit}, profile, followerCount }
+// { signedIn: true, provider, name, credits: {remaining, limit}, profile, followerCount, linkedProviders }
 // followerCount is private — only ever returned here, to the account owner,
 // never on the public profile response (see profile.js).
 const { getSessionUser } = require("./_lib/session");
 const { getProvider } = require("./_lib/providers");
-const { getCreditsStatus, loadUserData, getFollowerCount } = require("./_lib/store");
+const { getCreditsStatus, loadUserData, getFollowerCount, getLinkedProviders } = require("./_lib/store");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -14,10 +14,12 @@ module.exports = async (req, res) => {
     res.status(200).json({ signedIn: false, providers });
     return;
   }
-  const [credits, data, followerCount] = await Promise.all([
+  const accountKey = user.accountKey || (user.provider + ":" + user.sub);
+  const [credits, data, followerCount, linkedProviders] = await Promise.all([
     getCreditsStatus(user),
     loadUserData(user),
-    getFollowerCount(user.provider + ":" + user.sub)
+    getFollowerCount(accountKey),
+    getLinkedProviders(user)
   ]);
   res.status(200).json({
     signedIn: true,
@@ -27,6 +29,7 @@ module.exports = async (req, res) => {
     providers,
     credits,
     profile: data.profile,
-    followerCount
+    followerCount,
+    linkedProviders
   });
 };

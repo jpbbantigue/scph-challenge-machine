@@ -1,9 +1,14 @@
 // Vercel Serverless Function: GET /api/auth-callback?provider=...&code=...&state=...
-// Exchanges the code for a token, fetches the visitor's profile, and
-// redirects home with a signed session cookie set.
+// Exchanges the code for a token, fetches the visitor's profile, and either:
+//   - links this identity to the visitor's already-signed-in account (if the
+//     "scph_oauth_link" cookie is present — see auth-start.js), or
+//   - signs in normally, resolving the canonical accountKey (in case this
+//     identity was linked to another account previously) and baking it into
+//     the session.
 
 const { getProvider, redirectUri } = require("./_lib/providers");
-const { createSessionToken, sessionCookie, parseCookies } = require("./_lib/session");
+const { createSessionToken, sessionCookie, parseCookies, getSessionUser } = require("./_lib/session");
+const { resolveAccountKey, linkIdentity } = require("./_lib/store");
 
 module.exports = async (req, res) => {
   const q = req.query || {};
@@ -17,6 +22,8 @@ module.exports = async (req, res) => {
     res.status(400).send("Invalid or expired sign-in attempt — please try again.");
     return;
   }
+  const isLinkFlow = cookies.scph_oauth_link === "1";
+  const existingUser = isLinkFlow ? getSessionUser(req) : null; // read BEFORE we touch the session cookie
 
   const tokenParams = new URLSearchParams({
     client_id: cfg.clientId,
@@ -58,18 +65,33 @@ module.exports = async (req, res) => {
   const mapped = cfg.mapProfile(profile);
   if (!mapped.sub) { res.status(502).send("Provider profile was missing an id"); return; }
 
+  const clearOauthCookies = [
+    "scph_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
+    "scph_oauth_link=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0"
+  ];
+
+  // --- Linking flow: attach this identity to the already-signed-in account,
+  // then send them back to Settings without touching their session cookie. ---
+  if (isLinkFlow && existingUser) {
+    const result = await linkIdentity(existingUser, provider, String(mapped.sub));
+    res.setHeader("Set-Cookie", clearOauthCookies);
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Location", result.ok ? "/account.html?linked=1#settings" : "/account.html?linkError=" + encodeURIComponent(result.error) + "#settings");
+    res.status(302).end();
+    return;
+  }
+
+  // --- Normal sign-in ---
   // Credit tier is decided once, here, at sign-in — not re-checked on every
   // request — so it stays fixed for the life of the session (up to 30 days).
   // Signing out and back in re-evaluates it. Only Discord can be checked
   // (via the "guilds" scope); Google/Facebook sign-ins are always "basic".
   const tier = provider === "discord" ? await computeDiscordTier(accessToken) : "basic";
+  const accountKey = await resolveAccountKey({ provider, sub: String(mapped.sub) });
 
-  const token = createSessionToken({ provider, sub: String(mapped.sub), name: mapped.name, tier });
+  const token = createSessionToken({ provider, sub: String(mapped.sub), name: mapped.name, tier, accountKey });
 
-  res.setHeader("Set-Cookie", [
-    sessionCookie(token),
-    "scph_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0"
-  ]);
+  res.setHeader("Set-Cookie", [sessionCookie(token), ...clearOauthCookies]);
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Location", "/");
   res.status(302).end();

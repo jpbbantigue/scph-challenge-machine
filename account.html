@@ -47,17 +47,20 @@ button{font-family:inherit;}
 .layout{max-width:1100px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:240px 1fr;gap:32px;}
 @media (max-width:800px){.layout{grid-template-columns:1fr;}}
 
-.sidebar{position:sticky;top:24px;align-self:start;}
-.avatar-big{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:24px;color:#fff;margin-bottom:12px;}
-.side-name{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink);}
-.side-handle{font-size:12.5px;color:var(--ink-50);margin-top:2px;}
-.side-credits{font-size:11.5px;color:var(--gold);font-weight:600;margin-top:8px;}
+.sidebar{position:sticky;top:24px;align-self:start;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:20px 16px;display:flex;flex-direction:column;gap:18px;}
+.side-head{display:flex;align-items:center;gap:10px;padding:0 4px;}
+.avatar-big{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:14px;color:#fff;flex:none;}
+.side-head-text{min-width:0;}
+.side-name{font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.side-handle{font-size:11px;color:var(--ink-50);margin-top:1px;}
+.side-credits{font-size:11px;color:var(--gold);font-weight:600;}
 .tier-badge{display:inline-block;padding:1px 7px;border-radius:999px;background:rgba(244,191,58,0.16);border:1px solid rgba(244,191,58,0.35);color:var(--gold-hi);font-size:9.5px;font-weight:700;letter-spacing:0.04em;vertical-align:middle;}
-.side-nav{display:flex;flex-direction:column;gap:2px;margin-top:20px;}
-.side-nav button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:10px;border:none;background:none;color:var(--ink-65);font-size:13.5px;font-weight:500;cursor:pointer;}
+.side-nav{display:flex;flex-direction:column;gap:2px;}
+.side-nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:none;color:var(--ink-65);font-size:13.5px;font-weight:500;cursor:pointer;}
+.side-nav button .nav-glyph{width:8px;height:8px;flex:none;}
 .side-nav button:hover{background:rgba(255,255,255,0.05);color:var(--ink);}
-.side-nav button.active{background:rgba(41,91,255,0.14);color:var(--ink);}
-.side-nav hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:10px 0;}
+.side-nav button.active{background:rgba(41,91,255,0.14);color:var(--ink);font-weight:600;}
+.sidebar hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:0;}
 .signout-btn{width:100%;padding:9px 12px;border-radius:10px;border:none;background:none;color:#FF9AA5;font-size:13px;font-weight:600;text-align:left;cursor:pointer;}
 .signout-btn:hover{background:rgba(230,58,70,0.08);}
 
@@ -105,6 +108,12 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 .cat-badge.music{background:rgba(41,91,255,0.14);color:var(--royal-hi);}
 .cat-badge.characters{background:rgba(230,58,70,0.14);color:var(--crimson-hi);}
 .cat-badge.album{background:rgba(244,191,58,0.14);color:var(--gold);}
+.type-badge{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700;}
+.type-badge.ai{background:rgba(244,191,58,0.15);color:var(--gold-hi);}
+.type-badge.free{background:rgba(41,91,255,0.15);color:#9AB4FF;}
+.tab-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
+.tab-header h1{font-family:var(--font-display);font-size:24px;font-weight:700;margin:0;}
+.tab-sub{font-size:13.5px;color:var(--ink-50);margin:0 0 24px;}
 .list-item-text{font-size:13.5px;color:var(--ink);line-height:1.5;}
 .list-item-actions{display:flex;gap:10px;margin-top:8px;}
 .list-item-actions button,.list-item-actions a{background:none;border:none;color:var(--royal-hi);font-size:12px;font-weight:600;cursor:pointer;padding:0;}
@@ -161,8 +170,15 @@ const CATEGORIES = [
   { id:"characters", name:"Characters" },
   { id:"album", name:"Album/EP" }
 ];
-const SOCIAL_PLATFORMS = ["X / Twitter","Instagram","TikTok","YouTube","Bluesky","Website","Other"];
+const SOCIAL_PLATFORMS = ["YouTube","Instagram","Facebook","X (Twitter)","TikTok","Other"];
 const CREATIVE_PLATFORMS = ["Suno","Emochi","DreamGen","Other"];
+const NAV_ITEMS = [
+  { id:"profile", label:"Profile", color:"#4D7CFF", radius:"50%" },
+  { id:"history", label:"History", color:"#9AB4FF", radius:"2px" },
+  { id:"favorites", label:"Favorites", color:"#FFD978", radius:"2px" },
+  { id:"results", label:"Results", color:"#E63A46", radius:"2px" },
+  { id:"settings", label:"Settings", color:"rgba(243,245,252,0.5)", radius:"2px" }
+];
 
 const root = document.getElementById("root");
 let me = null; // /api/auth-me response
@@ -207,13 +223,14 @@ function render(){
   root.innerHTML =
     '<div class="layout">' +
       '<div class="sidebar">' +
-        '<div class="avatar-big">'+initials(myData.profile.displayName || me.name)+'</div>' +
-        '<div class="side-name">'+escapeHTML(myData.profile.displayName || me.name)+'</div>' +
-        '<div class="side-handle">'+(myData.profile.handle ? "@"+escapeHTML(myData.profile.handle) : "No username set")+'</div>' +
-        '<div class="side-credits">'+(me.credits ? me.credits.remaining+" / "+me.credits.limit+" AI rolls left today" : "")+(me.tier==="scph" ? ' <span class="tier-badge">SCPH</span>' : '')+'</div>' +
-        '<nav class="side-nav">' +
-          tabBtn("profile","Profile") + tabBtn("history","History") + tabBtn("favorites","Favorites") + tabBtn("results","Results") + tabBtn("settings","Settings") +
-        '</nav>' +
+        '<div class="side-head">' +
+          '<span class="avatar-big">'+initials(myData.profile.displayName || me.name)+'</span>' +
+          '<div class="side-head-text">' +
+            '<div class="side-name">'+escapeHTML(myData.profile.displayName || me.name)+'</div>' +
+            '<div class="side-credits">'+(me.credits ? me.credits.remaining+" / "+me.credits.limit+" credits today" : "")+(me.tier==="scph" ? ' <span class="tier-badge">SCPH</span>' : '')+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<nav class="side-nav">' + NAV_ITEMS.map(navBtn).join("") + '</nav>' +
         '<hr>' +
         '<button class="signout-btn" id="signOutBtn">Sign out</button>' +
       '</div>' +
@@ -231,8 +248,11 @@ function render(){
   renderTab();
 }
 
-function tabBtn(id, label){
-  return '<button class="'+(activeTab===id?"active":"")+'" data-tab="'+id+'">'+label+'</button>';
+function navBtn(item){
+  const isActive = activeTab === item.id;
+  return '<button class="'+(isActive?"active":"")+'" data-tab="'+item.id+'">' +
+    '<span class="nav-glyph" style="border-radius:'+item.radius+';background:'+item.color+';"></span>' + item.label +
+  '</button>';
 }
 
 function renderTab(){
@@ -249,10 +269,15 @@ function renderTab(){
 function renderProfileTab(el){
   const p = myData.profile;
   el.innerHTML =
-    '<div class="panel">' +
-      '<h2>Profile</h2>' +
-      '<p class="sub">This is what shows on your public profile, if you make it public.</p>' +
+    '<div class="tab-header">' +
+      '<h1>Profile</h1>' +
+      '<button class="followers-link" id="followersBtn" style="margin:0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:6px 14px;text-decoration:none;">' +
+        '<strong style="color:var(--ink);">'+(me.followerCount||0)+'</strong> followers <span style="color:var(--ink-40);font-size:10.5px;">&middot; only visible to you</span>' +
+      '</button>' +
+    '</div>' +
+    '<p class="tab-sub">This is how creators will see you across Prompt Royale.'+(p.handle ? '' : ' Set a username below to make your profile visible.')+'</p>' +
 
+    '<div class="panel">' +
       '<label class="field-label" for="fDisplayName">Display name</label>' +
       '<input type="text" id="fDisplayName" maxlength="60" value="'+escapeHTML(p.displayName||"")+'">' +
       '<button class="btn small secondary" id="saveDisplayName" style="margin-top:8px;">Save name</button>' +
@@ -260,23 +285,14 @@ function renderProfileTab(el){
       '<label class="field-label">Username</label>' +
       (p.handle
         ? '<div class="username-row">🔒 @'+escapeHTML(p.handle)+'</div><p class="hint">Usernames can only be set once.</p>'
-        : '<div style="display:flex;gap:8px;"><input type="text" id="fUsername" maxlength="20" placeholder="your-username"><button class="btn small" id="saveUsername">Set</button></div><p class="hint">Choose wisely — this can only be set once.</p>'
+        : '<div style="display:flex;gap:8px;"><input type="text" id="fUsername" maxlength="20" placeholder="e.g. alexrivera"><button class="btn small" id="saveUsername">Set Username</button></div><p class="hint">Can only be set once — choose wisely.</p>'
       ) +
       '<p class="status-msg" id="usernameStatus"></p>' +
 
-      '<label class="field-label">Visibility</label>' +
-      '<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-65);">' +
-        '<input type="checkbox" id="fPublic" '+(p.public?"checked":"")+'> Make my profile public' +
-      '</label>' +
-      '<button class="btn small secondary" id="savePublic" style="margin-top:8px;">Save</button>' +
-      '<p class="status-msg" id="publicStatus"></p>' +
-
       '<label class="field-label" for="fBio">Bio</label>' +
-      '<textarea id="fBio" rows="3" maxlength="200">'+escapeHTML(p.bio||"")+'</textarea>' +
+      '<textarea id="fBio" rows="3" maxlength="200" placeholder="Tell people what you create...">'+escapeHTML(p.bio||"")+'</textarea>' +
       '<div class="char-count"><span id="bioCount">'+((p.bio||"").length)+'</span> / 200</div>' +
       '<button class="btn small secondary" id="saveBio" style="margin-top:8px;">Save bio</button>' +
-
-      '<button class="followers-link" id="followersBtn">'+(me.followerCount||0)+' followers · only visible to you</button>' +
       '<p class="status-msg" id="profileStatus"></p>' +
     '</div>' +
 
@@ -320,13 +336,6 @@ function renderProfileTab(el){
       }catch(e){ setStatus("usernameStatus", e.message, true); }
     });
   }
-
-  document.getElementById("savePublic").addEventListener("click", async ()=>{
-    try{
-      const r = await api("/api/profile", { method:"PUT", body: JSON.stringify({ public: document.getElementById("fPublic").checked }) });
-      myData.profile = r.profile; setStatus("publicStatus","Saved.");
-    }catch(e){ setStatus("publicStatus", e.message, true); }
-  });
 
   document.getElementById("saveBio").addEventListener("click", async ()=>{
     try{
@@ -432,12 +441,17 @@ document.getElementById("closeFollowersModal").addEventListener("click", ()=>{
 });
 
 /* ---------------- History / Favorites tabs ---------------- */
-function renderTicketList(el, title, items, opts){
-  el.innerHTML = '<div class="panel"><h2>'+title+'</h2>' +
+function renderTicketList(el, title, sub, items, opts){
+  el.innerHTML = '<h1 style="font-family:var(--font-display);font-size:24px;font-weight:700;margin:0 0 4px;">'+title+'</h1>' +
+    '<p class="tab-sub">'+sub+'</p>' +
+    '<div class="panel">' +
     (items.length ? items.slice().reverse().slice(0,50).map((item,idx)=>{
       const realIdx = items.length-1-idx;
+      const rollType = item.rollType === "ai" ? "ai" : "free";
       return '<div class="list-item">' +
-        '<div class="list-item-top"><span class="cat-badge '+item.categoryId+'">'+catName(item.categoryId)+'</span><span>'+escapeHTML(item.time||"")+'</span></div>' +
+        '<div class="list-item-top"><span class="cat-badge '+item.categoryId+'">'+catName(item.categoryId)+'</span>'+
+        '<span class="type-badge '+rollType+'">'+(rollType==="ai"?"AI":"Free")+'</span>'+
+        '<span style="margin-left:auto;">'+escapeHTML(item.time||"")+'</span></div>' +
         '<div class="list-item-text">'+escapeHTML(item.mission)+'</div>' +
         '<div class="list-item-actions">' +
           '<button data-copy="'+realIdx+'">Copy</button>' +
@@ -472,15 +486,16 @@ function renderTicketList(el, title, items, opts){
     });
   });
 }
-function renderHistoryTab(el){ renderTicketList(el, "History", myData.history||[], { showFavorite:true, showRemove:false }); }
-function renderFavoritesTab(el){ renderTicketList(el, "Favorites", myData.favorites||[], { showFavorite:false, showRemove:true }); }
+function renderHistoryTab(el){ renderTicketList(el, "Roll History", "Every prompt you've rolled since signing up.", myData.history||[], { showFavorite:true, showRemove:false }); }
+function renderFavoritesTab(el){ renderTicketList(el, "Favorites", "Prompts you've saved for later.", myData.favorites||[], { showFavorite:false, showRemove:true }); }
 
 /* ---------------- Results tab ---------------- */
 async function renderResultsTab(el){
   el.innerHTML =
+    '<h1 style="font-family:var(--font-display);font-size:24px;font-weight:700;margin:0 0 4px;">Results</h1>' +
+    '<p class="tab-sub">Link the finished work you made from a prompt.</p>' +
     '<div class="panel">' +
-      '<h2>Link a Result</h2>' +
-      '<p class="sub">Connect a prompt you rolled to what you actually made from it.</p>' +
+      '<h2>Link a new result</h2>' +
       '<div class="results-form">' +
         '<div><label class="field-label">Category</label><select id="rCategory">'+CATEGORIES.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join("")+'</select></div>' +
         '<div><label class="field-label">Roll type</label><select id="rRollType"><option value="free">Free</option><option value="ai">AI</option></select></div>' +
@@ -514,16 +529,19 @@ async function loadResultsList(){
   const wrap = document.getElementById("resultsListWrap");
   try{
     const r = await api("/api/results");
-    wrap.innerHTML = r.results.length ? r.results.map(item=>
-      '<div class="list-item">' +
-        '<div class="list-item-top"><span class="cat-badge '+item.category_id+'">'+catName(item.category_id)+'</span><span>'+new Date(item.created_at).toLocaleDateString()+'</span></div>' +
+    wrap.innerHTML = r.results.length ? r.results.map(item=>{
+      const rollType = item.roll_type === "ai" ? "ai" : "free";
+      return '<div class="list-item">' +
+        '<div class="list-item-top"><span class="cat-badge '+item.category_id+'">'+catName(item.category_id)+'</span>'+
+        '<span class="type-badge '+rollType+'">'+(rollType==="ai"?"AI":"Free")+'</span>'+
+        '<span style="margin-left:auto;">'+new Date(item.created_at).toLocaleDateString()+'</span></div>' +
         '<div class="list-item-text">'+escapeHTML(item.prompt_text)+'</div>' +
         '<div class="list-item-actions">' +
           (item.result_url ? '<a href="'+escapeHTML(item.result_url)+'" target="_blank" rel="noopener">View Result ↗</a>' : '') +
           '<button class="remove" data-remove-result="'+item.id+'">Remove</button>' +
         '</div>' +
-      '</div>'
-    ).join("") : '<p class="empty-note">Nothing linked yet.</p>';
+      '</div>';
+    }).join("") : '<p class="empty-note">Nothing linked yet.</p>';
     wrap.querySelectorAll("[data-remove-result]").forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         await api("/api/results?id="+btn.dataset.removeResult, { method:"DELETE" });
@@ -558,10 +576,37 @@ function renderSettingsTab(el){
   const byokKeys = shared.byokKeys || { anthropic:"", openai:"" };
   const byokModels = shared.byokModels || { anthropic:"", openai:"" };
 
+  const linked = me.linkedProviders || [me.provider];
+  const providerMeta = {
+    google: { label:"Google", initial:"G", gradient:"linear-gradient(135deg,#4D7CFF,#1836B2)" },
+    discord: { label:"Discord", initial:"D", gradient:"linear-gradient(135deg,#E63A46,#74182D)" }
+  };
+  const linkQuery = new URLSearchParams(location.search);
+  const linkNotice = linkQuery.get("linked") ? '<p class="status-msg" style="color:var(--gold-hi);">Account linked.</p>'
+    : linkQuery.get("linkError") ? '<p class="status-msg error">'+escapeHTML(linkQuery.get("linkError"))+'</p>' : '';
+
   el.innerHTML =
+    '<h1 style="font-family:var(--font-display);font-size:24px;font-weight:700;margin:0 0 4px;">Settings</h1>' +
+    '<p class="tab-sub">Account, connections, and API access.</p>' +
     '<div class="panel">' +
-      '<h2>Account</h2>' +
-      '<p class="sub">Signed in with <strong>'+escapeHTML(me.provider)+'</strong> as '+escapeHTML(me.name)+'.</p>' +
+      '<h2>Connected accounts</h2>' +
+      '<p class="sub">Link both so you can sign in with either one.</p>' +
+      linkNotice +
+      '<div class="row-list">' +
+        Object.keys(providerMeta).filter(p=>me.providers.includes(p)).map(p=>{
+          const meta = providerMeta[p];
+          const isLinked = linked.includes(p);
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<span aria-hidden="true" style="width:26px;height:26px;border-radius:50%;background:'+meta.gradient+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">'+meta.initial+'</span>' +
+              '<span style="font-size:13.5px;font-weight:600;color:var(--ink);">'+meta.label+'</span>' +
+            '</div>' +
+            (isLinked
+              ? '<span class="connect-toggle connected">Connected</span>'
+              : '<button type="button" class="connect-toggle not-connected" data-connect="'+p+'" style="cursor:pointer;">Connect</button>') +
+          '</div>';
+        }).join("") +
+      '</div>' +
     '</div>' +
     '<div class="panel">' +
       '<h2>AI-generated entries</h2>' +
@@ -605,6 +650,12 @@ function renderSettingsTab(el){
     }
   }
   syncByokFieldsVisibility();
+
+  el.querySelectorAll("[data-connect]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      location.href = "/api/auth-start?provider="+btn.dataset.connect+"&link=1";
+    });
+  });
 
   sAiSource.addEventListener("change", ()=>{
     writeSharedState({ aiSource: sAiSource.value });

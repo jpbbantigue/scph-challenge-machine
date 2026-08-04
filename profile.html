@@ -14,13 +14,14 @@
 :root{
   --bg-0:#05070d;
   --ink:#F3F5FC;
+  --ink-75:rgba(243,245,252,0.75);
   --ink-65:rgba(243,245,252,0.65);
-  --ink-58:rgba(243,245,252,0.58);
   --ink-50:rgba(243,245,252,0.5);
   --ink-40:rgba(243,245,252,0.4);
   --royal-deep:#1836B2;
   --royal:#295BFF;
   --royal-hi:#4D7CFF;
+  --royal-pale:#9AB4FF;
   --crimson-deep:#74182D;
   --crimson:#B51F3E;
   --crimson-hi:#E63A46;
@@ -31,68 +32,77 @@
   --font-body:'Inter',sans-serif;
 }
 html,body{margin:0;padding:0;}
-body{background:var(--bg-0);color:var(--ink-65);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;}
-a{color:var(--royal-hi);text-decoration:none;}
+body{background:var(--bg-0);color:var(--ink);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{color:var(--royal-hi);}
 a:hover{color:var(--gold-hi);}
 button{font-family:inherit;}
 
-.wrap{max-width:720px;margin:0 auto;padding:0 20px 80px;}
-.topbar{max-width:720px;margin:0 auto;padding:20px 20px 0;}
-.brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink);}
-.brand-mark{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));display:block;}
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.ambient .glow{position:absolute;inset:0;background:radial-gradient(1000px 640px at 15% -10%, rgba(41,91,255,0.14), transparent 60%), radial-gradient(800px 560px at 100% 10%, rgba(230,58,70,0.08), transparent 55%);}
 
-.banner{height:140px;border-radius:20px;margin-top:20px;background:radial-gradient(120% 160% at 30% 0%, rgba(41,91,255,0.35), rgba(9,12,22,0.6) 60%), radial-gradient(100% 140% at 90% 100%, rgba(230,58,70,0.25), transparent 55%);}
-.profile-head{display:flex;align-items:flex-end;gap:16px;margin-top:-40px;padding-left:20px;}
-.avatar{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));border:4px solid var(--bg-0);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:32px;color:#fff;flex:none;}
-.head-actions{margin-left:auto;padding-bottom:8px;}
-.follow-btn{padding:9px 22px;border-radius:999px;border:none;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;}
-.follow-btn.following{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);color:var(--ink);}
+.topbar{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;max-width:820px;margin:0 auto;padding:22px 24px 0;}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:16px;}
+.brand-mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));position:relative;flex:none;}
+.roll-own{text-decoration:none;padding:9px 18px;border-radius:999px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));color:#fff;font-size:13.5px;font-weight:600;}
+
+.wrap{position:relative;z-index:1;max-width:820px;margin:24px auto 80px;padding:0 24px;}
+
+.banner-wrap{position:relative;border-radius:20px;overflow:hidden;margin-bottom:56px;border:1px solid rgba(255,255,255,0.08);}
+.banner{width:100%;height:200px;background:radial-gradient(120% 160% at 30% 0%, rgba(41,91,255,0.35), rgba(9,12,22,0.6) 60%), radial-gradient(100% 140% at 90% 100%, rgba(230,58,70,0.25), transparent 55%);}
+.avatar{position:absolute;left:28px;bottom:-40px;width:96px;height:96px;border-radius:50%;border:4px solid var(--bg-0);background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:32px;color:#fff;overflow:hidden;}
+
+.head-row{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;}
+.head-left .name-row{display:flex;align-items:center;gap:14px;margin-bottom:4px;flex-wrap:wrap;}
+.display-name{font-family:var(--font-display);font-size:26px;font-weight:700;margin:0;}
+.follow-btn{padding:8px 18px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
+.follow-btn.following{border-color:rgba(77,124,255,0.5);background:rgba(41,91,255,0.18);color:#CBD8FF;}
 .follow-btn:disabled{opacity:.6;cursor:default;}
+.handle{font-size:13.5px;color:var(--royal-pale);font-weight:600;margin:0 0 10px;}
+.bio{font-size:14px;line-height:1.55;color:var(--ink-75);max-width:440px;margin:0 0 14px;}
+.socials{display:flex;gap:10px;flex-wrap:wrap;}
+.social-chip{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:var(--ink);font-size:12.5px;font-weight:600;text-decoration:none;}
+.social-chip:hover{border-color:rgba(77,124,255,0.4);background:rgba(41,91,255,0.08);color:var(--ink);}
+.social-dot{width:6px;height:6px;border-radius:50%;background:var(--royal-hi);}
+.head-right{display:flex;gap:8px;flex-wrap:wrap;max-width:260px;justify-content:flex-end;}
+.linked-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid rgba(244,191,58,0.3);background:rgba(244,191,58,0.08);color:var(--gold-hi);font-size:11.5px;font-weight:600;}
+.linked-dot{width:5px;height:5px;border-radius:50%;background:var(--gold-hi);}
 
-.name-block{margin:16px 0 0 4px;}
-.display-name{font-family:var(--font-display);font-weight:700;font-size:24px;color:var(--ink);}
-.handle{font-size:13.5px;color:var(--ink-40);margin-top:2px;}
-.bio{font-size:14px;line-height:1.6;color:var(--ink-65);margin:14px 4px 0;max-width:560px;}
+.section{border-top:1px solid rgba(255,255,255,0.08);padding-top:28px;margin-bottom:28px;}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:4px;}
+.section h2{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0 0 4px;}
+.section-sub{font-size:13px;color:var(--ink-50);margin:0;}
+.cat-filter{padding:9px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:var(--ink);font-size:13px;}
 
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 4px 0;}
-.chip{padding:7px 14px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);font-size:12.5px;color:var(--ink-65);}
-.chip.social{color:var(--royal-hi);}
-.chip.creative{color:var(--gold);border-color:rgba(244,191,58,0.3);background:rgba(244,191,58,0.08);}
+.result-card{border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:18px 20px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.result-cat{font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--royal-pale);}
+.result-text{font-size:14px;line-height:1.55;color:var(--ink);margin:0;}
+.result-actions{display:flex;gap:10px;margin-top:4px;}
+.result-actions a{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;}
+.result-actions .view{border:1px solid rgba(244,191,58,0.3);background:rgba(244,191,58,0.08);color:var(--gold-hi);}
+.result-actions .try{border:1px solid rgba(77,124,255,0.3);background:rgba(41,91,255,0.08);color:var(--royal-pale);}
 
-.section{margin-top:36px;}
-.section-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.cat-filter{background:rgba(255,255,255,0.04);color:var(--ink-65);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:6px 10px;font-size:12.5px;}
-
-.result-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
-.result-top{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-40);margin-bottom:6px;}
-.cat-badge{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
-.cat-badge.music{background:rgba(41,91,255,0.14);color:var(--royal-hi);}
-.cat-badge.characters{background:rgba(230,58,70,0.14);color:var(--crimson-hi);}
-.cat-badge.album{background:rgba(244,191,58,0.14);color:var(--gold-hi);}
-.result-text{font-size:13.5px;color:var(--ink);line-height:1.5;}
-.result-link{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;}
-
-.achv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
-.achv-tile{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;}
-.achv-top{display:flex;align-items:center;gap:10px;}
-.tier-diamond{width:12px;height:12px;transform:rotate(45deg);border-radius:2px;flex:none;}
-.tier-diamond.bronze{background:#B08D57;}
-.tier-diamond.silver{background:#C7CDD6;}
+.achv-grid{display:flex;gap:12px;flex-wrap:wrap;}
+.achv-tile{display:flex;flex-direction:column;gap:8px;min-width:150px;padding:16px;border-radius:14px;}
+.achv-tile.bronze{background:rgba(230,164,106,0.08);border:1px solid rgba(230,164,106,0.28);}
+.achv-tile.silver{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);}
+.achv-tile.gold{background:rgba(244,191,58,0.1);border:1px solid rgba(244,191,58,0.35);}
+.achv-tile.platinum{background:rgba(203,216,255,0.08);border:1px solid rgba(203,216,255,0.3);}
+.achv-top{display:flex;align-items:center;gap:8px;}
+.tier-diamond{width:14px;height:14px;flex:none;transform:rotate(45deg);border-radius:3px;}
+.tier-diamond.bronze{background:#E6A46A;}
+.tier-diamond.silver{background:#E8ECFA;}
 .tier-diamond.gold{background:var(--gold);}
-.tier-diamond.platinum{background:#8FE3E0;}
-.achv-cat{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--ink);}
-.achv-tier{font-size:11.5px;color:var(--ink-50);margin-top:2px;}
-.achv-count{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);margin-top:10px;}
-.achv-divider{border-top:1px solid rgba(255,255,255,0.08);margin:10px 0;}
-.achv-conv{font-size:12px;color:var(--ink-50);}
-
-.badges{display:flex;flex-wrap:wrap;gap:8px;}
-.badge{padding:7px 13px;border-radius:999px;background:rgba(244,191,58,0.1);border:1px solid rgba(244,191,58,0.3);color:var(--gold-hi);font-size:12.5px;font-weight:600;}
-
-.stat-row{display:flex;gap:12px;}
-.stat-cell{flex:1;text-align:center;padding:16px 8px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);}
-.stat-cell .num{font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--gold-hi);}
-.stat-cell .label{font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);margin-top:4px;}
+.tier-diamond.platinum{background:#CBD8FF;}
+.achv-cat{font-size:10.5px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-50);}
+.achv-count{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);}
+.achv-tier{font-size:11px;font-weight:600;}
+.achv-tile.bronze .achv-tier{color:#E6A46A;}
+.achv-tile.silver .achv-tier{color:#E8ECFA;}
+.achv-tile.gold .achv-tier{color:var(--gold);}
+.achv-tile.platinum .achv-tier{color:#CBD8FF;}
+.achv-divider{border-top:1px solid rgba(255,255,255,0.08);margin:4px 0 2px;}
+.achv-conv-pct{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--gold-hi);}
+.achv-conv-note{font-size:10.5px;line-height:1.3;color:var(--ink-50);}
 
 .empty-note{font-size:13px;color:var(--ink-40);}
 .state-msg{text-align:center;font-size:14px;color:var(--ink-50);padding:80px 20px;}
@@ -100,7 +110,12 @@ button{font-family:inherit;}
 </head>
 <body>
 
-<div class="topbar"><a href="index.html" class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</a></div>
+<div class="ambient" aria-hidden="true"><div class="glow"></div></div>
+
+<div class="topbar">
+  <a href="index.html" class="brand"><span class="brand-mark" aria-hidden="true"></span>Prompt Royale</a>
+  <a href="index.html#slot-machine" class="roll-own">Roll Your Own</a>
+</div>
 
 <div class="wrap" id="content">
   <p class="state-msg">Loading profile…</p>
@@ -151,85 +166,86 @@ async function load(){
   try{
     data = await api("/api/profile?handle="+encodeURIComponent(currentHandle) + (currentCategoryFilter ? "&category="+encodeURIComponent(currentCategoryFilter) : ""));
   }catch(e){
-    content.innerHTML = '<p class="state-msg">This profile doesn’t exist or isn’t public.</p>';
+    content.innerHTML = '<p class="state-msg">This profile doesn’t exist.</p>';
     return;
   }
   render(data);
 }
 
+function tierClassFor(tier){ return tier ? tier.toLowerCase() : "bronze"; }
+
 function render(data){
   const content = document.getElementById("content");
-  const streak = (data.stats && data.stats.streak) || {};
 
-  const socialChips = (data.socials||[]).map(s=>'<a class="chip social" href="'+escapeHTML(s.value)+'" target="_blank" rel="noopener">'+escapeHTML(s.platform)+'</a>').join("");
-  const creativeChips = (data.linkedAccounts||[]).filter(a=>a.connected).map(a=>'<span class="chip creative">Also on '+escapeHTML(a.platform)+'</span>').join("");
+  const socialChips = (data.socials||[]).map(s=>
+    '<a class="social-chip" href="'+escapeHTML(s.value)+'" target="_blank" rel="noopener"><span class="social-dot" aria-hidden="true"></span>'+escapeHTML(s.platform)+'</a>'
+  ).join("");
+  const linkedBadges = (data.linkedAccounts||[]).filter(a=>a.connected).map(a=>
+    '<span class="linked-badge"><span class="linked-dot" aria-hidden="true"></span>Also on '+escapeHTML(a.platform)+'</span>'
+  ).join("");
 
   const catOptions = '<option value="">All categories</option>' + CATEGORIES.map(c=>'<option value="'+c.id+'" '+(currentCategoryFilter===c.id?"selected":"")+'>'+c.name+'</option>').join("");
 
   const resultsHTML = (data.results && data.results.length)
     ? data.results.map(r=>
         '<div class="result-card">' +
-          '<div class="result-top"><span class="cat-badge '+r.category_id+'">'+catName(r.category_id)+'</span><span>'+new Date(r.created_at).toLocaleDateString()+'</span></div>' +
-          '<div class="result-text">'+escapeHTML(r.prompt_text)+'</div>' +
-          (r.result_url ? '<a class="result-link" href="'+escapeHTML(r.result_url)+'" target="_blank" rel="noopener">View Result ↗</a>' : '') +
-          ' <a class="result-link" href="index.html?category='+encodeURIComponent(r.category_id)+'">Try It Yourself</a>' +
+          '<div class="result-cat">'+escapeHTML(catName(r.category_id))+'</div>' +
+          '<p class="result-text">'+escapeHTML(r.prompt_text)+'</p>' +
+          '<div class="result-actions">' +
+            (r.result_url ? '<a class="view" href="'+escapeHTML(r.result_url)+'" target="_blank" rel="noopener">View Result ↗</a>' : '') +
+            '<a class="try" href="index.html#slot-machine">Try It Yourself</a>' +
+          '</div>' +
         '</div>'
       ).join("")
     : '<p class="empty-note">No results linked yet.</p>';
 
-  const tierClass = (t)=> t ? t.toLowerCase() : "bronze";
   const achvHTML = (data.achievements && data.achievements.length)
-    ? data.achievements.map(a=>
-        '<div class="achv-tile">' +
-          '<div class="achv-top"><span class="tier-diamond '+tierClass(a.tier)+'"></span><div><div class="achv-cat">'+catName(a.categoryId)+'</div><div class="achv-tier">'+(a.tier||"—")+'</div></div></div>' +
-          '<div class="achv-count">'+a.count+'</div>' +
+    ? data.achievements.map(a=>{
+        const tc = tierClassFor(a.tier);
+        return '<div class="achv-tile '+tc+'">' +
+          '<div class="achv-top"><span class="tier-diamond '+tc+'" aria-hidden="true"></span><span class="achv-cat">'+escapeHTML(catName(a.categoryId))+'</span></div>' +
+          '<span class="achv-count">'+a.count+'</span>' +
+          '<span class="achv-tier">'+(a.tier||"—")+'</span>' +
           '<div class="achv-divider"></div>' +
-          '<div class="achv-conv">'+(a.conversionPct!=null ? a.conversionPct+"% of prompts turned into results" : "—")+'</div>' +
-        '</div>'
-      ).join("")
+          '<span class="achv-conv-pct">'+(a.conversionPct!=null ? a.conversionPct+"%" : "—")+'</span>' +
+          '<span class="achv-conv-note">of prompts turned into results</span>' +
+        '</div>';
+      }).join("")
     : '<p class="empty-note">No achievements yet.</p>';
 
-  const badgesHTML = (data.badges && data.badges.length)
-    ? data.badges.map(b=>'<span class="badge">'+escapeHTML(b.label)+'</span>').join("")
-    : '<span class="empty-note">No badges yet.</span>';
-
   content.innerHTML =
-    '<div class="banner"></div>' +
-    '<div class="profile-head">' +
+    '<div class="banner-wrap">' +
+      '<div class="banner"></div>' +
       '<div class="avatar">'+initials(data.displayName)+'</div>' +
-      '<div class="head-actions" id="followWrap"></div>' +
     '</div>' +
-    '<div class="name-block">' +
-      '<div class="display-name">'+escapeHTML(data.displayName)+'</div>' +
-      '<div class="handle">@'+escapeHTML(data.handle)+'</div>' +
-    '</div>' +
-    (data.bio ? '<p class="bio">'+escapeHTML(data.bio)+'</p>' : '') +
-    (socialChips || creativeChips ? '<div class="chips">'+socialChips+creativeChips+'</div>' : '') +
 
-    '<div class="section">' +
-      '<div class="stat-row">' +
-        '<div class="stat-cell"><div class="num">'+(data.stats.totalRolls||0)+'</div><div class="label">Total Rolls</div></div>' +
-        '<div class="stat-cell"><div class="num">'+(streak.current||0)+'</div><div class="label">Day Streak</div></div>' +
-        '<div class="stat-cell"><div class="num">'+(streak.longest||0)+'</div><div class="label">Best Streak</div></div>' +
+    '<div class="head-row">' +
+      '<div class="head-left">' +
+        '<div class="name-row">' +
+          '<h1 class="display-name">'+escapeHTML(data.displayName)+'</h1>' +
+          '<span id="followWrap"></span>' +
+        '</div>' +
+        '<p class="handle">@'+escapeHTML(data.handle)+'</p>' +
+        (data.bio ? '<p class="bio">'+escapeHTML(data.bio)+'</p>' : '') +
+        '<div class="socials">'+socialChips+'</div>' +
       '</div>' +
+      '<div class="head-right">'+linkedBadges+'</div>' +
     '</div>' +
 
     '<div class="section">' +
-      '<div class="section-title">Badges</div>' +
-      '<div class="badges">'+badgesHTML+'</div>' +
-    '</div>' +
-
-    '<div class="section">' +
-      '<div class="section-title">Achievements</div>' +
-      '<div class="achv-grid">'+achvHTML+'</div>' +
-    '</div>' +
-
-    '<div class="section">' +
-      '<div class="section-title">Results <select class="cat-filter" id="catFilter">'+catOptions+'</select></div>' +
+      '<div class="section-head">' +
+        '<div><h2>Results</h2><p class="section-sub">Finished work made from Prompt Royale rolls.</p></div>' +
+        '<select class="cat-filter" id="catFilter">'+catOptions+'</select>' +
+      '</div>' +
+      '<div style="height:16px;"></div>' +
       '<div id="resultsWrap">'+resultsHTML+'</div>' +
     '</div>' +
 
-    '<p class="empty-note" style="margin-top:40px;text-align:center;"><a href="index.html">← Back to Prompt Royale</a></p>';
+    '<div class="section" style="margin-bottom:0;">' +
+      '<h2>Achievements</h2>' +
+      '<p class="section-sub" style="margin-bottom:18px;">Results generated per category.</p>' +
+      '<div class="achv-grid">'+achvHTML+'</div>' +
+    '</div>';
 
   document.getElementById("catFilter").addEventListener("change", (e)=>{
     currentCategoryFilter = e.target.value;
@@ -245,7 +261,7 @@ function renderFollowButton(isFollowing){
     wrap.innerHTML = '';
     return;
   }
-  wrap.innerHTML = '<button class="follow-btn '+(isFollowing?"following":"")+'" id="followBtn">'+(isFollowing?"Following":"Follow")+'</button>';
+  wrap.innerHTML = '<button type="button" class="follow-btn '+(isFollowing?"following":"")+'" id="followBtn">'+(isFollowing?"Following ✓":"Follow")+'</button>';
   document.getElementById("followBtn").addEventListener("click", async ()=>{
     const btn = document.getElementById("followBtn");
     btn.disabled = true;

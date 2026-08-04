@@ -60,7 +60,22 @@ async function main() {
     )
   `;
   await sql`CREATE INDEX IF NOT EXISTS follows_followee_idx ON follows(followee_key)`;
-  console.log("Schema ready: accounts, profile_handles, results, follows");
+  // Lets one account have multiple sign-in identities (e.g. both Google and
+  // Discord). The account's *first* sign-in identity is implicit — its
+  // "provider:sub" IS the account_key in `accounts`. Every additional
+  // identity linked afterward gets a row here pointing back at that same
+  // account_key, resolved at sign-in time (see _lib/store.js: resolveAccountKey).
+  await sql`
+    CREATE TABLE IF NOT EXISTS linked_identities (
+      provider TEXT NOT NULL,
+      sub TEXT NOT NULL,
+      account_key TEXT NOT NULL REFERENCES accounts(account_key) ON DELETE CASCADE,
+      linked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (provider, sub)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS linked_identities_account_idx ON linked_identities(account_key)`;
+  console.log("Schema ready: accounts, profile_handles, results, follows, linked_identities");
 }
 
 main().catch((err) => {

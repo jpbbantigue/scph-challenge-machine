@@ -1460,7 +1460,12 @@ async function pullLever(){
     time: nowLabel(),
     categoryId: cat.id,
     vals: vals,
-    mission: buildMission(vals)
+    mission: buildMission(vals),
+    // Free/AI badge shown in Account > History/Favorites/Results (never on
+    // the public profile — that's private, per the design). Reflects
+    // whether AI mode was engaged for this pull, not whether every reel
+    // actually got an AI value (some may have silently fallen back).
+    rollType: (state.aiSource && state.aiSource !== "off") ? "ai" : "free"
   };
   state.current = ticket;
   state.history.push(ticket);

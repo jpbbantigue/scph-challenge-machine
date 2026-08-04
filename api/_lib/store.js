@@ -22,8 +22,67 @@ const MAX_SOCIALS = 8;
 const MAX_LINKED_ACCOUNTS = 8;
 const MAX_BIO_LEN = 200;
 
+// The account key a session operates on. Normally just "provider:sub" (the
+// identity used to sign in), but if that identity has been linked to
+// another account (see linkIdentity below), the session carries the
+// canonical accountKey from sign-in time instead — see auth-callback.js.
 function userKey(user) {
-  return user.provider + ":" + user.sub;
+  return user.accountKey || (user.provider + ":" + user.sub);
+}
+
+// Looks up whether (provider, sub) has been linked to another account;
+// falls back to its own default identity key if not. Called once at
+// sign-in (auth-callback.js) and baked into the session — not re-checked
+// per request.
+async function resolveAccountKey({ provider, sub }) {
+  const defaultKey = provider + ":" + sub;
+  const sql = getSql();
+  const rows = await sql`SELECT account_key FROM linked_identities WHERE provider = ${provider} AND sub = ${sub}`;
+  return rows[0] ? rows[0].account_key : defaultKey;
+}
+
+async function ensureAccountExists(key) {
+  const sql = getSql();
+  await sql`INSERT INTO accounts (account_key, data) VALUES (${key}, '{}'::jsonb) ON CONFLICT (account_key) DO NOTHING`;
+}
+
+// Links a second (or third) sign-in identity to the visitor's existing
+// account, so they can sign in with either Google or Discord afterward and
+// land on the same account. Refuses to link an identity that's already
+// tied to a *different* account (no automatic merging — that's a support
+// request, not a self-serve action, to avoid silently discarding data).
+async function linkIdentity(existingUser, newProvider, newSub) {
+  const existingKey = userKey(existingUser);
+  const newIdentityKey = newProvider + ":" + newSub;
+  if (newIdentityKey === existingKey) return { ok: true }; // no-op: same identity
+  const sql = getSql();
+
+  const existingLink = await sql`SELECT account_key FROM linked_identities WHERE provider = ${newProvider} AND sub = ${newSub}`;
+  if (existingLink[0]) {
+    if (existingLink[0].account_key === existingKey) return { ok: true }; // already linked here
+    return { ok: false, error: "That account is already linked to a different Prompt Royale account." };
+  }
+  const ownAccount = await sql`SELECT 1 FROM accounts WHERE account_key = ${newIdentityKey}`;
+  if (ownAccount[0]) {
+    return { ok: false, error: "That account already has its own Prompt Royale profile — sign in with it directly instead of linking." };
+  }
+
+  await ensureAccountExists(existingKey);
+  await sql`INSERT INTO linked_identities (provider, sub, account_key) VALUES (${newProvider}, ${newSub}, ${existingKey})`;
+  return { ok: true };
+}
+
+// Every provider currently linked to this account — its own primary
+// identity (implicit: the provider prefix of its account_key) plus
+// anything in linked_identities. Used to render Connect/Connected state in
+// Settings.
+async function getLinkedProviders(user) {
+  const key = userKey(user);
+  const sql = getSql();
+  const rows = await sql`SELECT provider FROM linked_identities WHERE account_key = ${key}`;
+  const providers = new Set(rows.map((r) => r.provider));
+  providers.add(key.split(":")[0]);
+  return Array.from(providers);
 }
 
 function todayStr() {
@@ -31,7 +90,7 @@ function todayStr() {
 }
 
 function defaultProfile() {
-  return { handle: null, public: false, displayName: null, bio: "", socials: [], linkedAccounts: [] };
+  return { handle: null, displayName: null, bio: "", socials: [], linkedAccounts: [] };
 }
 
 function defaultUserData() {
@@ -132,9 +191,9 @@ function isValidHandle(handle) {
 
 // Sets this account's username (the "handle" used for its public profile
 // URL). Write-once by design, matching the mockup: once set, it can't be
-// changed again — only the `public` visibility toggle stays editable
-// afterward via setProfilePublic. Handles are unique across all accounts,
-// enforced by profile_handles' primary key.
+// changed again. There's no separate public/private toggle — per the
+// design, a profile is simply visible once it has a username. Handles are
+// unique across all accounts, enforced by profile_handles' primary key.
 async function setUsername(user, handle) {
   const sql = getSql();
   const key = userKey(user);
@@ -155,15 +214,6 @@ async function setUsername(user, handle) {
     ON CONFLICT (handle) DO UPDATE SET account_key = EXCLUDED.account_key
   `;
   data.profile.handle = normalized;
-  data.updatedAt = Date.now();
-  await writeAccount(key, data);
-  return { ok: true, profile: data.profile };
-}
-
-async function setProfilePublic(user, isPublic) {
-  const key = userKey(user);
-  const data = await loadUserData(user);
-  data.profile.public = !!isPublic;
   data.updatedAt = Date.now();
   await writeAccount(key, data);
   return { ok: true, profile: data.profile };
@@ -373,7 +423,7 @@ async function getPublicProfileByHandle(handle, { categoryId, viewerUser } = {})
   `;
   if (!rows[0]) return null;
   const data = mergeWithDefaults(rows[0].data);
-  if (!data.profile || data.profile.handle !== normalized || !data.profile.public) return null;
+  if (!data.profile || data.profile.handle !== normalized) return null;
 
   const [results, achievements, following] = await Promise.all([
     listPublicResults(rows[0].account_key, categoryId),
@@ -412,7 +462,6 @@ module.exports = {
   consumeAICredit,
   getCreditsStatus,
   setUsername,
-  setProfilePublic,
   updateProfileFields,
   computeBadges,
   computeAchievements,
@@ -427,6 +476,9 @@ module.exports = {
   isFollowingHandle,
   getPublicProfileByHandle,
   deleteAccount,
+  resolveAccountKey,
+  linkIdentity,
+  getLinkedProviders,
   CREDIT_LIMITS,
   creditLimitForTier,
   DAILY_AI_CREDIT_LIMIT
