@@ -31,6 +31,15 @@ These were originally deferred pending Phase 2, but turned out not to need a dat
 - Netlify Blobs currently backs accounts, credits, and profiles — Phase 2's database work should evaluate whether the same store extends to reel content, or a separate DB (e.g. a hosted Postgres/SQLite) makes more sense.
 - **"Get More Credits" purchase flow** — extending the daily AI-credit limit after a paid transaction. Noted as a future direction when the credits system shipped, not built.
 
+## Planned: Community page (public profile directory)
+
+Right now a public profile (`profile.html?u=handle`) is only discoverable if the owner shares the direct link — there's no search, browsing, or listing anywhere on the site. Planned for later:
+
+- A `community.html` page listing all public profiles (handle, display name, total rolls, top badge), paginated, sorted by most-recent activity by default (with a "Most Rolls" sort option).
+- Backend: a new `listPublicProfiles({ sort, cursor })` function in `api/_lib/store.js`, querying `accounts` joined to `profile_handles` where `data->profile->>'public' = 'true'`, plus a matching `api/community.js` GET endpoint (would need to fold into an existing file or the deployment stays under Vercel Hobby's 12-function cap — see the earlier function-count fix).
+- Nav: a "Community" link, likely replacing or sitting alongside "Prompt Categories".
+- No opt-out beyond the existing public/private toggle — anyone who's already made their profile public would appear once this ships; worth a one-time note in-app if that matters (e.g. "public profiles are now listed on /community").
+
 ## Deferred (from the original design handoff, no timeline yet)
 
 - Account page overhaul (the handoff's dedicated account/profile UI, beyond the current Settings drawer — profile/credits/handle controls currently live in the Settings drawer, not a dedicated page).
