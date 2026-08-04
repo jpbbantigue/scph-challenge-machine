@@ -416,7 +416,7 @@ async function openFollowersModal(){
   list.innerHTML = '<p class="empty-note">Loading…</p>';
   modal.classList.add("open");
   try{
-    const r = await api("/api/followers");
+    const r = await api("/api/follow");
     list.innerHTML = r.followers.length
       ? r.followers.map(f=>'<div class="follower-row"><span class="follower-avatar">'+initials(f.displayName)+'</span><div><div class="follower-name">'+escapeHTML(f.displayName)+'</div><div class="follower-handle">@'+escapeHTML(f.handle)+'</div></div></div>').join("")
       : '<p class="empty-note">No followers yet.</p>';
@@ -553,7 +553,7 @@ function renderSettingsTab(el){
       '<div class="confirm-actions"><button class="btn danger small" id="confirmDelete">Yes, delete everything</button><button class="btn secondary small" id="cancelDelete">Cancel</button></div></div>';
     document.getElementById("confirmDelete").addEventListener("click", async ()=>{
       try{
-        await api("/api/delete-account", { method:"POST" });
+        await api("/api/data", { method:"DELETE" });
         location.href = "index.html";
       }catch(e){ alert(e.message); }
     });

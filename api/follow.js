@@ -1,16 +1,27 @@
 // Vercel Serverless Function:
+// GET    /api/follow           — the signed-in visitor's own follower list (private, for the "N followers" modal)
 // POST   /api/follow   { handle } — follow that user
 // DELETE /api/follow?handle=xxx — unfollow that user
-// Requires sign-in. Follower counts are private (see auth-me.js) — this
-// endpoint only toggles the relationship, it doesn't expose any counts.
+// All require sign-in. Follower counts/lists are private (see auth-me.js
+// for the count) — this never exposes anyone else's followers.
+//
+// Merged with what used to be followers.js — Vercel's Hobby plan caps
+// deployments at 12 serverless functions, so closely-related single-purpose
+// endpoints get consolidated rather than kept as separate files.
 
 const { getSessionUser } = require("./_lib/session");
-const { followAccount, unfollowAccount } = require("./_lib/store");
+const { followAccount, unfollowAccount, listFollowers } = require("./_lib/store");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   const user = getSessionUser(req);
   if (!user) { res.status(401).json({ error: "Not signed in" }); return; }
+
+  if (req.method === "GET") {
+    const followers = await listFollowers(user.provider + ":" + user.sub);
+    res.status(200).json({ followers });
+    return;
+  }
 
   if (req.method === "POST") {
     const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {});
