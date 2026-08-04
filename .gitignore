@@ -10,3 +10,5 @@
 # Editor/OS cruft
 .DS_Store
 node_modules/
+.vercel
+.env*

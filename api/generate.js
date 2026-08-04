@@ -1,16 +1,24 @@
 // Vercel Serverless Function: POST /api/generate
 //
 // Body: { categoryName: string, reels: [{ label: string, examples: string[] }, ...] }
-// Returns: { results: [{ label, text }] }  or  { error: string }
+// Returns: { results: [{ label, text }], creditsRemaining }  or  { error: string }
 //
 // Requires the GROQ_API_KEY environment variable to be set in the Vercel
 // project's dashboard (Settings > Environment Variables). Get a free key
 // at https://console.groq.com — the key never reaches the browser.
 //
-// Batched by design (see netlify/functions/generate.js for why — 1 request
-// per pull instead of 1 per reel). This Vercel path has no accounts/credits
-// (Netlify-only, see README), so there's nothing to meter here — it's the
-// same public, unauthenticated, zero-stakes endpoint as before, just batched.
+// Batched: one request covers every reel needed for a single "Pull" (or a
+// single reroll, as a one-item batch), so the daily credit spend is 1 per
+// pull rather than 1 per reel.
+//
+// This endpoint calls a site-wide key (this site's own cost), so it requires
+// sign-in and is metered by a daily credit allowance per account (see
+// _lib/store.js: consumeAICredit / DAILY_AI_CREDIT_LIMIT), backed by Neon
+// Postgres. A visitor's own Claude/OpenAI key (openai-generate.js) is never
+// metered — that's their own API cost, not the site's.
+
+const { getSessionUser } = require("./_lib/session");
+const { consumeAICredit } = require("./_lib/store");
 
 const MODEL = "llama-3.1-8b-instant";
 const MAX_FIELD_LEN = 60;
@@ -19,6 +27,12 @@ const MAX_REELS_PER_REQUEST = 8;
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
+
+  const user = getSessionUser(req);
+  if (!user) {
+    res.status(401).json({ error: "Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead." });
     return;
   }
 
@@ -41,6 +55,14 @@ module.exports = async (req, res) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     res.status(500).json({ error: "Server is missing GROQ_API_KEY — set it in the Vercel project's environment variables." });
+    return;
+  }
+
+  // One credit for the whole batch — this is what makes "1 pull = 1 credit"
+  // true regardless of how many reels that pull touches.
+  const credit = await consumeAICredit(user);
+  if (!credit.ok) {
+    res.status(429).json({ error: "Daily AI limit reached (" + credit.limit + "/day) — try again tomorrow, or add your own Claude/ChatGPT key in Settings." });
     return;
   }
 
@@ -69,7 +91,7 @@ module.exports = async (req, res) => {
     }
   }));
 
-  res.status(200).json({ results: results });
+  res.status(200).json({ results: results, creditsRemaining: credit.remaining });
 };
 
 function buildPrompt(categoryName, label, examples) {
