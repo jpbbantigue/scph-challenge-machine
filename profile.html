@@ -68,6 +68,7 @@ button{font-family:inherit;}
 .cat-badge{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
 .cat-badge.music{background:rgba(41,91,255,0.14);color:var(--royal-hi);}
 .cat-badge.characters{background:rgba(230,58,70,0.14);color:var(--crimson-hi);}
+.cat-badge.album{background:rgba(244,191,58,0.14);color:var(--gold-hi);}
 .result-text{font-size:13.5px;color:var(--ink);line-height:1.5;}
 .result-link{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;}
 
@@ -111,7 +112,8 @@ button{font-family:inherit;}
 
 const CATEGORIES = [
   { id:"music", name:"Music" },
-  { id:"characters", name:"Characters" }
+  { id:"characters", name:"Characters" },
+  { id:"album", name:"Album/EP" }
 ];
 
 function catName(id){ const c = CATEGORIES.find(c=>c.id===id); return c ? c.name : id; }

@@ -103,6 +103,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 .cat-badge{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
 .cat-badge.music{background:rgba(41,91,255,0.14);color:var(--royal-hi);}
 .cat-badge.characters{background:rgba(230,58,70,0.14);color:var(--crimson-hi);}
+.cat-badge.album{background:rgba(244,191,58,0.14);color:var(--gold);}
 .list-item-text{font-size:13.5px;color:var(--ink);line-height:1.5;}
 .list-item-actions{display:flex;gap:10px;margin-top:8px;}
 .list-item-actions button,.list-item-actions a{background:none;border:none;color:var(--royal-hi);font-size:12px;font-weight:600;cursor:pointer;padding:0;}
@@ -156,7 +157,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--royal-hi
 
 const CATEGORIES = [
   { id:"music", name:"Music" },
-  { id:"characters", name:"Characters" }
+  { id:"characters", name:"Characters" },
+  { id:"album", name:"Album/EP" }
 ];
 const SOCIAL_PLATFORMS = ["X / Twitter","Instagram","TikTok","YouTube","Bluesky","Website","Other"];
 const CREATIVE_PLATFORMS = ["Suno","Emochi","DreamGen","Other"];
@@ -533,12 +535,50 @@ async function loadResultsList(){
 }
 
 /* ---------------- Settings tab ---------------- */
+const STORE_KEY = "promptRoyale.v1";
+const DEFAULT_BYOK_MODEL = { anthropic: "claude-haiku-4-5-20251001", openai: "gpt-4o-mini" };
+
+// The reel machine's local state (favorites/history/reel toggles/AI source)
+// lives in the same origin's localStorage under STORE_KEY — this only ever
+// patches the AI-provider fields, never touches the rest, since this page
+// doesn't load the full reel-engine state.
+function readSharedState(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+}
+function writeSharedState(patch){
+  const current = readSharedState();
+  Object.assign(current, patch);
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(current)); }catch(e){}
+}
+
 function renderSettingsTab(el){
+  const shared = readSharedState();
+  const aiSource = shared.aiSource || "off";
+  const byokKeys = shared.byokKeys || { anthropic:"", openai:"" };
+  const byokModels = shared.byokModels || { anthropic:"", openai:"" };
+
   el.innerHTML =
     '<div class="panel">' +
       '<h2>Account</h2>' +
       '<p class="sub">Signed in with <strong>'+escapeHTML(me.provider)+'</strong> as '+escapeHTML(me.name)+'.</p>' +
-      '<p class="hint">AI provider settings (this site’s AI, or your own Claude/ChatGPT key) live in the main page’s Settings panel — <a href="index.html">open it there</a>.</p>' +
+    '</div>' +
+    '<div class="panel">' +
+      '<h2>AI-generated entries</h2>' +
+      '<p class="sub">Controls the reel machine on the main page — applies next time you load it there.</p>' +
+      '<select id="sAiSource">' +
+        '<option value="off">Off — use the built-in lists</option>' +
+        '<option value="groq">This site’s AI (Groq, no key needed)</option>' +
+        '<option value="anthropic">My own Claude API key</option>' +
+        '<option value="openai">My own ChatGPT (OpenAI) API key</option>' +
+      '</select>' +
+      '<div id="sByokFields" style="display:none;margin-top:12px;">' +
+        '<label class="field-label">API key</label>' +
+        '<input type="text" id="sByokKey" placeholder="sk-ant-... / sk-...">' +
+        '<label class="field-label">Model (optional override)</label>' +
+        '<input type="text" id="sByokModel">' +
+        '<p class="hint">Stored only in this browser’s local storage.</p>' +
+      '</div>' +
+      '<p class="status-msg" id="aiSettingsStatus"></p>' +
     '</div>' +
     '<div class="panel">' +
       '<h2>Delete Account</h2>' +
@@ -546,6 +586,44 @@ function renderSettingsTab(el){
       '<button class="btn danger" id="deleteAccountBtn">Delete my account</button>' +
       '<div id="deleteConfirmBox"></div>' +
     '</div>';
+
+  const sAiSource = document.getElementById("sAiSource");
+  const sByokFields = document.getElementById("sByokFields");
+  const sByokKey = document.getElementById("sByokKey");
+  const sByokModel = document.getElementById("sByokModel");
+  sAiSource.value = aiSource;
+
+  function syncByokFieldsVisibility(){
+    const src = sAiSource.value;
+    const show = src === "anthropic" || src === "openai";
+    sByokFields.style.display = show ? "block" : "none";
+    if(show){
+      sByokKey.value = byokKeys[src] || "";
+      sByokModel.value = byokModels[src] || "";
+      sByokModel.placeholder = DEFAULT_BYOK_MODEL[src];
+    }
+  }
+  syncByokFieldsVisibility();
+
+  sAiSource.addEventListener("change", ()=>{
+    writeSharedState({ aiSource: sAiSource.value });
+    syncByokFieldsVisibility();
+    setStatus("aiSettingsStatus", "Saved.");
+  });
+  sByokKey.addEventListener("input", ()=>{
+    const src = sAiSource.value;
+    if(src !== "anthropic" && src !== "openai") return;
+    byokKeys[src] = sByokKey.value;
+    writeSharedState({ byokKeys });
+    setStatus("aiSettingsStatus", "Saved.");
+  });
+  sByokModel.addEventListener("input", ()=>{
+    const src = sAiSource.value;
+    if(src !== "anthropic" && src !== "openai") return;
+    byokModels[src] = sByokModel.value;
+    writeSharedState({ byokModels });
+    setStatus("aiSettingsStatus", "Saved.");
+  });
 
   document.getElementById("deleteAccountBtn").addEventListener("click", ()=>{
     document.getElementById("deleteConfirmBox").innerHTML =

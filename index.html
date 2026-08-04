@@ -121,6 +121,26 @@ a:hover{color:var(--gold-hi);}
 .navlink{color:var(--ink-75);text-decoration:none;font-size:14px;font-weight:500;background:none;border:none;padding:0;cursor:pointer;transition:color .15s ease;font-family:inherit;}
 .navlink:hover{color:var(--ink);}
 .nav-actions{display:flex;align-items:center;gap:10px;}
+.account-menu-wrap{position:relative;}
+.account-avatar-btn{width:38px;height:38px;border-radius:50%;border:1px solid rgba(77,124,255,0.3);background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:14px;flex:none;}
+.account-avatar-btn:hover{border-color:rgba(77,124,255,0.6);}
+.account-dropdown{position:absolute;top:calc(100% + 14px);right:0;width:280px;z-index:60;border-radius:18px;background:rgba(10,14,24,0.98);border:1px solid rgba(77,124,255,0.28);box-shadow:0 26px 56px rgba(0,0,0,0.55);padding:18px;backdrop-filter:blur(20px);}
+.account-dropdown[hidden]{display:none;}
+.account-dropdown h3{font-family:var(--font-display);font-size:15.5px;font-weight:600;margin:0 0 4px;color:var(--ink);}
+.account-dropdown p{font-size:12.5px;line-height:1.5;color:var(--ink-50);margin:0 0 16px;}
+.dd-signin-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;width:100%;text-align:left;margin-bottom:8px;font-family:inherit;}
+.dd-signin-btn:hover{border-color:rgba(77,124,255,0.4);background:rgba(41,91,255,0.08);}
+.dd-user-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.dd-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--royal-hi),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:15px;color:#fff;flex:none;}
+.dd-name{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.dd-credits{font-size:11.5px;color:var(--gold-hi);font-weight:600;margin-top:2px;}
+.dd-links{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}
+.dd-links a{display:block;padding:9px 10px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:500;}
+.dd-links a:hover{background:rgba(255,255,255,0.06);}
+.dd-divider{border-top:1px solid rgba(255,255,255,0.08);margin:8px 0;}
+.dd-signout{width:100%;padding:9px 10px;border-radius:10px;border:none;background:transparent;color:#FF9AA5;font-size:13px;font-weight:600;text-align:left;cursor:pointer;font-family:inherit;}
+.dd-signout:hover{background:rgba(230,58,70,0.08);}
+.dd-discord-cta{font-size:11px;color:var(--ink-40);margin-top:14px;text-align:center;}
 .pill-cta{
   text-decoration:none;padding:10px 20px;border-radius:999px;
   background:linear-gradient(135deg,var(--royal),var(--royal-deep));color:#fff;
@@ -271,8 +291,21 @@ a:hover{color:var(--gold-hi);}
 
 /* ---------- how it works ---------- */
 .hiw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;}
-.hiw-card{border-radius:20px;padding:26px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);transition:transform .2s ease, border-color .2s ease;}
-.hiw-card:hover{transform:translateY(-4px);border-color:rgba(77,124,255,0.35);}
+.hiw-card{
+  border-radius:20px;padding:26px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  opacity:0;filter:blur(6px);transform:scale(.94);
+  transition:opacity .5s ease, filter .5s ease, transform .5s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.hiw-card.in-view{opacity:1;filter:blur(0);transform:scale(1);animation:hiw-glow-pulse .6s ease-out;}
+.hiw-card.in-view:hover{transform:translateY(-4px);border-color:rgba(77,124,255,0.35);}
+@keyframes hiw-glow-pulse{
+  0%{box-shadow:0 0 0 0 rgba(77,124,255,0.55);}
+  70%{box-shadow:0 0 0 18px rgba(77,124,255,0);}
+  100%{box-shadow:0 0 0 0 rgba(77,124,255,0);}
+}
+@media (prefers-reduced-motion: reduce){
+  .hiw-card{opacity:1;filter:none;transform:none;transition:none;animation:none;}
+}
 .hiw-num{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--royal),var(--royal-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:15px;color:#fff;margin-bottom:18px;}
 .hiw-card h3{font-family:var(--font-display);font-size:18px;font-weight:600;margin:0 0 8px;color:var(--ink);}
 .hiw-card p{font-size:14.5px;line-height:1.6;color:var(--ink-58);margin:0;}
@@ -391,11 +424,12 @@ details[open] summary::before{content:"▾ ";}
     <div class="navlinks">
       <a class="navlink" href="#how-it-works">How It Works</a>
       <a class="navlink" href="#categories">Prompt Categories</a>
-      <a class="navlink" href="#pulls">History</a>
-      <a class="navlink" href="account.html">Account</a>
-      <button class="navlink" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">Settings</button>
     </div>
     <div class="nav-actions">
+      <div class="account-menu-wrap">
+        <button class="account-avatar-btn" id="accountAvatarBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Account menu"><span id="accountAvatarInitial">•</span></button>
+        <div class="account-dropdown" id="accountDropdown" hidden></div>
+      </div>
       <a class="pill-cta" href="#slot-machine">Start Rolling</a>
     </div>
   </nav>
@@ -485,25 +519,6 @@ details[open] summary::before{content:"▾ ";}
   <div class="cat-grid" id="categoryCards"></div>
 </section>
 
-<section class="section wide" id="pulls">
-  <div class="section-head" style="text-align:left;margin-bottom:24px;">
-    <span class="section-eyebrow gold">Recent Pulls</span>
-    <h2 style="margin-top:10px;">Fresh off the reels</h2>
-  </div>
-  <div class="recent-grid" id="recentPulls" hidden></div>
-  <p class="empty-note" id="recentPullsEmpty">No challenges pulled yet — hit the lever above.</p>
-  <section class="panels">
-    <details>
-      <summary>Full history</summary>
-      <ul class="list" id="historyList"></ul>
-    </details>
-    <details>
-      <summary>Favorites</summary>
-      <ul class="list" id="favList"></ul>
-    </details>
-  </section>
-</section>
-
 <div class="final-cta-wrap">
   <div class="final-cta">
     <div class="final-cta-inner">
@@ -538,48 +553,6 @@ details[open] summary::before{content:"▾ ";}
   </div>
 </footer>
 
-</div>
-
-<div class="drawer-backdrop" id="drawerBackdrop" hidden>
-  <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-    <h2 id="drawerTitle">Settings</h2>
-    <div id="accountSection">
-      <label class="field-label">Account</label>
-      <p class="hint" id="accountStatus">Checking sign-in status…</p>
-      <div id="signInButtons" hidden>
-        <button type="button" class="signin-btn account-btn" data-provider="google">Sign in with Google</button>
-        <button type="button" class="signin-btn account-btn" data-provider="discord">Sign in with Discord</button>
-        <button type="button" class="signin-btn account-btn" data-provider="facebook">Sign in with Facebook</button>
-      </div>
-      <button type="button" class="done" id="signOutBtn" hidden>Sign out</button>
-      <p class="hint">Signing in syncs your favorites, history, and settings to your account, so they follow you across devices and browsers.</p>
-      <p class="hint" id="accountLinkWrap" hidden><a href="account.html">Manage profile, history, favorites & results →</a></p>
-      <p class="hint discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord community →</a></p>
-    </div>
-    <hr>
-    <p class="hint">Flip reels on or off with the switch in each tile's top-left corner. At least one has to stay on.</p>
-    <hr>
-    <label class="field-label" for="aiSource">AI-generated entries</label>
-    <select id="aiSource">
-      <option value="off">Off — use the built-in lists</option>
-      <option value="groq">This site's AI (Groq, no key needed)</option>
-      <option value="anthropic">My own Claude API key</option>
-      <option value="openai">My own ChatGPT (OpenAI) API key</option>
-    </select>
-    <p class="hint" id="aiCreditsHint"></p>
-    <div class="byok-fields" id="byokFields" hidden>
-      <label class="field-label" for="byokKey">API key</label>
-      <input type="password" id="byokKey" placeholder="sk-ant-... / sk-...">
-      <label class="field-label" for="byokModel">Model (optional override)</label>
-      <input type="text" id="byokModel">
-      <p class="hint">Stored only in this browser's local storage, sent <span id="byokDestNote"></span>.</p>
-      <button type="button" class="done" id="testAIBtn">Test connection</button>
-    </div>
-    <p class="hint" id="aiStatus" style="min-height:14px;"></p>
-    <div class="drawer-actions">
-      <button class="done" id="closeSettings" type="button">Done</button>
-    </div>
-  </div>
 </div>
 
 <div class="drawer-backdrop" id="contactBackdrop" hidden>
@@ -622,7 +595,8 @@ const MUSIC_TWIST_ITEMS = ["No drums until the final chorus","Vocals must whispe
 
 const ACCENTS = {
   royal:{ border:"rgba(77,124,255,0.35)", glyph:"linear-gradient(135deg,#4D7CFF,#1836B2)" },
-  crimson:{ border:"rgba(230,58,70,0.35)", glyph:"linear-gradient(135deg,#E63A46,#74182D)" }
+  crimson:{ border:"rgba(230,58,70,0.35)", glyph:"linear-gradient(135deg,#E63A46,#74182D)" },
+  gold:{ border:"rgba(244,191,58,0.4)", glyph:"linear-gradient(135deg,#FFD978,#C68B24)" }
 };
 
 const CATEGORIES = [
@@ -645,6 +619,15 @@ const CATEGORIES = [
       {label:"Trait", key:"trait", items:["Never forgets a debt","Speaks only in questions","Collects other people's memories","Refuses to be touched","Always arrives late to save someone","Can't lie without flinching","Names everything they own","Only trusts strangers, never friends","Keeps a list of people to apologize to","Talks to the dead as if they're listening","Can't stay in one place more than a year","Remembers every promise ever made to them"]},
       {label:"Flaw", key:"flaw", items:["Addicted to being needed","Terrified of silence","Trusts too easily","Cannot forgive himself","Obsessed with control","Haunted by a broken promise","Runs from every good thing","Mistakes control for safety","Can't accept help from anyone","Sabotages happiness before it's real","Needs to be the one who suffers most","Confuses loyalty with self-erasure"]},
       {label:"Mood", key:"mood", items:["Quietly tragic","Reluctantly heroic","Charismatically dangerous","Wounded but hopeful","Coldly composed","Chaotically loyal","Weary but unbroken","Magnetically unstable","Gently ruthless","Defiantly tender"]}
+    ]
+  },
+  {
+    id:"album", name:"Album/EP", blurb:"Full-project themes & concepts", accent:"gold",
+    reels:[
+      {label:"Theme", key:"theme", items:["Grief and Renewal","Coming of Age","Digital Isolation","Nostalgia for a Place That Never Existed","Reinvention","Falling Apart Gracefully","Chosen Family","Escape Velocity","Unfinished Business","The Space Between Words","Ghosts of Old Selves","Learning to Stay","Beautiful Exhaustion","Home as a Moving Target","The Weight of Almost","Quiet Rebellion","Letting the Dead Rest","Becoming Someone Else","The Long Way Back","Static and Silence"]},
+      {label:"Genre 1", key:"genre1", items:["Dream Pop","Trip-Hop","Afrobeat","Baroque Pop","Drum & Bass","Neo-Soul","Shoegaze","Bolero","City Pop","Math Rock","Zydeco","Vaporwave","Highlife","Post-Punk","Bedroom Pop","Cumbia","Grime","Dungeon Synth","Emo Rap","J-Pop","Dub","Country Noir","Krautrock","Bachata"]},
+      {label:"Genre 2", key:"genre2", items:["Synthwave","Flamenco","Ambient Jazz","Trap","Bossa Nova","Industrial","Gospel","Chiptune","Reggaeton","Doom Metal","Folktronica","Baile Funk","Lo-fi Hip-Hop","Bluegrass","Witch House","Disco","Tuareg Blues","Ska","Balearic House","Opera","Nu-Disco","Highlife","Grunge","Salsa"]},
+      {label:"Story/Concept", key:"story", items:["A concept album following a character through five stages of grief","A breakup told in reverse chronological order","Letters to a version of yourself you left behind","A soundtrack for a city that no longer exists","The rise and fall of a fictional band","A year lived entirely at night","Voicemails never returned","A love story told through weather","An astronaut's diary on the way home","The last summer before everything changed","A road trip with no destination","Two strangers writing to each other for a decade","A haunted house telling its own history","The soundtrack to a slow goodbye","A war fought entirely in silence","Growing up in a town everyone left","A machine's love song for its creator","The night shift at the end of the world","A family's unspoken history, sung instead of said","Falling in and out of the same dream"]}
     ]
   }
 ];
@@ -775,42 +758,63 @@ async function pullAccountData(){
   saveState();
   buildReelsDOM();
   syncReelControlsFromState();
-  renderHistory();
-  renderFavorites();
 }
 
+let availableProviders = [];
+
+// Renders the avatar-button dropdown (mockup: signed-out shows "Continue
+// with Google/Discord"; signed-in shows avatar, name, credits, and links
+// into account.html for Profile/History/Favorites/Results/Settings — those
+// all moved off this page and into the real Account page).
 function renderAccountUI(){
-  if(!els.accountStatus) return;
+  const dd = document.getElementById("accountDropdown");
+  const avatarInitial = document.getElementById("accountAvatarInitial");
+  if(!dd) return;
   if(account.signedIn){
-    els.accountStatus.textContent = "Signed in with "+account.provider+" as "+account.name+". Synced across your devices.";
-    els.signInButtons.hidden = true;
-    els.signOutBtn.hidden = false;
-    els.accountLinkWrap.hidden = false;
+    const initial = (account.name||"?").trim().slice(0,1).toUpperCase();
+    avatarInitial.textContent = initial;
+    dd.innerHTML =
+      '<div class="dd-user-row"><span class="dd-avatar">'+initial+'</span><div>'+
+        '<div class="dd-name">'+escapeHTML(account.name)+'</div>'+
+        (account.credits ? '<div class="dd-credits">'+account.credits.remaining+' / '+account.credits.limit+' AI rolls left</div>' : '')+
+      '</div></div>'+
+      '<div class="dd-links">'+
+        '<a href="account.html#profile">Profile</a>'+
+        '<a href="account.html#history">History</a>'+
+        '<a href="account.html#favorites">Favorites</a>'+
+        '<a href="account.html#results">Results</a>'+
+        '<a href="account.html#settings">Settings</a>'+
+      '</div>'+
+      '<div class="dd-divider"></div>'+
+      '<button type="button" class="dd-signout" id="ddSignOutBtn">Sign out</button>';
+    document.getElementById("ddSignOutBtn").addEventListener("click", async ()=>{
+      try{ await fetch("/api/auth-logout", {method:"POST"}); }catch(e){}
+      window.location.reload();
+    });
   } else {
-    els.accountStatus.textContent = "Not signed in — favorites/history stay on this browser only.";
-    els.signInButtons.hidden = false;
-    els.signOutBtn.hidden = true;
-    els.accountLinkWrap.hidden = true;
+    avatarInitial.textContent = "•";
+    const googleBtn = availableProviders.includes("google") ? '<button type="button" class="dd-signin-btn" data-provider="google">Continue with Google</button>' : '';
+    const discordBtn = availableProviders.includes("discord") ? '<button type="button" class="dd-signin-btn" data-provider="discord">Continue with Discord</button>' : '';
+    dd.innerHTML =
+      '<h3>Sign in to Prompt Royale</h3>'+
+      '<p>Save favorites, track history, and roll with AI.</p>'+
+      googleBtn + discordBtn +
+      '<p class="dd-discord-cta"><a href="https://discord.gg/nSdj4wBZv" target="_blank" rel="noopener">Join the Discord community →</a></p>';
+    dd.querySelectorAll(".dd-signin-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ window.location.href = "/api/auth-start?provider="+btn.dataset.provider; });
+    });
   }
   updateAICreditsHint();
 }
 
 // This site's own Groq key ("groq" AI source) is metered per signed-in
 // account; BYOK Claude/OpenAI keys are never metered (that's the visitor's
-// own API cost). Shows the live balance, or a nudge to sign in / use BYOK.
+// own API cost). AI provider selection now lives in account.html's
+// Settings tab — this just keeps the lever-disable/fallback-banner logic
+// (which depends on state.aiSource + account.credits) up to date.
 function updateAICreditsHint(){
   updateCreditsExhaustedState();
   updateSignInNotice();
-  if(!els.aiCreditsHint) return;
-  if(state.aiSource !== "groq"){ els.aiCreditsHint.textContent = ""; return; }
-  if(!account.signedIn){
-    els.aiCreditsHint.textContent = "Sign in above to use this site's AI — free daily credits per account.";
-  } else if(account.credits){
-    els.aiCreditsHint.textContent = account.credits.remaining+" / "+account.credits.limit+" free AI rolls left today."
-      + (account.credits.remaining <= 0 ? " Switch AI off (or add your own key) to keep rolling for free." : "");
-  } else {
-    els.aiCreditsHint.textContent = "";
-  }
 }
 
 async function checkAccount(){
@@ -819,21 +823,9 @@ async function checkAccount(){
     res = await fetch("/api/auth-me");
     data = await res.json();
   }catch(e){
-    els.accountStatus.textContent = "Accounts aren't available right now.";
-    els.signInButtons.hidden = true;
-    els.signOutBtn.hidden = true;
-    return;
+    return; // accounts unavailable — dropdown stays in its default signed-out state
   }
-  const providers = data.providers || [];
-  els.signInButtons.querySelectorAll(".account-btn").forEach(btn=>{
-    btn.hidden = !providers.includes(btn.dataset.provider);
-  });
-  if(providers.length === 0){
-    els.accountStatus.textContent = "Accounts aren't configured on this deployment yet.";
-    els.signInButtons.hidden = true;
-    els.signOutBtn.hidden = true;
-    return;
-  }
+  availableProviders = data.providers || [];
   account.signedIn = !!data.signedIn;
   account.provider = data.provider || null;
   account.name = data.name || null;
@@ -923,26 +915,7 @@ const els = {
   copyBtn: document.getElementById("copyBtn"),
   favBtn: document.getElementById("favBtn"),
   aiFallbackNotice: document.getElementById("aiFallbackNotice"),
-  historyList: document.getElementById("historyList"),
-  favList: document.getElementById("favList"),
-  recentPulls: document.getElementById("recentPulls"),
-  recentPullsEmpty: document.getElementById("recentPullsEmpty"),
   lever: document.getElementById("pullLever"),
-  settingsBtn: document.getElementById("settingsBtn"),
-  drawerBackdrop: document.getElementById("drawerBackdrop"),
-  closeSettings: document.getElementById("closeSettings"),
-  aiSource: document.getElementById("aiSource"),
-  byokFields: document.getElementById("byokFields"),
-  byokKey: document.getElementById("byokKey"),
-  byokModel: document.getElementById("byokModel"),
-  byokDestNote: document.getElementById("byokDestNote"),
-  testAIBtn: document.getElementById("testAIBtn"),
-  aiStatus: document.getElementById("aiStatus"),
-  aiCreditsHint: document.getElementById("aiCreditsHint"),
-  accountStatus: document.getElementById("accountStatus"),
-  signInButtons: document.getElementById("signInButtons"),
-  signOutBtn: document.getElementById("signOutBtn"),
-  accountLinkWrap: document.getElementById("accountLinkWrap"),
   contactBtn: document.getElementById("contactBtn"),
   contactBackdrop: document.getElementById("contactBackdrop"),
   closeContact: document.getElementById("closeContact"),
@@ -1053,6 +1026,22 @@ function buildCharactersMission(vals){
   return mission;
 }
 
+// Shares the Music category's genre-fusion logic (both use genre1/genre2 keys).
+function buildAlbumMission(vals){
+  const useTheme = isActive("theme") && vals.theme;
+  const genreLabel = genreFusionDescriptor(vals);
+  const useStory = isActive("story") && vals.story;
+
+  const descriptors = [];
+  if(useTheme) descriptors.push(stripTrailingPunct(vals.theme).toLowerCase());
+  if(genreLabel) descriptors.push(genreLabel);
+
+  let mission = "Write a " + (descriptors.length ? descriptors.join(" ")+" album/EP" : "album/EP");
+  if(useStory) mission += " centered on "+stripTrailingPunct(vals.story);
+  mission += ".";
+  return mission;
+}
+
 // Generic fallback for any future category without a hand-written template:
 // labels every active reel explicitly so the sentence still reads clearly.
 function buildGenericMission(cat, vals){
@@ -1068,6 +1057,7 @@ function buildMission(vals){
   const cat = currentCategory();
   if(cat.id === "music") return buildMusicMission(vals);
   if(cat.id === "characters") return buildCharactersMission(vals);
+  if(cat.id === "album") return buildAlbumMission(vals);
   return buildGenericMission(cat, vals);
 }
 
@@ -1116,72 +1106,10 @@ function isFavorited(ticket){
   return state.favorites.some(f=>f.mission===ticket.mission);
 }
 
-function renderList(container, items, opts){
-  if(!items.length){
-    container.innerHTML = '<li class="empty-note" style="border:none;">'+opts.emptyText+'</li>';
-    return;
-  }
-  container.innerHTML = "";
-  items.slice().reverse().slice(0,25).forEach(item=>{
-    const li = document.createElement("li");
-    const span = document.createElement("span");
-    span.textContent = item.mission;
-    li.appendChild(span);
-    const btn = document.createElement("button");
-    btn.className = "mini";
-    btn.type = "button";
-    btn.textContent = opts.actionLabel;
-    btn.addEventListener("click", ()=>opts.onAction(item));
-    li.appendChild(btn);
-    container.appendChild(li);
-  });
-}
-
-function renderHistory(){
-  renderList(els.historyList, state.history, {
-    emptyText:"No challenges pulled yet — hit the lever above.",
-    actionLabel:"Restore",
-    onAction:(item)=>{
-      if(item.categoryId && item.categoryId !== state.categoryId){ switchCategory(item.categoryId); }
-      state.current = item; renderTicket(); saveState();
-    }
-  });
-  renderRecentPulls();
-}
-function renderRecentPulls(){
-  const recent = state.history.slice().reverse().slice(0,3);
-  if(!recent.length){
-    els.recentPulls.hidden = true;
-    els.recentPullsEmpty.hidden = false;
-    return;
-  }
-  els.recentPullsEmpty.hidden = true;
-  els.recentPulls.hidden = false;
-  els.recentPulls.innerHTML = "";
-  recent.forEach(item=>{
-    const card = document.createElement("div");
-    card.className = "recent-card";
-    const time = document.createElement("div");
-    time.className = "recent-time";
-    time.textContent = item.time;
-    const label = document.createElement("div");
-    label.className = "recent-label";
-    label.textContent = item.mission;
-    card.appendChild(time);
-    card.appendChild(label);
-    els.recentPulls.appendChild(card);
-  });
-}
-function renderFavorites(){
-  renderList(els.favList, state.favorites, {
-    emptyText:"Nothing saved yet — star a ticket to keep it.",
-    actionLabel:"Remove",
-    onAction:(item)=>{
-      state.favorites = state.favorites.filter(f=>f.mission!==item.mission);
-      renderFavorites(); renderTicket(); saveState();
-    }
-  });
-}
+// History/Favorites lists moved to account.html (Account > History/Favorites)
+// — the home page only needs to know whether the current ticket is
+// favorited (isFavorited, used by renderTicket) and to keep saving to
+// state.history/state.favorites so account.html has data to show.
 
 /* ---------------- AI mode: Groq (this site's key) or bring-your-own-key ---------------- */
 // Three sources, chosen via the Settings dropdown:
@@ -1199,12 +1127,6 @@ function renderFavorites(){
 const AI_ENDPOINT = "/api/generate";
 const OPENAI_RELAY_ENDPOINT = "/api/openai-generate";
 const DEFAULT_BYOK_MODEL = { anthropic: "claude-haiku-4-5-20251001", openai: "gpt-4o-mini" };
-
-function setAIStatus(text, isError){
-  if(!els.aiStatus) return;
-  els.aiStatus.textContent = text || "";
-  els.aiStatus.classList.toggle("ai-error", !!isError);
-}
 
 function shuffle(arr){
   const a = arr.slice();
@@ -1351,10 +1273,6 @@ async function aiGenerate(key){
   throw new Error("groq is handled via the batched path, not aiGenerate");
 }
 
-function aiSourceLabel(src){
-  return src==="anthropic" ? "Claude" : src==="openai" ? "ChatGPT" : "This site's AI";
-}
-
 let aiFallbackNoticeTimer = null;
 let persistentBannerActive = false;
 function showAIFallbackNotice(msg, persistent){
@@ -1379,22 +1297,6 @@ function updateSignInNotice(){
     showAIFallbackNotice("Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead. — showing built-in results instead.", true);
   } else {
     hidePersistentBannerIfActive();
-  }
-}
-
-async function testAIEndpoint(){
-  if(!state.aiSource || state.aiSource === "off"){ setAIStatus(""); return false; }
-  setAIStatus("Checking AI connection…");
-  const cat = currentCategory();
-  const probeKey = (cat.reels.find(r=>isActive(r.key)) || cat.reels[0]).key;
-  try{
-    if(state.aiSource === "groq"){ await groqGenerateBatch(cat, [probeKey]); }
-    else { await aiGenerate(probeKey); }
-    setAIStatus(aiSourceLabel(state.aiSource)+" ready — fresh entries generate on every pull.");
-    return true;
-  }catch(err){
-    setAIStatus((err && err.message ? err.message : "AI unavailable")+" — using the built-in lists instead.", true);
-    return false;
   }
 }
 
@@ -1553,7 +1455,6 @@ async function pullLever(){
   recordRollStats(cat.id);
 
   renderTicket();
-  renderHistory();
   rollCountEl.textContent = String(state.history.length);
   saveState();
   els.announcer.textContent = "New challenge: "+ticket.mission;
@@ -1674,65 +1575,33 @@ els.favBtn.addEventListener("click", ()=>{
   } else {
     state.favorites.push(state.current);
   }
-  renderFavorites();
   renderTicket();
   saveState();
 });
 
-els.settingsBtn.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = false; els.closeSettings.focus(); });
-els.closeSettings.addEventListener("click", ()=>{ els.drawerBackdrop.hidden = true; els.settingsBtn.focus(); });
-els.drawerBackdrop.addEventListener("click", (e)=>{ if(e.target===els.drawerBackdrop) els.drawerBackdrop.hidden = true; });
-document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && !els.drawerBackdrop.hidden) els.drawerBackdrop.hidden = true; });
-
-function updateByokFieldsVisibility(){
-  const src = state.aiSource;
-  const show = (src === "anthropic" || src === "openai");
-  els.byokFields.hidden = !show;
-  if(show){
-    els.byokKey.value = state.byokKeys[src] || "";
-    els.byokModel.value = state.byokModels[src] || "";
-    els.byokModel.placeholder = DEFAULT_BYOK_MODEL[src];
-    els.byokDestNote.textContent = src === "anthropic"
-      ? "directly to Anthropic's API from your browser — this site never sees it"
-      : "to this site's relay function, which forwards it to OpenAI for that one request and doesn't store it";
-  }
-}
-
-els.aiSource.addEventListener("change", async ()=>{
-  state.aiSource = els.aiSource.value;
-  updateByokFieldsVisibility();
-  updateAICreditsHint();
-  saveState();
-  if(state.aiSource === "off"){ setAIStatus(""); return; }
-  if(state.aiSource === "groq" || (state.byokKeys[state.aiSource] || "").trim()){
-    await testAIEndpoint();
-  } else {
-    setAIStatus("Add your API key above, then hit “Test connection.”");
+/* ---------------- account avatar dropdown ---------------- */
+// AI-source/BYOK controls and sign-in buttons now live in the dropdown
+// (rendered dynamically by renderAccountUI) and account.html's Settings
+// tab — this just handles opening/closing the popover itself.
+const accountAvatarBtn = document.getElementById("accountAvatarBtn");
+const accountDropdown = document.getElementById("accountDropdown");
+accountAvatarBtn.addEventListener("click", (e)=>{
+  e.stopPropagation();
+  const willShow = accountDropdown.hidden;
+  accountDropdown.hidden = !willShow;
+  accountAvatarBtn.setAttribute("aria-expanded", String(willShow));
+});
+document.addEventListener("click", (e)=>{
+  if(!accountDropdown.hidden && !accountDropdown.contains(e.target) && e.target !== accountAvatarBtn){
+    accountDropdown.hidden = true;
+    accountAvatarBtn.setAttribute("aria-expanded", "false");
   }
 });
-
-els.byokKey.addEventListener("input", ()=>{
-  const src = state.aiSource;
-  if(src === "anthropic" || src === "openai"){
-    state.byokKeys[src] = els.byokKey.value;
-    saveState();
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && !accountDropdown.hidden){
+    accountDropdown.hidden = true;
+    accountAvatarBtn.setAttribute("aria-expanded", "false");
   }
-});
-els.byokModel.addEventListener("input", ()=>{
-  const src = state.aiSource;
-  if(src === "anthropic" || src === "openai"){
-    state.byokModels[src] = els.byokModel.value;
-    saveState();
-  }
-});
-els.testAIBtn.addEventListener("click", ()=>{ testAIEndpoint(); });
-
-els.signInButtons.querySelectorAll(".account-btn").forEach(btn=>{
-  btn.addEventListener("click", ()=>{ window.location.href = "/api/auth-start?provider="+btn.dataset.provider; });
-});
-els.signOutBtn.addEventListener("click", async ()=>{
-  try{ await fetch("/api/auth-logout", {method:"POST"}); }catch(e){}
-  window.location.reload();
 });
 
 /* ---------------- contact modal ---------------- */
@@ -1782,10 +1651,7 @@ function init(){
   syncReelControlsFromState();
   rollCountEl.textContent = String(state.history.length);
 
-  els.aiSource.value = state.aiSource || "off";
-  updateByokFieldsVisibility();
   updateAICreditsHint();
-  if(state.aiSource && state.aiSource !== "off") testAIEndpoint();
 
   if(state.current && state.current.categoryId === state.categoryId){
     renderReelValues(state.current.vals);
@@ -1796,10 +1662,29 @@ function init(){
     renderReelValues(placeholder);
     renderTicket();
   }
-  renderHistory();
-  renderFavorites();
   checkAccount();
+  initHowItWorksAnimation();
 }
+
+// Staggered reel-style "spin→land" entrance for the How It Works cards,
+// triggered once via IntersectionObserver when the section scrolls into
+// view (not on every scroll) — matches the mockup's animation spec.
+function initHowItWorksAnimation(){
+  const section = document.getElementById("how-it-works");
+  const cards = section ? Array.from(section.querySelectorAll(".hiw-card")) : [];
+  if(!cards.length || !("IntersectionObserver" in window)) return;
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      cards.forEach((card,i)=>{
+        setTimeout(()=>card.classList.add("in-view"), i*140);
+      });
+      observer.disconnect();
+    });
+  }, { threshold: 0.3 });
+  observer.observe(section);
+}
+
 init();
 
 })();
