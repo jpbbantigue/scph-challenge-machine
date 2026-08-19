@@ -85,6 +85,11 @@ a:hover{color:var(--gold-hi);}
 
 @keyframes float-orb{0%,100%{transform:translate(0,0);}50%{transform:translate(18px,-24px);}}
 @keyframes settle{0%{transform:translateY(-6px);opacity:.4;}100%{transform:translateY(0);opacity:1;}}
+@keyframes spin-tick{0%{filter:blur(0px);opacity:1;}40%{filter:blur(3px);opacity:.55;}100%{filter:blur(0px);opacity:1;}}
+@keyframes reel-land-pulse{0%{box-shadow:0 0 0 0 rgba(77,124,255,0.55);}70%{box-shadow:0 0 0 18px rgba(77,124,255,0);}100%{box-shadow:0 0 0 0 rgba(77,124,255,0);}}
+@keyframes ticket-print{0%{clip-path:inset(0 0 100% 0);}100%{clip-path:inset(0 0 0% 0);}}
+@keyframes ticket-tear{0%{transform:translateX(-50%) translateY(0) rotate(0deg);opacity:1;}100%{transform:translateX(-50%) translateY(30px) rotate(-4deg);opacity:0;}}
+@keyframes save-flash-pop{0%{transform:scale(1);}40%{transform:scale(1.35) translateY(-3px);}100%{transform:scale(1);}}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}
 }
@@ -106,7 +111,8 @@ a:hover{color:var(--gold-hi);}
 .page{position:relative;z-index:1;}
 
 /* ---------- nav ---------- */
-.nav-wrap{position:sticky;top:0;z-index:50;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+.nav-wrap{position:static;z-index:50;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+@media (max-width:768px){.nav-wrap{position:sticky;top:0;}}
 .topnav{
   width:100%;max-width:1180px;display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:11px 18px;border-radius:999px;
@@ -219,7 +225,8 @@ a:hover{color:var(--gold-hi);}
   display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
   transition:opacity .2s ease, filter .2s ease;
 }
-.reel-unit.disabled{opacity:0.4;filter:grayscale(.4);}
+.reel-unit.disabled{opacity:0.4;filter:grayscale(1);}
+.reel-unit.landed{animation:reel-land-pulse .65s ease-out;}
 .reel-fade-top,.reel-fade-bottom{position:absolute;left:0;right:0;height:26px;z-index:2;pointer-events:none;}
 .reel-fade-top{top:0;background:linear-gradient(180deg, rgba(9,12,22,0.95), transparent);}
 .reel-fade-bottom{bottom:0;background:linear-gradient(0deg, rgba(9,12,22,0.95), transparent);}
@@ -233,7 +240,7 @@ a:hover{color:var(--gold-hi);}
 .reel-switch .knob{width:11px;height:11px;border-radius:50%;background:#fff;}
 .reel-label{font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-40);margin-bottom:8px;}
 .reel-value{font-family:var(--font-display);font-weight:600;font-size:14.5px;line-height:1.25;text-align:center;color:var(--ink);word-break:break-word;}
-.reel-value.spinning{filter:blur(1.5px);opacity:.85;}
+.reel-value.spinning{animation:spin-tick .13s linear infinite;}
 .reel-value.settle{animation:settle .28s ease-out;}
 .reel-window{cursor:pointer;display:flex;flex-direction:column;align-items:center;width:100%;}
 .reel-lock{
@@ -241,7 +248,7 @@ a:hover{color:var(--gold-hi);}
   border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);cursor:pointer;padding:0;
   display:flex;align-items:center;justify-content:center;color:var(--ink-50);font-size:11px;
 }
-.reel-lock[aria-pressed="true"]{border-color:var(--gold);background:rgba(244,191,58,0.18);color:var(--gold-hi);}
+.reel-lock[aria-pressed="true"]{border-color:rgba(230,58,70,0.55);background:rgba(230,58,70,0.18);color:#FF9AA5;}
 .reel-lock:disabled{opacity:0.3;cursor:not-allowed;}
 
 .roll-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
@@ -256,56 +263,51 @@ a:hover{color:var(--gold-hi);}
 .roll-btn:active,.roll-btn.pressed{transform:translateY(0) scale(.98);}
 .roll-btn:disabled{opacity:.6;cursor:default;}
 .roll-btn .diamond{width:13px;height:13px;background:var(--gold-hi);transform:rotate(45deg);border-radius:3px;flex:none;}
+.roll-btn.rolling .diamond{animation:spin-tick .4s linear infinite;}
 .roll-btn.ai-variant{background:rgba(244,191,58,0.08);border:1px solid rgba(244,191,58,0.4);color:var(--gold-hi);box-shadow:none;}
 .roll-btn.ai-variant:hover:not(:disabled){background:rgba(244,191,58,0.14);}
 .roll-btn.ai-variant .diamond{background:var(--gold);}
 .roll-btn .roll-note{opacity:0.7;font-weight:500;font-size:12.5px;}
 
-/* ---------- mini roller bar ---------- */
-.mini-roller-wrap{position:sticky;top:0;z-index:49;display:flex;justify-content:center;overflow:hidden;padding:0 20px;
-  transition:max-height .32s ease, opacity .28s ease, margin-top .32s ease;
-  max-height:0;opacity:0;margin-top:0;pointer-events:none;}
-.mini-roller-wrap.show{max-height:68px;opacity:1;margin-top:8px;pointer-events:auto;}
-.mini-roller{width:100%;max-width:1180px;display:flex;align-items:stretch;border-radius:12px;overflow:hidden;
-  background:rgba(9,12,22,0.92);border:1px solid rgba(244,191,58,0.3);backdrop-filter:blur(18px);
-  box-shadow:0 14px 32px rgba(0,0,0,0.4);font-family:var(--font-mono);}
-.mini-roller-stripe{width:4px;flex:none;background:linear-gradient(180deg,var(--gold),var(--crimson-hi));}
-.mini-roller-label{display:flex;align-items:center;padding:0 4px 0 16px;border-right:1px dashed rgba(255,255,255,0.14);
-  flex:none;font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
-.mini-roller-values{display:flex;align-items:center;overflow-x:auto;flex:1;min-width:0;}
-.mini-roller-value{display:flex;flex-direction:column;gap:2px;padding:8px 16px;border-right:1px dashed rgba(255,255,255,0.1);flex:none;}
-.mini-roller-value .l{font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);white-space:nowrap;}
-.mini-roller-value .v{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;}
-.mini-roller-btn{flex:none;border:none;cursor:pointer;font-family:inherit;}
-.mini-roller-btn.roll{padding:0 20px;border-left:1px solid rgba(77,124,255,0.3);background:rgba(41,91,255,0.16);
-  color:#CBD8FF;font-weight:700;font-size:12.5px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;}
-.mini-roller-btn.icon{width:42px;border-left:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--ink);font-size:14px;}
-.mini-roller-btn.icon.gold{color:var(--gold-hi);}
 
-/* ---------- ticket / result ---------- */
-.ticket-wrap{max-width:640px;margin:0 auto;padding:0 24px clamp(48px,7vw,88px);display:none;scroll-margin-top:150px;}
-.ticket-wrap.show{display:block;}
+/* ---------- printed ticket (paper receipt hanging below the divider) ---------- */
+/* Absolutely positioned relative to the divider so it never affects card
+   height — it visually "hangs" out of the slot machine without pushing
+   anything below it. */
+.ticket-divider{margin-top:14px;border-top:1px dashed rgba(255,255,255,0.25);position:relative;}
 .ticket{
-  border-radius:20px;padding:28px 30px;
-  background:linear-gradient(180deg, rgba(20,26,46,0.85), rgba(9,12,22,0.9));
-  border:1px solid rgba(77,124,255,0.22);box-shadow:0 20px 50px rgba(0,0,0,0.4);
-  font-family:var(--font-mono);
+  position:absolute;top:100%;left:50%;width:92%;transform:translateX(-50%);transform-origin:top center;
+  background:#fdfbf3;border-radius:0 0 8px 8px;box-shadow:0 16px 30px rgba(0,0,0,0.4);
+  z-index:5;overflow:hidden;
+  display:flex;align-items:flex-start;gap:10px;padding:16px 18px;
+  clip-path:inset(0 0 0% 0);
 }
-.ticket-head{display:flex;justify-content:space-between;font-size:12px;letter-spacing:0.06em;color:var(--ink-40);margin-bottom:18px;}
-.ticket-body{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
-.ticket-line{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:baseline;}
-.ticket-line .tag{font-size:11.5px;letter-spacing:0.06em;color:var(--ink-40);}
-.ticket-line .val{font-size:15px;font-weight:600;color:var(--ink);}
-.ticket-rule{border-top:1px dashed rgba(255,255,255,0.15);margin:0 0 18px;}
-.ticket-mission{font-style:italic;font-size:15px;line-height:1.6;color:rgba(243,245,252,0.85);margin:0 0 24px;}
-.ticket-actions{display:flex;flex-wrap:wrap;gap:12px;}
+.ticket[hidden]{display:none;}
+.ticket.printing{animation:ticket-print .5s ease-out forwards;}
+.ticket.tearing{animation:ticket-tear .36s ease-in forwards;}
+.ticket-text{flex:1;min-width:0;}
+#ticket .ticket-mission{
+  font-family:var(--font-mono);font-size:13px;line-height:1.55;color:#1a1a1a;font-style:italic;margin:0 0 8px;
+}
+#ticket .ticket-meta{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.04em;color:rgba(26,26,26,0.5);}
+.ticket-actions{display:flex;gap:6px;flex:none;}
 .ticket-actions button{
-  padding:11px 20px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);background:transparent;
-  color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
-  display:flex;align-items:center;gap:7px;transition:all .2s ease;
+  width:30px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,0.15);background:transparent;
+  color:#1a1a1a;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+  font-size:15px;transition:all .15s ease;
 }
-.ticket-actions button:hover{border-color:var(--royal-hi);background:rgba(41,91,255,0.1);}
-.ticket-actions button.favd{border-color:var(--gold);background:rgba(244,191,58,0.14);color:var(--gold-hi);}
+.ticket-actions button:hover:not(:disabled){border-color:var(--royal-hi);background:rgba(41,91,255,0.08);}
+.ticket-actions button:disabled{opacity:0.4;cursor:not-allowed;}
+.ticket-actions #favBtn{color:#C68B24;}
+.ticket-actions #favBtn:hover:not(:disabled){border-color:#C68B24;background:rgba(244,191,58,0.12);}
+.ticket-actions #favBtn.saveflash{animation:save-flash-pop .55s ease;}
+.ticket-actions #favBtn.favd{color:#C68B24;background:rgba(244,191,58,0.14);}
+.ticket-icon.copy-icon{position:relative;width:13px;height:13px;display:inline-block;}
+.ticket-icon.copy-icon::before,.ticket-icon.copy-icon::after{
+  content:"";position:absolute;width:9px;height:9px;border:1.5px solid currentColor;border-radius:2px;background:#fdfbf3;
+}
+.ticket-icon.copy-icon::before{top:0;left:0;}
+.ticket-icon.copy-icon::after{bottom:0;right:0;}
 .copy-flash{color:var(--royal-hi);}
 
 /* ---------- shared section heading ---------- */
@@ -477,16 +479,6 @@ details[open] summary::before{content:"▾ ";}
       <a class="pill-cta" href="#slot-machine">Start Rolling</a>
     </div>
   </nav>
-  <div class="mini-roller-wrap" id="miniRollerWrap" aria-hidden="true">
-    <div class="mini-roller">
-      <div class="mini-roller-stripe" aria-hidden="true"></div>
-      <div class="mini-roller-label">Now Rolling</div>
-      <div class="mini-roller-values" id="miniRollerValues"></div>
-      <button class="mini-roller-btn roll" id="miniRollAgainBtn" type="button">Roll Again</button>
-      <button class="mini-roller-btn icon" id="miniCopyBtn" type="button" aria-label="Copy prompt">&#10697;</button>
-      <button class="mini-roller-btn icon gold" id="miniSaveBtn" type="button" aria-label="Save prompt">&#9734;</button>
-    </div>
-  </div>
 </div>
 
 <div id="top"></div>
@@ -519,30 +511,34 @@ details[open] summary::before{content:"▾ ";}
         </button>
         <button class="roll-btn ai-variant" id="pullLeverAI" type="button">
           <span class="diamond" aria-hidden="true"></span>
-          Use AI <span class="roll-note" id="useAiNote">(50/day)</span>
+          Use AI <span class="roll-note" id="useAiNote">(3/day)</span>
         </button>
+      </div>
+
+      <div class="ticket-divider" id="ticketDivider">
+        <article class="ticket" id="ticket" aria-live="polite" hidden>
+          <div class="ticket-text">
+            <p class="ticket-mission" id="ticketMission"></p>
+            <div class="ticket-meta"><span id="ticketNo">NO. 000000</span> &middot; <span id="ticketTime">--:--</span></div>
+          </div>
+          <div class="ticket-actions">
+            <button id="copyBtn" type="button" aria-label="Copy prompt" title="Copy prompt">
+              <span class="ticket-icon copy-icon" aria-hidden="true"></span>
+            </button>
+            <button id="favBtn" type="button" aria-label="Save to favorites" title="Save to favorites">
+              <span aria-hidden="true">&#9734;</span>
+            </button>
+            <button id="shareBtn" type="button" aria-label="Share as image" title="Share as image">
+              <span class="ticket-icon share-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+            </button>
+          </div>
+        </article>
       </div>
     </div>
   </div>
 </section>
 
 <p class="hint" id="aiFallbackNotice" hidden style="max-width:640px;margin:0 auto 14px;padding:10px 16px;text-align:center;border-radius:12px;background:rgba(230,58,70,0.1);border:1px solid rgba(230,58,70,0.3);color:var(--crimson-hi);"></p>
-
-<div class="ticket-wrap" id="ticketWrap">
-  <article class="ticket" id="ticket" aria-live="polite">
-    <div class="ticket-head">
-      <span id="ticketNo">NO. 000000</span>
-      <span id="ticketTime">--:--</span>
-    </div>
-    <div class="ticket-body" id="ticketBody"></div>
-    <div class="ticket-rule"></div>
-    <p class="ticket-mission" id="ticketMission"></p>
-    <div class="ticket-actions">
-      <button id="copyBtn" type="button">Copy prompt</button>
-      <button id="favBtn" type="button"><span aria-hidden="true">☆</span> Save to favorites</button>
-    </div>
-  </article>
-</div>
 
 <section class="section" id="how-it-works">
   <div class="section-head">
@@ -670,9 +666,9 @@ const CATEGORIES = [
   {
     id:"music", name:"Music", blurb:"Songs, scores & sonic ideas", accent:"royal",
     reels:[
+      {label:"Mood", key:"mood", items:["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"]},
       {label:"Genre 1", key:"genre1", items:["Dream Pop","Trip-Hop","Afrobeat","Baroque Pop","Drum & Bass","Neo-Soul","Shoegaze","Bolero","City Pop","Math Rock","Zydeco","Vaporwave","Highlife","Post-Punk","Bedroom Pop","Cumbia","Grime","Dungeon Synth","Emo Rap","J-Pop","Dub","Country Noir","Krautrock","Bachata"]},
       {label:"Genre 2", key:"genre2", items:["Synthwave","Flamenco","Ambient Jazz","Trap","Bossa Nova","Industrial","Gospel","Chiptune","Reggaeton","Doom Metal","Folktronica","Baile Funk","Lo-fi Hip-Hop","Bluegrass","Witch House","Disco","Tuareg Blues","Ska","Balearic House","Opera","Nu-Disco","Highlife","Grunge","Salsa"]},
-      {label:"Mood", key:"mood", items:["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"]},
       {label:"Subject", key:"subject", items:["A lighthouse keeper's last night","Two rivals falling in love","A city that forgets itself","An astronaut coming home","A letter never sent","The last dance of summer","A machine learning to grieve","A ghost who pays rent","A thief who only steals memories","The last payphone in town","A wedding that never happens","A stranger who knows your name","The house that keeps changing rooms","A war fought over a song","Someone rehearsing an apology forever","A town built on a lie","The year the ocean rose","A twin who was never born","A radio station only the lonely find","Falling in love during a blackout"]},
       {label:"Twist", key:"twist", items:MUSIC_TWIST_ITEMS}
     ]
@@ -759,7 +755,7 @@ function currentActive(){ return state.active[state.categoryId]; }
 function currentLocks(){ return state.locks[state.categoryId]; }
 
 /* ---------------- account sync (Phase 2) ---------------- */
-const account = { signedIn:false, provider:null, name:null, credits:null, profile:null };
+const account = { signedIn:false, provider:null, name:null, credits:null, profile:null, tier:null };
 
 function debounce(fn, wait){
   let t;
@@ -875,21 +871,30 @@ function renderAccountUI(){
   updateAICreditsHint();
 }
 
-// This site's own Groq key ("groq" AI source) is metered per signed-in
-// account; BYOK Claude/OpenAI keys are never metered (that's the visitor's
-// own API cost). AI provider selection now lives in account.html's
-// Settings tab — this just keeps the lever-disable/fallback-banner logic
-// (which depends on state.aiSource + account.credits) up to date.
+// This site's own Groq key ("groq" AI source) is metered per-tier, not
+// per-signed-in-account anymore — five tiers (anonymous/basic/affiliate/
+// scph/paid) all get *some* free-API allowance (3/20/75/100/300 per day),
+// strictly increasing, so the "(N/day)" countdown messaging applies
+// uniformly across every tier. There's no more zero-access special case —
+// once every tier has a real (if small) allowance, "exhausted" always means
+// "used today's N, try again tomorrow, or add your own key," never
+// "no free access at all." BYOK still requires a signed-in account (keys
+// live in Account Settings), but Groq itself no longer does.
 function updateAICreditsHint(){
   updateCreditsExhaustedState();
   updateSignInNotice();
   if(els.useAiNote){
-    els.useAiNote.textContent = account.signedIn && account.credits
+    els.useAiNote.textContent = account.credits
       ? "("+account.credits.remaining+"/"+account.credits.limit+" today)"
-      : "(50/day)";
+      : "(3/day)"; // anonymous default before /api/auth-me resolves
   }
 }
 
+// /api/auth-me now returns a credits/tier status for anonymous callers too
+// (tier:"anonymous", credits:{remaining,limit}), not just signed-in accounts
+// — assumption made here because the backend's anonymous-tracking endpoint
+// may not have landed yet; same {remaining,limit} shape as the existing
+// signed-in credits object, so this needs no branching once it's live.
 async function checkAccount(){
   let res, data;
   try{
@@ -903,6 +908,7 @@ async function checkAccount(){
   account.provider = data.provider || null;
   account.name = data.name || null;
   account.credits = data.credits || null;
+  account.tier = data.tier || null;
   account.profile = data.profile || null;
   renderAccountUI();
   if(account.signedIn) await pullAccountData();
@@ -910,9 +916,62 @@ async function checkAccount(){
 
 function reelDef(cat, key){ return cat.reels.find(r=>r.key===key); }
 
-function pick(cat, key){
-  const list = reelDef(cat, key).items;
+// Music reel data can be sourced from the backend (Wikipedia-crawled genres,
+// expanded mood/subject/twist lists) once /api/reel-data resolves. Until
+// then — or if the fetch fails entirely — pick() keeps using the hardcoded
+// arrays in CATEGORIES/MUSIC_TWIST_ITEMS above, same resilience pattern as
+// the AI-generation fallback (never let a network dependency break the
+// ability to pull the lever).
+let MUSIC_REEL_DATA = null; // { genres, moods, subjects, twists } once loaded
+const MUSIC_REEL_DATA_KEY_MAP = { genre1:"genres", genre2:"genres", mood:"moods", subject:"subjects", twist:"twists" };
+async function loadMusicReelData(){
+  try{
+    const res = await fetch("/api/reel-data?category=music");
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data && Array.isArray(data.genres) && data.genres.length){
+      MUSIC_REEL_DATA = {
+        genres: data.genres,
+        moods: Array.isArray(data.moods) && data.moods.length ? data.moods : null,
+        subjects: Array.isArray(data.subjects) && data.subjects.length ? data.subjects : null,
+        twists: Array.isArray(data.twists) && data.twists.length ? data.twists : null
+      };
+    }
+  }catch(e){
+    // Network error, 404, etc — MUSIC_REEL_DATA stays null and pick() keeps
+    // using the hardcoded fallback arrays. Nothing else to do here.
+  }
+}
+loadMusicReelData();
+
+function sourceListFor(cat, key){
+  if(cat.id === "music" && MUSIC_REEL_DATA){
+    const dataKey = MUSIC_REEL_DATA_KEY_MAP[key];
+    const list = dataKey && MUSIC_REEL_DATA[dataKey];
+    if(list && list.length) return list;
+  }
+  return reelDef(cat, key).items;
+}
+
+function pick(cat, key, exclude){
+  const list = sourceListFor(cat, key);
+  if(exclude){
+    const filtered = list.filter(v=>String(v).toLowerCase() !== String(exclude).toLowerCase());
+    if(filtered.length) return filtered[Math.floor(Math.random()*filtered.length)];
+  }
   return list[Math.floor(Math.random()*list.length)];
+}
+
+// Music's Genre 1 / Genre 2 must never land on the same value within one
+// pull. Called as a final pass over any freshly-picked/generated value map
+// so it applies uniformly regardless of which source (built-in list, Groq,
+// BYOK) produced the values.
+function enforceGenreDistinctness(cat, map){
+  if(cat.id !== "music") return map;
+  if(map.genre1 && map.genre2 && String(map.genre1).toLowerCase() === String(map.genre2).toLowerCase()){
+    map.genre2 = pick(cat, "genre2", map.genre1);
+  }
+  return map;
 }
 
 /* ---------------- DOM build ---------------- */
@@ -1040,13 +1099,14 @@ function buildReelsDOM(){
 }
 
 const els = {
+  ticketDivider: document.getElementById("ticketDivider"),
   ticket: document.getElementById("ticket"),
   ticketNo: document.getElementById("ticketNo"),
   ticketTime: document.getElementById("ticketTime"),
-  ticketBody: document.getElementById("ticketBody"),
   ticketMission: document.getElementById("ticketMission"),
   copyBtn: document.getElementById("copyBtn"),
   favBtn: document.getElementById("favBtn"),
+  shareBtn: document.getElementById("shareBtn"),
   aiFallbackNotice: document.getElementById("aiFallbackNotice"),
   leverFree: document.getElementById("pullLeverFree"),
   leverAI: document.getElementById("pullLeverAI"),
@@ -1089,10 +1149,12 @@ function renderReelValues(vals){
   });
 }
 
+// Lock is disabled when the reel is off, or while that specific reel is
+// actively spinning (spinningKeys, set by spinReel).
 function renderLocks(){
   currentCategory().reels.forEach(r=>{
     lockBtn(r.key).setAttribute("aria-pressed", String(!!currentLocks()[r.key]));
-    lockBtn(r.key).disabled = !isActive(r.key);
+    lockBtn(r.key).disabled = !isActive(r.key) || !!spinningKeys[r.key];
   });
 }
 
@@ -1118,6 +1180,7 @@ function stripHauntedByPrefix(s){
 // Combines the two Music genre reels into one descriptor. If both are active
 // and differ, that's a fusion pairing ("Shoegaze x Cumbia"); if they land on
 // the same genre, or only one is active, it just reads as that single genre.
+// Used by Album/EP, which keeps its existing "fusion" phrasing.
 function genreFusionDescriptor(vals){
   const g1 = isActive("genre1") && vals.genre1 ? stripTrailingPunct(vals.genre1) : "";
   const g2 = isActive("genre2") && vals.genre2 ? stripTrailingPunct(vals.genre2) : "";
@@ -1125,20 +1188,36 @@ function genreFusionDescriptor(vals){
   return g1 || g2 || "";
 }
 
+// Exact target format: "Write a {Mood}, {Genre 1} x {Genre 2} about {Subject}. {Twist}."
+// Each active reel's raw value is stripped of trailing punctuation and
+// stitched in with casing preserved as-authored (Mood is NOT lowercased).
+// "a" vs "an" based on the leading word's first letter — per the handoff
+// spec ("Write a/an {Mood}...") — a simple vowel-letter check, same
+// convention used for the rest of this sentence's plain-English phrasing.
+function indefiniteArticleFor(word){
+  const first = String(word||"").trim().charAt(0).toLowerCase();
+  return /[aeiou]/.test(first) ? "an" : "a";
+}
+
 function buildMusicMission(vals){
   const useMood = isActive("mood") && vals.mood;
-  const genreLabel = genreFusionDescriptor(vals);
+  const useGenre1 = isActive("genre1") && vals.genre1;
+  const useGenre2 = isActive("genre2") && vals.genre2;
   const useSubject = isActive("subject") && vals.subject;
   const useTwist = isActive("twist") && vals.twist;
 
-  const descriptors = [];
-  if(useMood) descriptors.push(stripTrailingPunct(vals.mood).toLowerCase());
-  if(genreLabel) descriptors.push(genreLabel);
+  const leadParts = [];
+  if(useMood) leadParts.push(stripTrailingPunct(vals.mood));
+  const genreBits = [];
+  if(useGenre1) genreBits.push(stripTrailingPunct(vals.genre1));
+  if(useGenre2) genreBits.push(stripTrailingPunct(vals.genre2));
+  if(genreBits.length) leadParts.push(genreBits.join(" x "));
 
-  let mission = "Write a " + (descriptors.length ? descriptors.join(" ")+" song" : "song");
+  let mission = "Write "+indefiniteArticleFor(leadParts[0]);
+  if(leadParts.length) mission += " "+leadParts.join(", ");
   if(useSubject) mission += " about "+stripTrailingPunct(vals.subject);
   mission += ".";
-  if(useTwist) mission += " Constraint: "+stripTrailingPunct(vals.twist)+".";
+  if(useTwist) mission += " "+stripTrailingPunct(vals.twist)+".";
   return mission;
 }
 
@@ -1196,15 +1275,6 @@ function buildMission(vals){
   return buildGenericMission(cat, vals);
 }
 
-function ticketLinesHTML(vals){
-  let html = "";
-  currentCategory().reels.forEach(r=>{
-    if(!isActive(r.key)) return;
-    html += '<div class="ticket-line"><span class="tag">'+r.label.toUpperCase()+'</span><span class="val">'+escapeHTML(vals[r.key])+'</span></div>';
-  });
-  return html;
-}
-
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
@@ -1218,68 +1288,73 @@ function nowLabel(){
   return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
 }
 
+// Printed ticket (paper receipt), absolutely positioned below the dashed
+// divider so it never affects card height — hidden entirely until the first
+// roll, then updates in place. The print-in/tear-off reveal animations are
+// driven separately by playTicketPrint()/playTicketTear() (called from
+// pullLever/pullLeverEntry), not from here — this just syncs content/
+// disabled-state so it can be called freely (category switches, favoriting)
+// without retriggering an animation.
 function renderTicket(){
   const c = state.current;
-  if(!c || c.categoryId !== state.categoryId){
-    els.ticketBody.innerHTML = '<div class="ticket-line"><span class="val">Pull the lever to get your first '+currentCategory().name.toLowerCase()+' challenge.</span></div>';
-    els.ticketMission.textContent = "";
-    els.ticketNo.textContent = padTicketNo(state.ticketNo);
-    els.ticketTime.textContent = "";
-    els.favBtn.classList.remove("favd");
-    els.favBtn.innerHTML = '<span aria-hidden="true">☆</span> Save to favorites';
-    renderMiniRoller();
+  // hasRolled is session-scoped (starts false on every page load, see
+  // init()) so a page refresh always resets the receipt to hidden/empty,
+  // even if a previous roll is still sitting in persisted state.
+  const showing = hasRolled && !!(c && c.categoryId === state.categoryId);
+  if(!showing){
+    els.ticket.hidden = true;
+    els.copyBtn.disabled = true;
+    els.favBtn.disabled = true;
+    els.shareBtn.disabled = true;
     return;
   }
+  els.ticket.hidden = false;
+  els.copyBtn.disabled = false;
+  els.favBtn.disabled = false;
+  els.shareBtn.disabled = false;
   els.ticketNo.textContent = padTicketNo(c.no);
   els.ticketTime.textContent = c.time;
-  els.ticketBody.innerHTML = ticketLinesHTML(c.vals);
   els.ticketMission.textContent = c.mission;
   els.favBtn.classList.toggle("favd", isFavorited(c));
-  els.favBtn.innerHTML = isFavorited(c) ? '<span aria-hidden="true">★</span> Saved' : '<span aria-hidden="true">☆</span> Save to favorites';
-  renderMiniRoller();
+  els.favBtn.innerHTML = isFavorited(c) ? '<span aria-hidden="true">&#9733;</span>' : '<span aria-hidden="true">&#9734;</span>';
 }
 
-/* ---------------- mini roller bar (sticky "Now Rolling" strip) ---------------- */
-// Only rendered/shown once the visitor has rolled at least once (hasRolled),
-// and only visible while scrolled past the hero and before "How It Works" —
-// uses separate show/hide thresholds (hysteresis) so it doesn't flicker
-// right at the scroll boundary.
+// Restarts the ticket-print reveal (clip-path top-to-bottom) — called once
+// content has been synced via renderTicket(), so removing/re-adding the
+// "printing" class forces the CSS animation to replay even though the
+// element was already in the DOM.
+function playTicketPrint(){
+  if(!els.ticket) return;
+  els.ticket.classList.remove("tearing");
+  els.ticket.classList.remove("printing");
+  void els.ticket.offsetWidth; // force reflow so the animation restarts
+  els.ticket.classList.add("printing");
+}
+
+// Plays the tear-off animation and resolves once it's finished (~360ms) —
+// awaited by pullLeverEntry before starting a reroll's spin sequence, per
+// the "tear off, then reprint" spec.
+function playTicketTear(){
+  return new Promise(resolve=>{
+    if(!els.ticket || els.ticket.hidden){ resolve(); return; }
+    els.ticket.classList.remove("printing");
+    void els.ticket.offsetWidth;
+    els.ticket.classList.add("tearing");
+    setTimeout(()=>{
+      els.ticket.classList.remove("tearing");
+      // Without this, removing the "tearing" class reverts the element to
+      // its base (fully visible) styles instantly — the old ticket would
+      // flash back into view for the whole reel-spin duration instead of
+      // staying torn-off/hidden until the new roll prints.
+      els.ticket.hidden = true;
+      resolve();
+    }, 360);
+  });
+}
+
+// Session-scoped: starts false on every page load (see init()) so a page
+// refresh always resets the receipt to hidden/empty.
 let hasRolled = false;
-const miniRollerWrapEl = document.getElementById("miniRollerWrap");
-const miniRollerValuesEl = document.getElementById("miniRollerValues");
-
-function renderMiniRoller(){
-  if(!miniRollerValuesEl) return;
-  const c = state.current;
-  if(!c || c.categoryId !== state.categoryId){ miniRollerValuesEl.innerHTML = ""; return; }
-  const cat = currentCategory();
-  miniRollerValuesEl.innerHTML = cat.reels
-    .filter(r=>isActive(r.key))
-    .map(r=>'<div class="mini-roller-value"><span class="l">'+escapeHTML(r.label.toUpperCase())+'</span><span class="v">'+escapeHTML(c.vals[r.key]||"")+'</span></div>')
-    .join("");
-}
-
-function updateMiniRollerVisibility(){
-  if(!miniRollerWrapEl) return;
-  if(!hasRolled){ miniRollerWrapEl.classList.remove("show"); return; }
-  const hero = document.getElementById("slot-machine");
-  const howItWorks = document.getElementById("how-it-works");
-  if(!hero || !howItWorks) return;
-  const heroBottom = hero.getBoundingClientRect().bottom;
-  const nextTop = howItWorks.getBoundingClientRect().top;
-  const wasShown = miniRollerWrapEl.classList.contains("show");
-  const pastHero = wasShown ? heroBottom < 130 : heroBottom < 70;
-  const beforeNextSection = wasShown ? nextTop > 40 : nextTop > 100;
-  miniRollerWrapEl.classList.toggle("show", pastHero && beforeNextSection);
-}
-window.addEventListener("scroll", updateMiniRollerVisibility, {passive:true});
-
-const miniRollAgainBtn = document.getElementById("miniRollAgainBtn");
-const miniCopyBtn = document.getElementById("miniCopyBtn");
-const miniSaveBtn = document.getElementById("miniSaveBtn");
-if(miniRollAgainBtn) miniRollAgainBtn.addEventListener("click", ()=>pullLever(lastRollUsedAI));
-if(miniCopyBtn) miniCopyBtn.addEventListener("click", ()=>{ if(els.copyBtn) els.copyBtn.click(); });
-if(miniSaveBtn) miniSaveBtn.addEventListener("click", ()=>{ if(els.favBtn) els.favBtn.click(); });
 
 function isFavorited(ticket){
   return state.favorites.some(f=>f.mission===ticket.mission);
@@ -1467,16 +1542,13 @@ function showAIFallbackNotice(msg, persistent){
 function hidePersistentBannerIfActive(){
   if(persistentBannerActive){ els.aiFallbackNotice.hidden = true; persistentBannerActive = false; }
 }
-// Shown for as long as groq is selected but the visitor isn't signed in —
-// unlike the transient fallback banner, this doesn't auto-hide, since the
-// condition (and the silent built-in-list fallback it explains) persists
-// until they sign in, switch AI off, or add their own key.
+// Anonymous visitors now get a real (if small) free-API allowance too, so
+// there's no more persistent "sign in to use AI at all" banner — signing in
+// only matters for a bigger daily allowance and BYOK. Kept as a no-op hook
+// (clears any stale persistent banner from before this tier redesign) so
+// callers elsewhere don't need to change.
 function updateSignInNotice(){
-  if(state.aiSource === "groq" && !account.signedIn){
-    showAIFallbackNotice("Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead. — showing built-in results instead.", true);
-  } else {
-    hidePersistentBannerIfActive();
-  }
+  hidePersistentBannerIfActive();
 }
 
 // The mockup has two separate roll buttons (Free / Use AI) rather than a
@@ -1500,40 +1572,40 @@ function effectiveSourceFor(useAI){
 // BYOK and unmetered.
 async function getFreshValuesForPull(keys, useAI){
   const source = effectiveSourceFor(useAI);
+  const cat = currentCategory();
   const map = {};
   if(source === "groq"){
     try{
       const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
-      const batch = await Promise.race([groqGenerateBatch(currentCategory(), keys), timeout]);
-      keys.forEach(key=>{ map[key] = batch[key] || pick(currentCategory(), key); });
+      const batch = await Promise.race([groqGenerateBatch(cat, keys), timeout]);
+      keys.forEach(key=>{ map[key] = batch[key] || pick(cat, key); });
     }catch(err){
-      // Not-signed-in always routes through the persistent sign-in banner
-      // (same underlying reason every time) rather than the transient one,
-      // so it doesn't flash and then vanish after 6s mid-session.
-      if(!account.signedIn){ updateSignInNotice(); }
-      else { showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead."); }
-      keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
+      showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead.");
+      keys.forEach(key=>{ map[key] = pick(cat, key); });
     }
-    return map;
+    return enforceGenreDistinctness(cat, map);
   }
   if(source === "anthropic" || source === "openai"){
     await Promise.all(keys.map(async key=>{
       try{
         const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
         map[key] = await Promise.race([aiGenerate(key), timeout]);
-      }catch(e){ map[key] = pick(currentCategory(), key); }
+      }catch(e){ map[key] = pick(cat, key); }
     }));
-    return map;
+    return enforceGenreDistinctness(cat, map);
   }
-  keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
-  return map;
+  keys.forEach(key=>{ map[key] = pick(cat, key); });
+  return enforceGenreDistinctness(cat, map);
 }
 
 /* ---------------- spin logic ---------------- */
 function sleep(ms){ return new Promise(resolve=>setTimeout(resolve, ms)); }
-const DEFAULT_SPIN_DURATION = 700;
 let spinning = false;
+let tearing = false;
 let creditsExhausted = false;
+// Per-reel spinning flags — drives the "lock disabled while that reel is
+// actively spinning" constraint (renderLocks reads this).
+let spinningKeys = {};
 
 // "Roll Free" never touches credits, so it only disables while spinning.
 // "Use AI" additionally disables once today's Groq credits are used up
@@ -1541,19 +1613,35 @@ let creditsExhausted = false;
 // rather than letting a click silently fall back to the built-in list, it
 // has to be explicit: add your own key, or wait for tomorrow.
 function applyLeverState(){
-  els.leverFree.disabled = spinning;
-  els.leverAI.disabled = spinning || creditsExhausted;
+  els.leverFree.disabled = spinning || tearing;
+  els.leverAI.disabled = spinning || tearing || creditsExhausted;
   els.leverAI.title = creditsExhausted
     ? "Daily AI limit reached — add your own key in Settings, or try again tomorrow."
     : "";
 }
+// Every tier (including anonymous, via /api/auth-me's credits status) now
+// carries a real daily allowance, so this no longer requires account.signedIn
+// — it just checks whatever credits status is currently known, whoever it's for.
 function updateCreditsExhaustedState(){
-  creditsExhausted = !!(effectiveSourceFor(true) === "groq" && account.signedIn && account.credits && account.credits.remaining <= 0);
+  creditsExhausted = !!(effectiveSourceFor(true) === "groq" && account.credits && account.credits.remaining <= 0);
   applyLeverState();
 }
 
-// valuePromise resolves to the final string this reel should land on (may take a while in AI mode).
-async function spinReel(key, valuePromise){
+// Toggles the "rolling" class on both roll buttons — their diamond icon
+// blurs/pulses (spin-tick 0.4s) in sync while true, per the handoff spec.
+function setRollingUI(isRolling){
+  els.leverFree.classList.toggle("rolling", isRolling);
+  els.leverAI.classList.toggle("rolling", isRolling);
+}
+
+// Reel spin/tick/land choreography, precise per the hero handoff spec:
+//  - stagger duration by reel index: 900ms + i*380ms (reduced-motion: 160ms + i*60ms)
+//  - tick interval starts at 65ms, +6ms/tick, capped at 160ms (reduced-motion starts at 80ms)
+//  - blur/opacity flicker per tick via the .spinning CSS class (spin-tick keyframe)
+//  - ~650ms "landed" pulse (reel-land-pulse) on the panel once the value settles
+// finalValuePromise resolves to the value this reel should land on (may take
+// a while in AI mode) — ticks show random flicker text independent of it.
+async function spinReel(key, index, finalValuePromise){
   const unit = reelUnit(key);
   const valEl = reelValueEl(key);
 
@@ -1562,35 +1650,49 @@ async function spinReel(key, valuePromise){
     return null;
   }
   if(currentLocks()[key]){
-    const v = await valuePromise;
+    const v = await finalValuePromise;
     valEl.textContent = v;
     return v;
   }
+
   const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(reduced){
-    const v = await valuePromise;
-    valEl.textContent = v;
-    return v;
-  }
+  const duration = reduced ? 160 + index*60 : 900 + index*380;
 
+  spinningKeys[key] = true;
+  renderLocks();
   valEl.classList.add("spinning");
-  const minDuration = DEFAULT_SPIN_DURATION;
-  const start = performance.now();
+
   let finalValue = null;
-  valuePromise.then(v=>{ finalValue = v; }).catch(()=>{ finalValue = pick(currentCategory(), key); });
+  finalValuePromise.then(v=>{ finalValue = v; }).catch(()=>{ finalValue = pick(currentCategory(), key); });
 
-  while(true){
-    const elapsed = performance.now() - start;
-    if(finalValue !== null && elapsed >= minDuration) break;
-    // once minDuration has passed and we're still waiting (AI mode), show a "thinking" cue instead of noise
-    valEl.textContent = (elapsed > minDuration) ? "…" : pick(currentCategory(), key);
-    await sleep(Math.min(40 + (elapsed/minDuration)*140, 220));
+  const start = performance.now();
+  let tickDelay = reduced ? 80 : 65;
+  await new Promise(resolve=>{
+    function tick(){
+      const elapsed = performance.now() - start;
+      if(elapsed >= duration){ resolve(); return; }
+      valEl.textContent = pick(currentCategory(), key);
+      tickDelay = Math.min(tickDelay + 6, 160);
+      setTimeout(tick, tickDelay);
+    }
+    setTimeout(tick, 20);
+  });
+
+  // The stagger duration may elapse before an AI-backed value actually
+  // resolves — wait for it rather than landing on stale flicker text.
+  if(finalValue === null){
+    try{ finalValue = await finalValuePromise; }catch(e){ finalValue = pick(currentCategory(), key); }
   }
+  if(finalValue == null) finalValue = pick(currentCategory(), key);
 
+  spinningKeys[key] = false;
   valEl.classList.remove("spinning");
   valEl.textContent = finalValue;
-  valEl.classList.add("settle");
-  setTimeout(()=>valEl.classList.remove("settle"), 300);
+  if(unit){
+    unit.classList.add("landed");
+    setTimeout(()=>unit.classList.remove("landed"), 650);
+  }
+  renderLocks();
   return finalValue;
 }
 
@@ -1620,10 +1722,11 @@ function recordRollStats(categoryId){
 let lastRollUsedAI = false;
 
 async function pullLever(useAI){
-  if(spinning || (useAI && creditsExhausted)) return;
+  if(spinning || tearing || (useAI && creditsExhausted)) return;
   lastRollUsedAI = useAI;
   spinning = true;
   applyLeverState();
+  setRollingUI(true);
   const btn = useAI ? els.leverAI : els.leverFree;
   btn.classList.add("pressed");
   setTimeout(()=>btn.classList.remove("pressed"), 140);
@@ -1633,10 +1736,16 @@ async function pullLever(useAI){
   const hasCurrentSameCat = !!(state.current && state.current.categoryId === cat.id);
   const keysNeedingFresh = keys.filter(key=>isActive(key) && !(currentLocks()[key] && hasCurrentSameCat));
   const freshMap = keysNeedingFresh.length ? await getFreshValuesForPull(keysNeedingFresh, useAI) : {};
-  const results = await Promise.all(keys.map(key=>{
-    if(!isActive(key)) return spinReel(key, Promise.resolve(null));
+  // Each reel spins independently with an index-based stagger (see
+  // spinReel) — Promise.all naturally waits for the longest-duration
+  // (highest-index, still-rollable) reel, which is "the last reel to
+  // finish" that triggers completion per the handoff spec. If every reel
+  // is locked/disabled, every branch below resolves immediately and the
+  // roll completes right away.
+  const results = await Promise.all(keys.map((key,i)=>{
+    if(!isActive(key)) return spinReel(key, i, Promise.resolve(null));
     const valuePromise = (currentLocks()[key] && hasCurrentSameCat) ? Promise.resolve(state.current.vals[key]) : Promise.resolve(freshMap[key]);
-    return spinReel(key, valuePromise);
+    return spinReel(key, i, valuePromise);
   }));
   const vals = {};
   keys.forEach((key,i)=>{ vals[key] = results[i]; });
@@ -1659,43 +1768,54 @@ async function pullLever(useAI){
   if(state.history.length > 100) state.history.shift();
   recordRollStats(cat.id);
 
+  // Must flip to true before renderTicket() — renderTicket() gates ticket
+  // visibility on hasRolled, so on the very first roll of a session it
+  // needs to already be true or the newly-printed ticket renders hidden.
+  hasRolled = true;
   renderTicket();
+  playTicketPrint();
   rollCountEl.textContent = String(state.history.length);
   saveState();
   els.announcer.textContent = "New challenge: "+ticket.mission;
 
-  // Only rendered/shown after the first successful roll. Once it appears,
-  // auto-scroll it into view (window.scrollTo, not scrollIntoView) with a
-  // short delay so the scroll happens after the reel-landing animation settles.
-  const ticketWrapEl = document.getElementById("ticketWrap");
-  if(!hasRolled){
-    hasRolled = true;
-    if(ticketWrapEl) ticketWrapEl.classList.add("show");
-    setTimeout(()=>{
-      if(!ticketWrapEl) return;
-      const top = ticketWrapEl.getBoundingClientRect().top + window.scrollY - 110;
-      window.scrollTo({ top: top, behavior: "smooth" });
-    }, 400);
-  }
-  updateMiniRollerVisibility();
-
   spinning = false;
+  setRollingUI(false);
   applyLeverState();
 }
 
+// Entry point for both roll buttons (and the sticky bar's Roll Again): if a
+// ticket is already showing, play the tear-off first and only start the new
+// roll once it finishes ("tear off, then reprint"); first roll has nothing
+// to tear, so it starts immediately.
+async function pullLeverEntry(useAI){
+  if(spinning || tearing) return;
+  if(useAI && creditsExhausted) return;
+  if(hasRolled && !els.ticket.hidden){
+    tearing = true;
+    applyLeverState();
+    await playTicketTear();
+    tearing = false;
+    applyLeverState();
+  }
+  await pullLever(useAI);
+}
+
 async function rerollSingle(key){
-  if(spinning || currentLocks()[key] || !isActive(key)) return;
+  if(spinning || tearing || spinningKeys[key] || currentLocks()[key] || !isActive(key)) return;
   if(lastRollUsedAI && creditsExhausted) return;
-  if(!state.current || state.current.categoryId !== state.categoryId){ pullLever(lastRollUsedAI); return; }
+  if(!state.current || state.current.categoryId !== state.categoryId){ pullLeverEntry(lastRollUsedAI); return; }
   spinning = true;
+  applyLeverState();
+  const index = currentCategory().reels.findIndex(r=>r.key===key);
   const freshMap = await getFreshValuesForPull([key], lastRollUsedAI);
-  const value = await spinReel(key, Promise.resolve(freshMap[key]));
+  const value = await spinReel(key, index, Promise.resolve(freshMap[key]));
   state.current.vals[key] = value;
   state.current.mission = buildMission(state.current.vals);
   renderTicket();
   saveState();
   els.announcer.textContent = "Updated "+reelDef(currentCategory(),key).label+": "+value;
   spinning = false;
+  applyLeverState();
 }
 
 /* ---------------- category switching ---------------- */
@@ -1722,6 +1842,7 @@ function bindReelEvents(){
     });
     lockBtn(r.key).addEventListener("click", (e)=>{
       e.stopPropagation();
+      if(spinningKeys[r.key] || !isActive(r.key)) return;
       currentLocks()[r.key] = !currentLocks()[r.key];
       renderLocks();
       saveState();
@@ -1730,8 +1851,8 @@ function bindReelEvents(){
       e.stopPropagation();
       const btn = switchBtn(r.key);
       const willBeOn = btn.getAttribute("aria-pressed") !== "true";
-      if(!willBeOn && activeCount() <= 1 && isActive(r.key)){
-        // don't allow turning off the last remaining active reel
+      // At least 2 reels must stay enabled — no-op if this would drop below that.
+      if(!willBeOn && activeCount() <= 2 && isActive(r.key)){
         return;
       }
       currentActive()[r.key] = willBeOn;
@@ -1744,13 +1865,13 @@ function bindReelEvents(){
   });
 }
 
-els.leverFree.addEventListener("click", ()=>pullLever(false));
-els.leverAI.addEventListener("click", ()=>pullLever(true));
+els.leverFree.addEventListener("click", ()=>pullLeverEntry(false));
+els.leverAI.addEventListener("click", ()=>pullLeverEntry(true));
 
 document.addEventListener("keydown", (e)=>{
   if(e.code === "Space" && document.activeElement === document.body){
     e.preventDefault();
-    pullLever(false);
+    pullLeverEntry(false);
   }
 });
 
@@ -1766,13 +1887,11 @@ favCatBtnEl.addEventListener("click", ()=>{
 });
 
 els.copyBtn.addEventListener("click", ()=>{
-  if(!state.current) return;
+  if(!state.current || els.copyBtn.disabled) return;
   const text = state.current.mission;
   const done = ()=>{
-    const original = els.copyBtn.textContent;
-    els.copyBtn.textContent = "Copied!";
     els.copyBtn.classList.add("copy-flash");
-    setTimeout(()=>{ els.copyBtn.textContent = original; els.copyBtn.classList.remove("copy-flash"); }, 1400);
+    setTimeout(()=>{ els.copyBtn.classList.remove("copy-flash"); }, 1400);
   };
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
@@ -1791,12 +1910,124 @@ function fallbackCopy(text, done){
   document.body.removeChild(ta);
 }
 
+// Renders the current ticket as a shareable PNG (canvas-drawn receipt,
+// same visual language as the on-page ticket) with the site URL printed
+// at the bottom as the "link back" — a shared image can't carry a real
+// hyperlink on most platforms, so the URL has to be legible in the image
+// itself, the same way Wordle/Spotify-Wrapped-style share images work.
+function wrapCanvasText(ctx, text, maxWidth){
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  words.forEach(word=>{
+    const test = line ? line+" "+word : word;
+    if(ctx.measureText(test).width > maxWidth && line){
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  });
+  if(line) lines.push(line);
+  return lines;
+}
+function renderTicketCanvas(ticket){
+  const width = 640;
+  const padX = 32;
+  const missionFont = "italic 17px 'SF Mono', Menlo, ui-monospace, monospace";
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.font = missionFont;
+  const missionLines = wrapCanvasText(ctx, ticket.mission, width - padX*2);
+  const lineHeight = 27;
+  const missionH = missionLines.length * lineHeight;
+  const height = 74 + missionH + 76; // top padding + mission block + meta/footer block
+  canvas.width = width;
+  canvas.height = height;
+
+  // Paper card with rounded corners.
+  const r = 14;
+  ctx.fillStyle = "#fdfbf3";
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.arcTo(width, 0, width, height, r);
+  ctx.arcTo(width, height, 0, height, r);
+  ctx.arcTo(0, height, 0, 0, r);
+  ctx.arcTo(0, 0, width, 0, r);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#1a1a1a";
+  ctx.font = missionFont;
+  ctx.textBaseline = "top";
+  missionLines.forEach((line,i)=>{ ctx.fillText(line, padX, 40 + i*lineHeight); });
+
+  ctx.fillStyle = "rgba(26,26,26,0.5)";
+  ctx.font = "11px 'SF Mono', Menlo, ui-monospace, monospace";
+  ctx.fillText("NO. "+String(ticket.no).padStart(6,"0")+" · "+ticket.time, padX, 40 + missionH + 14);
+
+  ctx.strokeStyle = "rgba(26,26,26,0.15)";
+  ctx.beginPath();
+  ctx.moveTo(padX, height - 42);
+  ctx.lineTo(width - padX, height - 42);
+  ctx.stroke();
+
+  ctx.fillStyle = "#C68B24";
+  ctx.font = "bold 13px 'Space Grotesk', sans-serif";
+  const wordmark = "Prompt Royale";
+  ctx.fillText(wordmark, padX, height - 28);
+  const wordmarkWidth = ctx.measureText(wordmark).width;
+
+  ctx.fillStyle = "rgba(26,26,26,0.55)";
+  ctx.font = "12px 'Inter', sans-serif";
+  ctx.fillText(location.origin.replace(/^https?:\/\//,""), padX + wordmarkWidth + 14, height - 28);
+
+  return canvas;
+}
+async function shareTicketImage(){
+  if(!state.current || els.shareBtn.disabled) return;
+  const canvas = renderTicketCanvas(state.current);
+  canvas.toBlob(async (blob)=>{
+    if(!blob) return;
+    const file = new File([blob], "prompt-royale-receipt.png", {type:"image/png"});
+    const shareData = {
+      files: [file],
+      title: "Prompt Royale",
+      text: state.current.mission+" — made with Prompt Royale",
+      url: location.origin
+    };
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share(shareData);
+        return;
+      }catch(e){
+        if(e && e.name === "AbortError") return; // user cancelled the share sheet
+        // fall through to download on any other failure
+      }
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "prompt-royale-receipt.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }, "image/png");
+}
+els.shareBtn.addEventListener("click", shareTicketImage);
+
 els.favBtn.addEventListener("click", ()=>{
-  if(!state.current) return;
+  if(!state.current || els.favBtn.disabled) return;
   if(isFavorited(state.current)){
     state.favorites = state.favorites.filter(f=>f.mission!==state.current.mission);
   } else {
-    state.favorites.push(state.current);
+    // Newest-first, capped at 8 — matches the ticket's own save-slot spec;
+    // account.html's broader Favorites tab shares this same list.
+    state.favorites = [state.current].concat(state.favorites).slice(0, 8);
+    els.favBtn.classList.remove("saveflash");
+    void els.favBtn.offsetWidth;
+    els.favBtn.classList.add("saveflash");
+    setTimeout(()=>els.favBtn.classList.remove("saveflash"), 550);
   }
   renderTicket();
   saveState();
@@ -1879,19 +2110,17 @@ function init(){
 
   if(state.current && state.current.categoryId === state.categoryId){
     renderReelValues(state.current.vals);
+    // Reel values from a previous session are restored for continuity, but
+    // the receipt itself always starts hidden/empty on a fresh page load —
+    // hasRolled stays false here (its default) so renderTicket() below
+    // keeps the ticket hidden until an explicit roll happens this session.
     renderTicket();
-    // A returning visitor already has a rolled ticket from a previous
-    // session — show it immediately, no scroll animation needed.
-    hasRolled = true;
-    const ticketWrapEl = document.getElementById("ticketWrap");
-    if(ticketWrapEl) ticketWrapEl.classList.add("show");
   } else {
     const placeholder = {};
     currentCategory().reels.forEach(r=>{ placeholder[r.key] = "—"; });
     renderReelValues(placeholder);
     renderTicket();
   }
-  updateMiniRollerVisibility();
   checkAccount();
   initHowItWorksAnimation();
 }

@@ -7,6 +7,21 @@ const crypto = require("crypto");
 const COOKIE_NAME = "scph_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
+// First-party cookie identifying an anonymous (not signed-in) visitor, for
+// the small free-API (Groq) allowance every tier now gets — see
+// _lib/store.js: consumeAnonCredit/getAnonCreditsStatus. Not signed/HMAC'd
+// like the session cookie (it's not an auth credential, just a counter
+// key), long-lived so the daily allowance is meaningful across visits.
+const ANON_COOKIE_NAME = "scph_anon_id";
+const ANON_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+function newAnonId() {
+  return crypto.randomBytes(16).toString("hex");
+}
+function anonIdCookie(id) {
+  return ANON_COOKIE_NAME + "=" + id + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" + ANON_COOKIE_MAX_AGE;
+}
+
 function getSecret() {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("Server is missing SESSION_SECRET");
@@ -71,4 +86,8 @@ function clearSessionCookie() {
   return COOKIE_NAME + "=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
 }
 
-module.exports = { createSessionToken, verifySessionToken, getSessionUser, sessionCookie, clearSessionCookie, parseCookies, b64url, b64urlDecode };
+module.exports = {
+  createSessionToken, verifySessionToken, getSessionUser, sessionCookie, clearSessionCookie,
+  parseCookies, b64url, b64urlDecode,
+  ANON_COOKIE_NAME, newAnonId, anonIdCookie
+};

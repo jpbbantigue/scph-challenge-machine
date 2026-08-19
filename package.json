@@ -6,7 +6,10 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@netlify/blobs": "^8.1.0",
-    "@neondatabase/serverless": "^0.10.4"
+    "@neondatabase/serverless": "^0.10.4",
+    "@netlify/blobs": "^8.1.0"
+  },
+  "devDependencies": {
+    "cheerio": "^1.2.0"
   }
 }
