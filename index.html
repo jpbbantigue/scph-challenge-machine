@@ -282,30 +282,23 @@ a:hover{color:var(--gold-hi);}
 .mini-roller-btn.icon{width:42px;border-left:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--ink);font-size:14px;}
 .mini-roller-btn.icon.gold{color:var(--gold-hi);}
 
-/* ---------- ticket / result ---------- */
-.ticket-wrap{max-width:640px;margin:0 auto;padding:0 24px clamp(48px,7vw,88px);display:none;scroll-margin-top:150px;}
-.ticket-wrap.show{display:block;}
-.ticket{
-  border-radius:20px;padding:28px 30px;
+/* ---------- inline result block (relocated from the old below-machine ticket) ---------- */
+.result-block{
+  margin-top:22px;border-radius:20px;padding:24px 26px;
   background:linear-gradient(180deg, rgba(20,26,46,0.85), rgba(9,12,22,0.9));
   border:1px solid rgba(77,124,255,0.22);box-shadow:0 20px 50px rgba(0,0,0,0.4);
   font-family:var(--font-mono);
 }
-.ticket-head{display:flex;justify-content:space-between;font-size:12px;letter-spacing:0.06em;color:var(--ink-40);margin-bottom:18px;}
-.ticket-body{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
-.ticket-line{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:baseline;}
-.ticket-line .tag{font-size:11.5px;letter-spacing:0.06em;color:var(--ink-40);}
-.ticket-line .val{font-size:15px;font-weight:600;color:var(--ink);}
-.ticket-rule{border-top:1px dashed rgba(255,255,255,0.15);margin:0 0 18px;}
-.ticket-mission{font-style:italic;font-size:15px;line-height:1.6;color:rgba(243,245,252,0.85);margin:0 0 24px;}
-.ticket-actions{display:flex;flex-wrap:wrap;gap:12px;}
-.ticket-actions button{
+.result-head{display:flex;justify-content:space-between;font-size:12px;letter-spacing:0.06em;color:var(--ink-40);margin-bottom:16px;}
+.result-mission{font-style:italic;font-size:15px;line-height:1.6;color:rgba(243,245,252,0.85);margin:0 0 20px;}
+.result-actions{display:flex;flex-wrap:wrap;gap:12px;}
+.result-actions button{
   padding:11px 20px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);background:transparent;
   color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
   display:flex;align-items:center;gap:7px;transition:all .2s ease;
 }
-.ticket-actions button:hover{border-color:var(--royal-hi);background:rgba(41,91,255,0.1);}
-.ticket-actions button.favd{border-color:var(--gold);background:rgba(244,191,58,0.14);color:var(--gold-hi);}
+.result-actions button:hover{border-color:var(--royal-hi);background:rgba(41,91,255,0.1);}
+.result-actions button.favd{border-color:var(--gold);background:rgba(244,191,58,0.14);color:var(--gold-hi);}
 .copy-flash{color:var(--royal-hi);}
 
 /* ---------- shared section heading ---------- */
@@ -519,30 +512,26 @@ details[open] summary::before{content:"▾ ";}
         </button>
         <button class="roll-btn ai-variant" id="pullLeverAI" type="button">
           <span class="diamond" aria-hidden="true"></span>
-          Use AI <span class="roll-note" id="useAiNote">(50/day)</span>
+          Use AI <span class="roll-note" id="useAiNote">(3/day)</span>
         </button>
       </div>
+
+      <article class="result-block" id="resultBlock" aria-live="polite">
+        <div class="result-head">
+          <span id="ticketNo">NO. 000000</span>
+          <span id="ticketTime">--:--</span>
+        </div>
+        <p class="result-mission" id="ticketMission"></p>
+        <div class="result-actions">
+          <button id="copyBtn" type="button">Copy prompt</button>
+          <button id="favBtn" type="button"><span aria-hidden="true">☆</span> Save to favorites</button>
+        </div>
+      </article>
     </div>
   </div>
 </section>
 
 <p class="hint" id="aiFallbackNotice" hidden style="max-width:640px;margin:0 auto 14px;padding:10px 16px;text-align:center;border-radius:12px;background:rgba(230,58,70,0.1);border:1px solid rgba(230,58,70,0.3);color:var(--crimson-hi);"></p>
-
-<div class="ticket-wrap" id="ticketWrap">
-  <article class="ticket" id="ticket" aria-live="polite">
-    <div class="ticket-head">
-      <span id="ticketNo">NO. 000000</span>
-      <span id="ticketTime">--:--</span>
-    </div>
-    <div class="ticket-body" id="ticketBody"></div>
-    <div class="ticket-rule"></div>
-    <p class="ticket-mission" id="ticketMission"></p>
-    <div class="ticket-actions">
-      <button id="copyBtn" type="button">Copy prompt</button>
-      <button id="favBtn" type="button"><span aria-hidden="true">☆</span> Save to favorites</button>
-    </div>
-  </article>
-</div>
 
 <section class="section" id="how-it-works">
   <div class="section-head">
@@ -670,9 +659,9 @@ const CATEGORIES = [
   {
     id:"music", name:"Music", blurb:"Songs, scores & sonic ideas", accent:"royal",
     reels:[
+      {label:"Mood", key:"mood", items:["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"]},
       {label:"Genre 1", key:"genre1", items:["Dream Pop","Trip-Hop","Afrobeat","Baroque Pop","Drum & Bass","Neo-Soul","Shoegaze","Bolero","City Pop","Math Rock","Zydeco","Vaporwave","Highlife","Post-Punk","Bedroom Pop","Cumbia","Grime","Dungeon Synth","Emo Rap","J-Pop","Dub","Country Noir","Krautrock","Bachata"]},
       {label:"Genre 2", key:"genre2", items:["Synthwave","Flamenco","Ambient Jazz","Trap","Bossa Nova","Industrial","Gospel","Chiptune","Reggaeton","Doom Metal","Folktronica","Baile Funk","Lo-fi Hip-Hop","Bluegrass","Witch House","Disco","Tuareg Blues","Ska","Balearic House","Opera","Nu-Disco","Highlife","Grunge","Salsa"]},
-      {label:"Mood", key:"mood", items:["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"]},
       {label:"Subject", key:"subject", items:["A lighthouse keeper's last night","Two rivals falling in love","A city that forgets itself","An astronaut coming home","A letter never sent","The last dance of summer","A machine learning to grieve","A ghost who pays rent","A thief who only steals memories","The last payphone in town","A wedding that never happens","A stranger who knows your name","The house that keeps changing rooms","A war fought over a song","Someone rehearsing an apology forever","A town built on a lie","The year the ocean rose","A twin who was never born","A radio station only the lonely find","Falling in love during a blackout"]},
       {label:"Twist", key:"twist", items:MUSIC_TWIST_ITEMS}
     ]
@@ -759,7 +748,7 @@ function currentActive(){ return state.active[state.categoryId]; }
 function currentLocks(){ return state.locks[state.categoryId]; }
 
 /* ---------------- account sync (Phase 2) ---------------- */
-const account = { signedIn:false, provider:null, name:null, credits:null, profile:null };
+const account = { signedIn:false, provider:null, name:null, credits:null, profile:null, tier:null };
 
 function debounce(fn, wait){
   let t;
@@ -875,21 +864,30 @@ function renderAccountUI(){
   updateAICreditsHint();
 }
 
-// This site's own Groq key ("groq" AI source) is metered per signed-in
-// account; BYOK Claude/OpenAI keys are never metered (that's the visitor's
-// own API cost). AI provider selection now lives in account.html's
-// Settings tab — this just keeps the lever-disable/fallback-banner logic
-// (which depends on state.aiSource + account.credits) up to date.
+// This site's own Groq key ("groq" AI source) is metered per-tier, not
+// per-signed-in-account anymore — five tiers (anonymous/basic/affiliate/
+// scph/paid) all get *some* free-API allowance (3/20/75/100/300 per day),
+// strictly increasing, so the "(N/day)" countdown messaging applies
+// uniformly across every tier. There's no more zero-access special case —
+// once every tier has a real (if small) allowance, "exhausted" always means
+// "used today's N, try again tomorrow, or add your own key," never
+// "no free access at all." BYOK still requires a signed-in account (keys
+// live in Account Settings), but Groq itself no longer does.
 function updateAICreditsHint(){
   updateCreditsExhaustedState();
   updateSignInNotice();
   if(els.useAiNote){
-    els.useAiNote.textContent = account.signedIn && account.credits
+    els.useAiNote.textContent = account.credits
       ? "("+account.credits.remaining+"/"+account.credits.limit+" today)"
-      : "(50/day)";
+      : "(3/day)"; // anonymous default before /api/auth-me resolves
   }
 }
 
+// /api/auth-me now returns a credits/tier status for anonymous callers too
+// (tier:"anonymous", credits:{remaining,limit}), not just signed-in accounts
+// — assumption made here because the backend's anonymous-tracking endpoint
+// may not have landed yet; same {remaining,limit} shape as the existing
+// signed-in credits object, so this needs no branching once it's live.
 async function checkAccount(){
   let res, data;
   try{
@@ -903,6 +901,7 @@ async function checkAccount(){
   account.provider = data.provider || null;
   account.name = data.name || null;
   account.credits = data.credits || null;
+  account.tier = data.tier || null;
   account.profile = data.profile || null;
   renderAccountUI();
   if(account.signedIn) await pullAccountData();
@@ -910,9 +909,62 @@ async function checkAccount(){
 
 function reelDef(cat, key){ return cat.reels.find(r=>r.key===key); }
 
-function pick(cat, key){
-  const list = reelDef(cat, key).items;
+// Music reel data can be sourced from the backend (Wikipedia-crawled genres,
+// expanded mood/subject/twist lists) once /api/reel-data resolves. Until
+// then — or if the fetch fails entirely — pick() keeps using the hardcoded
+// arrays in CATEGORIES/MUSIC_TWIST_ITEMS above, same resilience pattern as
+// the AI-generation fallback (never let a network dependency break the
+// ability to pull the lever).
+let MUSIC_REEL_DATA = null; // { genres, moods, subjects, twists } once loaded
+const MUSIC_REEL_DATA_KEY_MAP = { genre1:"genres", genre2:"genres", mood:"moods", subject:"subjects", twist:"twists" };
+async function loadMusicReelData(){
+  try{
+    const res = await fetch("/api/reel-data?category=music");
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data && Array.isArray(data.genres) && data.genres.length){
+      MUSIC_REEL_DATA = {
+        genres: data.genres,
+        moods: Array.isArray(data.moods) && data.moods.length ? data.moods : null,
+        subjects: Array.isArray(data.subjects) && data.subjects.length ? data.subjects : null,
+        twists: Array.isArray(data.twists) && data.twists.length ? data.twists : null
+      };
+    }
+  }catch(e){
+    // Network error, 404, etc — MUSIC_REEL_DATA stays null and pick() keeps
+    // using the hardcoded fallback arrays. Nothing else to do here.
+  }
+}
+loadMusicReelData();
+
+function sourceListFor(cat, key){
+  if(cat.id === "music" && MUSIC_REEL_DATA){
+    const dataKey = MUSIC_REEL_DATA_KEY_MAP[key];
+    const list = dataKey && MUSIC_REEL_DATA[dataKey];
+    if(list && list.length) return list;
+  }
+  return reelDef(cat, key).items;
+}
+
+function pick(cat, key, exclude){
+  const list = sourceListFor(cat, key);
+  if(exclude){
+    const filtered = list.filter(v=>String(v).toLowerCase() !== String(exclude).toLowerCase());
+    if(filtered.length) return filtered[Math.floor(Math.random()*filtered.length)];
+  }
   return list[Math.floor(Math.random()*list.length)];
+}
+
+// Music's Genre 1 / Genre 2 must never land on the same value within one
+// pull. Called as a final pass over any freshly-picked/generated value map
+// so it applies uniformly regardless of which source (built-in list, Groq,
+// BYOK) produced the values.
+function enforceGenreDistinctness(cat, map){
+  if(cat.id !== "music") return map;
+  if(map.genre1 && map.genre2 && String(map.genre1).toLowerCase() === String(map.genre2).toLowerCase()){
+    map.genre2 = pick(cat, "genre2", map.genre1);
+  }
+  return map;
 }
 
 /* ---------------- DOM build ---------------- */
@@ -1040,10 +1092,9 @@ function buildReelsDOM(){
 }
 
 const els = {
-  ticket: document.getElementById("ticket"),
+  resultBlock: document.getElementById("resultBlock"),
   ticketNo: document.getElementById("ticketNo"),
   ticketTime: document.getElementById("ticketTime"),
-  ticketBody: document.getElementById("ticketBody"),
   ticketMission: document.getElementById("ticketMission"),
   copyBtn: document.getElementById("copyBtn"),
   favBtn: document.getElementById("favBtn"),
@@ -1118,6 +1169,7 @@ function stripHauntedByPrefix(s){
 // Combines the two Music genre reels into one descriptor. If both are active
 // and differ, that's a fusion pairing ("Shoegaze x Cumbia"); if they land on
 // the same genre, or only one is active, it just reads as that single genre.
+// Used by Album/EP, which keeps its existing "fusion" phrasing.
 function genreFusionDescriptor(vals){
   const g1 = isActive("genre1") && vals.genre1 ? stripTrailingPunct(vals.genre1) : "";
   const g2 = isActive("genre2") && vals.genre2 ? stripTrailingPunct(vals.genre2) : "";
@@ -1125,20 +1177,28 @@ function genreFusionDescriptor(vals){
   return g1 || g2 || "";
 }
 
+// Exact target format: "Write a {Mood}, {Genre 1} x {Genre 2} about {Subject}. {Twist}."
+// Each active reel's raw value is stripped of trailing punctuation and
+// stitched in with casing preserved as-authored (Mood is NOT lowercased).
 function buildMusicMission(vals){
   const useMood = isActive("mood") && vals.mood;
-  const genreLabel = genreFusionDescriptor(vals);
+  const useGenre1 = isActive("genre1") && vals.genre1;
+  const useGenre2 = isActive("genre2") && vals.genre2;
   const useSubject = isActive("subject") && vals.subject;
   const useTwist = isActive("twist") && vals.twist;
 
-  const descriptors = [];
-  if(useMood) descriptors.push(stripTrailingPunct(vals.mood).toLowerCase());
-  if(genreLabel) descriptors.push(genreLabel);
+  const leadParts = [];
+  if(useMood) leadParts.push(stripTrailingPunct(vals.mood));
+  const genreBits = [];
+  if(useGenre1) genreBits.push(stripTrailingPunct(vals.genre1));
+  if(useGenre2) genreBits.push(stripTrailingPunct(vals.genre2));
+  if(genreBits.length) leadParts.push(genreBits.join(" x "));
 
-  let mission = "Write a " + (descriptors.length ? descriptors.join(" ")+" song" : "song");
+  let mission = "Write a";
+  if(leadParts.length) mission += " "+leadParts.join(", ");
   if(useSubject) mission += " about "+stripTrailingPunct(vals.subject);
   mission += ".";
-  if(useTwist) mission += " Constraint: "+stripTrailingPunct(vals.twist)+".";
+  if(useTwist) mission += " "+stripTrailingPunct(vals.twist)+".";
   return mission;
 }
 
@@ -1196,15 +1256,6 @@ function buildMission(vals){
   return buildGenericMission(cat, vals);
 }
 
-function ticketLinesHTML(vals){
-  let html = "";
-  currentCategory().reels.forEach(r=>{
-    if(!isActive(r.key)) return;
-    html += '<div class="ticket-line"><span class="tag">'+r.label.toUpperCase()+'</span><span class="val">'+escapeHTML(vals[r.key])+'</span></div>';
-  });
-  return html;
-}
-
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
@@ -1218,11 +1269,15 @@ function nowLabel(){
   return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
 }
 
+// Inline result block, shared by every category — shows the assembled
+// mission sentence + Unique ID + Datestamp + Copy/Save, relocated from the
+// old below-machine ticket panel (which is fully removed). Always present
+// in the layout (no hidden-until-first-roll/scroll behavior); before the
+// first pull it just shows placeholder copy.
 function renderTicket(){
   const c = state.current;
   if(!c || c.categoryId !== state.categoryId){
-    els.ticketBody.innerHTML = '<div class="ticket-line"><span class="val">Pull the lever to get your first '+currentCategory().name.toLowerCase()+' challenge.</span></div>';
-    els.ticketMission.textContent = "";
+    els.ticketMission.textContent = "Pull the lever to get your first "+currentCategory().name.toLowerCase()+" challenge.";
     els.ticketNo.textContent = padTicketNo(state.ticketNo);
     els.ticketTime.textContent = "";
     els.favBtn.classList.remove("favd");
@@ -1232,7 +1287,6 @@ function renderTicket(){
   }
   els.ticketNo.textContent = padTicketNo(c.no);
   els.ticketTime.textContent = c.time;
-  els.ticketBody.innerHTML = ticketLinesHTML(c.vals);
   els.ticketMission.textContent = c.mission;
   els.favBtn.classList.toggle("favd", isFavorited(c));
   els.favBtn.innerHTML = isFavorited(c) ? '<span aria-hidden="true">★</span> Saved' : '<span aria-hidden="true">☆</span> Save to favorites';
@@ -1467,16 +1521,13 @@ function showAIFallbackNotice(msg, persistent){
 function hidePersistentBannerIfActive(){
   if(persistentBannerActive){ els.aiFallbackNotice.hidden = true; persistentBannerActive = false; }
 }
-// Shown for as long as groq is selected but the visitor isn't signed in —
-// unlike the transient fallback banner, this doesn't auto-hide, since the
-// condition (and the silent built-in-list fallback it explains) persists
-// until they sign in, switch AI off, or add their own key.
+// Anonymous visitors now get a real (if small) free-API allowance too, so
+// there's no more persistent "sign in to use AI at all" banner — signing in
+// only matters for a bigger daily allowance and BYOK. Kept as a no-op hook
+// (clears any stale persistent banner from before this tier redesign) so
+// callers elsewhere don't need to change.
 function updateSignInNotice(){
-  if(state.aiSource === "groq" && !account.signedIn){
-    showAIFallbackNotice("Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead. — showing built-in results instead.", true);
-  } else {
-    hidePersistentBannerIfActive();
-  }
+  hidePersistentBannerIfActive();
 }
 
 // The mockup has two separate roll buttons (Free / Use AI) rather than a
@@ -1500,33 +1551,30 @@ function effectiveSourceFor(useAI){
 // BYOK and unmetered.
 async function getFreshValuesForPull(keys, useAI){
   const source = effectiveSourceFor(useAI);
+  const cat = currentCategory();
   const map = {};
   if(source === "groq"){
     try{
       const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
-      const batch = await Promise.race([groqGenerateBatch(currentCategory(), keys), timeout]);
-      keys.forEach(key=>{ map[key] = batch[key] || pick(currentCategory(), key); });
+      const batch = await Promise.race([groqGenerateBatch(cat, keys), timeout]);
+      keys.forEach(key=>{ map[key] = batch[key] || pick(cat, key); });
     }catch(err){
-      // Not-signed-in always routes through the persistent sign-in banner
-      // (same underlying reason every time) rather than the transient one,
-      // so it doesn't flash and then vanish after 6s mid-session.
-      if(!account.signedIn){ updateSignInNotice(); }
-      else { showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead."); }
-      keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
+      showAIFallbackNotice((err && err.message ? err.message : "AI unavailable")+" — showing built-in results instead.");
+      keys.forEach(key=>{ map[key] = pick(cat, key); });
     }
-    return map;
+    return enforceGenreDistinctness(cat, map);
   }
   if(source === "anthropic" || source === "openai"){
     await Promise.all(keys.map(async key=>{
       try{
         const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("AI timeout")), 12000));
         map[key] = await Promise.race([aiGenerate(key), timeout]);
-      }catch(e){ map[key] = pick(currentCategory(), key); }
+      }catch(e){ map[key] = pick(cat, key); }
     }));
-    return map;
+    return enforceGenreDistinctness(cat, map);
   }
-  keys.forEach(key=>{ map[key] = pick(currentCategory(), key); });
-  return map;
+  keys.forEach(key=>{ map[key] = pick(cat, key); });
+  return enforceGenreDistinctness(cat, map);
 }
 
 /* ---------------- spin logic ---------------- */
@@ -1547,8 +1595,11 @@ function applyLeverState(){
     ? "Daily AI limit reached — add your own key in Settings, or try again tomorrow."
     : "";
 }
+// Every tier (including anonymous, via /api/auth-me's credits status) now
+// carries a real daily allowance, so this no longer requires account.signedIn
+// — it just checks whatever credits status is currently known, whoever it's for.
 function updateCreditsExhaustedState(){
-  creditsExhausted = !!(effectiveSourceFor(true) === "groq" && account.signedIn && account.credits && account.credits.remaining <= 0);
+  creditsExhausted = !!(effectiveSourceFor(true) === "groq" && account.credits && account.credits.remaining <= 0);
   applyLeverState();
 }
 
@@ -1664,19 +1715,7 @@ async function pullLever(useAI){
   saveState();
   els.announcer.textContent = "New challenge: "+ticket.mission;
 
-  // Only rendered/shown after the first successful roll. Once it appears,
-  // auto-scroll it into view (window.scrollTo, not scrollIntoView) with a
-  // short delay so the scroll happens after the reel-landing animation settles.
-  const ticketWrapEl = document.getElementById("ticketWrap");
-  if(!hasRolled){
-    hasRolled = true;
-    if(ticketWrapEl) ticketWrapEl.classList.add("show");
-    setTimeout(()=>{
-      if(!ticketWrapEl) return;
-      const top = ticketWrapEl.getBoundingClientRect().top + window.scrollY - 110;
-      window.scrollTo({ top: top, behavior: "smooth" });
-    }, 400);
-  }
+  hasRolled = true;
   updateMiniRollerVisibility();
 
   spinning = false;
@@ -1880,11 +1919,8 @@ function init(){
   if(state.current && state.current.categoryId === state.categoryId){
     renderReelValues(state.current.vals);
     renderTicket();
-    // A returning visitor already has a rolled ticket from a previous
-    // session — show it immediately, no scroll animation needed.
+    // A returning visitor already has a rolled ticket from a previous session.
     hasRolled = true;
-    const ticketWrapEl = document.getElementById("ticketWrap");
-    if(ticketWrapEl) ticketWrapEl.classList.add("show");
   } else {
     const placeholder = {};
     currentCategory().reels.forEach(r=>{ placeholder[r.key] = "—"; });
