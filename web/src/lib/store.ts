@@ -258,29 +258,20 @@ export async function getCreditsStatus(user: SessionUser): Promise<{ remaining: 
 }
 
 // ---------------- Anonymous (not signed-in) AI credits ----------------
-// Backed by a small `anon_credits` table keyed by the scph_anon cookie ID,
-// with a per-IP daily cap as a backstop against clearing the cookie to
-// farm more pulls. Self-migrating (CREATE TABLE IF NOT EXISTS) since this
-// project has no separate migration runner.
-async function ensureAnonCreditsTable(): Promise<void> {
-  const sql = getSql();
-  await sql`
-    CREATE TABLE IF NOT EXISTS anon_credits (
-      anon_id text PRIMARY KEY,
-      ip text,
-      date date NOT NULL,
-      used int NOT NULL DEFAULT 0,
-      updated_at timestamptz NOT NULL DEFAULT now()
-    )
-  `;
-}
+// Backed by the `anon_credits` table (see scripts/init-db.mjs on the static
+// site: cookie_id TEXT PK, date, used, last_ip INET) keyed by the
+// scph_anon cookie ID, with a per-IP daily cap (3x the per-cookie limit) as
+// a backstop against clearing the cookie to farm more pulls. This table
+// already exists in the shared Neon DB (same project as the static site),
+// so column names here must match that schema exactly rather than
+// introducing a parallel shape.
+export const ANON_IP_CREDIT_LIMIT = ANON_CREDIT_LIMIT * 3;
 
 export async function getAnonCreditsStatus(anonId: string): Promise<{ remaining: number; limit: number }> {
   const sql = getSql();
-  await ensureAnonCreditsTable();
   const today = todayStr();
-  const rows = await sql`SELECT used FROM anon_credits WHERE anon_id = ${anonId} AND date = ${today}`;
-  const used = rows[0] ? (rows[0].used as number) : 0;
+  const rows = await sql`SELECT to_char(date, 'YYYY-MM-DD') AS date, used FROM anon_credits WHERE cookie_id = ${anonId}`;
+  const used = rows[0] && rows[0].date === today ? (rows[0].used as number) : 0;
   return { remaining: Math.max(0, ANON_CREDIT_LIMIT - used), limit: ANON_CREDIT_LIMIT };
 }
 
@@ -289,35 +280,36 @@ export async function consumeAnonCredit(
   ip: string | null
 ): Promise<{ ok: boolean; remaining: number; limit: number }> {
   const sql = getSql();
-  await ensureAnonCreditsTable();
   const today = todayStr();
 
-  // Per-IP backstop: even with a fresh cookie, the same IP can't exceed the
-  // anonymous limit either — counts every anon row touched from that IP
-  // today, so clearing cookies alone doesn't grant a fresh allowance.
+  const rows = await sql`SELECT to_char(date, 'YYYY-MM-DD') AS date, used FROM anon_credits WHERE cookie_id = ${anonId}`;
+  const cookieUsed = rows[0] && rows[0].date === today ? (rows[0].used as number) : 0;
+  if (cookieUsed >= ANON_CREDIT_LIMIT) {
+    return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
+  }
+
+  // Per-IP backstop: even with a fresh cookie, the same IP can't blow past
+  // 3x the per-cookie limit either — blunts trivial cookie-clearing abuse
+  // without blocking legitimate distinct users behind a shared IP.
   if (ip) {
-    const ipRows = await sql`SELECT COALESCE(SUM(used),0)::int AS total FROM anon_credits WHERE ip = ${ip} AND date = ${today}`;
+    const ipRows = await sql`
+      SELECT COALESCE(SUM(used), 0)::int AS total FROM anon_credits
+      WHERE last_ip = ${ip}::inet AND date = ${today}::date
+    `;
     const ipUsed = ipRows[0] ? (ipRows[0].total as number) : 0;
-    if (ipUsed >= ANON_CREDIT_LIMIT) {
+    if (ipUsed >= ANON_IP_CREDIT_LIMIT) {
       return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
     }
   }
 
-  const rows = await sql`
-    INSERT INTO anon_credits (anon_id, ip, date, used)
-    VALUES (${anonId}, ${ip}, ${today}, 0)
-    ON CONFLICT (anon_id) DO UPDATE SET
-      ip = EXCLUDED.ip,
-      used = CASE WHEN anon_credits.date = ${today} THEN anon_credits.used ELSE 0 END,
-      date = ${today}
-    RETURNING used
+  const nextUsed = cookieUsed + 1;
+  const ipParam = ip || null;
+  await sql`
+    INSERT INTO anon_credits (cookie_id, date, used, last_ip)
+    VALUES (${anonId}, ${today}::date, ${nextUsed}, ${ipParam}::inet)
+    ON CONFLICT (cookie_id) DO UPDATE SET date = ${today}::date, used = ${nextUsed}, last_ip = COALESCE(${ipParam}::inet, anon_credits.last_ip)
   `;
-  const used = rows[0] ? (rows[0].used as number) : 0;
-  if (used >= ANON_CREDIT_LIMIT) {
-    return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
-  }
-  await sql`UPDATE anon_credits SET used = used + 1, updated_at = now() WHERE anon_id = ${anonId}`;
-  return { ok: true, remaining: ANON_CREDIT_LIMIT - (used + 1), limit: ANON_CREDIT_LIMIT };
+  return { ok: true, remaining: ANON_CREDIT_LIMIT - nextUsed, limit: ANON_CREDIT_LIMIT };
 }
 
 function normalizeHandle(handle: string | undefined | null): string {
