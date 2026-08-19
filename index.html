@@ -1216,6 +1216,14 @@ function genreFusionDescriptor(vals){
 // Exact target format: "Write a {Mood}, {Genre 1} x {Genre 2} about {Subject}. {Twist}."
 // Each active reel's raw value is stripped of trailing punctuation and
 // stitched in with casing preserved as-authored (Mood is NOT lowercased).
+// "a" vs "an" based on the leading word's first letter — per the handoff
+// spec ("Write a/an {Mood}...") — a simple vowel-letter check, same
+// convention used for the rest of this sentence's plain-English phrasing.
+function indefiniteArticleFor(word){
+  const first = String(word||"").trim().charAt(0).toLowerCase();
+  return /[aeiou]/.test(first) ? "an" : "a";
+}
+
 function buildMusicMission(vals){
   const useMood = isActive("mood") && vals.mood;
   const useGenre1 = isActive("genre1") && vals.genre1;
@@ -1230,7 +1238,7 @@ function buildMusicMission(vals){
   if(useGenre2) genreBits.push(stripTrailingPunct(vals.genre2));
   if(genreBits.length) leadParts.push(genreBits.join(" x "));
 
-  let mission = "Write a";
+  let mission = "Write "+indefiniteArticleFor(leadParts[0]);
   if(leadParts.length) mission += " "+leadParts.join(", ");
   if(useSubject) mission += " about "+stripTrailingPunct(vals.subject);
   mission += ".";
@@ -1314,7 +1322,10 @@ function nowLabel(){
 // without retriggering an animation.
 function renderTicket(){
   const c = state.current;
-  const showing = !!(c && c.categoryId === state.categoryId);
+  // hasRolled is session-scoped (starts false on every page load, see
+  // init()) so a page refresh always resets the receipt to hidden/empty,
+  // even if a previous roll is still sitting in persisted state.
+  const showing = hasRolled && !!(c && c.categoryId === state.categoryId);
   if(!showing){
     els.ticket.hidden = true;
     els.copyBtn.disabled = true;
@@ -1356,6 +1367,11 @@ function playTicketTear(){
     els.ticket.classList.add("tearing");
     setTimeout(()=>{
       els.ticket.classList.remove("tearing");
+      // Without this, removing the "tearing" class reverts the element to
+      // its base (fully visible) styles instantly — the old ticket would
+      // flash back into view for the whole reel-spin duration instead of
+      // staying torn-off/hidden until the new roll prints.
+      els.ticket.hidden = true;
       resolve();
     }, 360);
   });
@@ -2050,9 +2066,11 @@ function init(){
 
   if(state.current && state.current.categoryId === state.categoryId){
     renderReelValues(state.current.vals);
+    // Reel values from a previous session are restored for continuity, but
+    // the receipt itself always starts hidden/empty on a fresh page load —
+    // hasRolled stays false here (its default) so renderTicket() below
+    // keeps the ticket hidden until an explicit roll happens this session.
     renderTicket();
-    // A returning visitor already has a rolled ticket from a previous session.
-    hasRolled = true;
   } else {
     const placeholder = {};
     currentCategory().reels.forEach(r=>{ placeholder[r.key] = "—"; });
