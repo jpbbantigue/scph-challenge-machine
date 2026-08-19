@@ -1831,13 +1831,16 @@ async function pullLever(useAI){
   if(state.history.length > 100) state.history.shift();
   recordRollStats(cat.id);
 
+  // Must flip to true before renderTicket() — renderTicket() gates ticket
+  // visibility on hasRolled, so on the very first roll of a session it
+  // needs to already be true or the newly-printed ticket renders hidden.
+  hasRolled = true;
   renderTicket();
   playTicketPrint();
   rollCountEl.textContent = String(state.history.length);
   saveState();
   els.announcer.textContent = "New challenge: "+ticket.mission;
 
-  hasRolled = true;
   updateMiniRollerVisibility(); // no auto-scroll — this only toggles the sticky mini-bar
 
   spinning = false;
