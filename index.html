@@ -557,6 +557,9 @@ details[open] summary::before{content:"▾ ";}
             <button id="favBtn" type="button" aria-label="Save to favorites" title="Save to favorites">
               <span aria-hidden="true">&#9734;</span>
             </button>
+            <button id="shareBtn" type="button" aria-label="Share as image" title="Share as image">
+              <span class="ticket-icon share-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+            </button>
           </div>
         </article>
       </div>
@@ -1132,6 +1135,7 @@ const els = {
   ticketMission: document.getElementById("ticketMission"),
   copyBtn: document.getElementById("copyBtn"),
   favBtn: document.getElementById("favBtn"),
+  shareBtn: document.getElementById("shareBtn"),
   aiFallbackNotice: document.getElementById("aiFallbackNotice"),
   leverFree: document.getElementById("pullLeverFree"),
   leverAI: document.getElementById("pullLeverAI"),
@@ -1330,12 +1334,14 @@ function renderTicket(){
     els.ticket.hidden = true;
     els.copyBtn.disabled = true;
     els.favBtn.disabled = true;
+    els.shareBtn.disabled = true;
     renderMiniRoller();
     return;
   }
   els.ticket.hidden = false;
   els.copyBtn.disabled = false;
   els.favBtn.disabled = false;
+  els.shareBtn.disabled = false;
   els.ticketNo.textContent = padTicketNo(c.no);
   els.ticketTime.textContent = c.time;
   els.ticketMission.textContent = c.mission;
@@ -1974,6 +1980,112 @@ function fallbackCopy(text, done){
   try{ document.execCommand("copy"); done(); }catch(e){}
   document.body.removeChild(ta);
 }
+
+// Renders the current ticket as a shareable PNG (canvas-drawn receipt,
+// same visual language as the on-page ticket) with the site URL printed
+// at the bottom as the "link back" — a shared image can't carry a real
+// hyperlink on most platforms, so the URL has to be legible in the image
+// itself, the same way Wordle/Spotify-Wrapped-style share images work.
+function wrapCanvasText(ctx, text, maxWidth){
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  words.forEach(word=>{
+    const test = line ? line+" "+word : word;
+    if(ctx.measureText(test).width > maxWidth && line){
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  });
+  if(line) lines.push(line);
+  return lines;
+}
+function renderTicketCanvas(ticket){
+  const width = 640;
+  const padX = 32;
+  const missionFont = "italic 17px 'SF Mono', Menlo, ui-monospace, monospace";
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.font = missionFont;
+  const missionLines = wrapCanvasText(ctx, ticket.mission, width - padX*2);
+  const lineHeight = 27;
+  const missionH = missionLines.length * lineHeight;
+  const height = 74 + missionH + 76; // top padding + mission block + meta/footer block
+  canvas.width = width;
+  canvas.height = height;
+
+  // Paper card with rounded corners.
+  const r = 14;
+  ctx.fillStyle = "#fdfbf3";
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.arcTo(width, 0, width, height, r);
+  ctx.arcTo(width, height, 0, height, r);
+  ctx.arcTo(0, height, 0, 0, r);
+  ctx.arcTo(0, 0, width, 0, r);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#1a1a1a";
+  ctx.font = missionFont;
+  ctx.textBaseline = "top";
+  missionLines.forEach((line,i)=>{ ctx.fillText(line, padX, 40 + i*lineHeight); });
+
+  ctx.fillStyle = "rgba(26,26,26,0.5)";
+  ctx.font = "11px 'SF Mono', Menlo, ui-monospace, monospace";
+  ctx.fillText("NO. "+String(ticket.no).padStart(6,"0")+" · "+ticket.time, padX, 40 + missionH + 14);
+
+  ctx.strokeStyle = "rgba(26,26,26,0.15)";
+  ctx.beginPath();
+  ctx.moveTo(padX, height - 42);
+  ctx.lineTo(width - padX, height - 42);
+  ctx.stroke();
+
+  ctx.fillStyle = "#C68B24";
+  ctx.font = "bold 13px 'Space Grotesk', sans-serif";
+  const wordmark = "Prompt Royale";
+  ctx.fillText(wordmark, padX, height - 28);
+  const wordmarkWidth = ctx.measureText(wordmark).width;
+
+  ctx.fillStyle = "rgba(26,26,26,0.55)";
+  ctx.font = "12px 'Inter', sans-serif";
+  ctx.fillText(location.origin.replace(/^https?:\/\//,""), padX + wordmarkWidth + 14, height - 28);
+
+  return canvas;
+}
+async function shareTicketImage(){
+  if(!state.current || els.shareBtn.disabled) return;
+  const canvas = renderTicketCanvas(state.current);
+  canvas.toBlob(async (blob)=>{
+    if(!blob) return;
+    const file = new File([blob], "prompt-royale-receipt.png", {type:"image/png"});
+    const shareData = {
+      files: [file],
+      title: "Prompt Royale",
+      text: state.current.mission+" — made with Prompt Royale",
+      url: location.origin
+    };
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share(shareData);
+        return;
+      }catch(e){
+        if(e && e.name === "AbortError") return; // user cancelled the share sheet
+        // fall through to download on any other failure
+      }
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "prompt-royale-receipt.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }, "image/png");
+}
+els.shareBtn.addEventListener("click", shareTicketImage);
 
 els.favBtn.addEventListener("click", ()=>{
   if(!state.current || els.favBtn.disabled) return;
