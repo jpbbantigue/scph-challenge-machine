@@ -111,7 +111,8 @@ a:hover{color:var(--gold-hi);}
 .page{position:relative;z-index:1;}
 
 /* ---------- nav ---------- */
-.nav-wrap{position:sticky;top:0;z-index:50;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+.nav-wrap{position:static;z-index:50;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+@media (max-width:768px){.nav-wrap{position:sticky;top:0;}}
 .topnav{
   width:100%;max-width:1180px;display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:11px 18px;border-radius:999px;
@@ -268,26 +269,6 @@ a:hover{color:var(--gold-hi);}
 .roll-btn.ai-variant .diamond{background:var(--gold);}
 .roll-btn .roll-note{opacity:0.7;font-weight:500;font-size:12.5px;}
 
-/* ---------- mini roller bar ---------- */
-.mini-roller-wrap{position:sticky;top:0;z-index:49;display:flex;justify-content:center;overflow:hidden;padding:0 20px;
-  transition:max-height .32s ease, opacity .28s ease, margin-top .32s ease;
-  max-height:0;opacity:0;margin-top:0;pointer-events:none;}
-.mini-roller-wrap.show{max-height:68px;opacity:1;margin-top:8px;pointer-events:auto;}
-.mini-roller{width:100%;max-width:1180px;display:flex;align-items:stretch;border-radius:12px;overflow:hidden;
-  background:rgba(9,12,22,0.92);border:1px solid rgba(244,191,58,0.3);backdrop-filter:blur(18px);
-  box-shadow:0 14px 32px rgba(0,0,0,0.4);font-family:var(--font-mono);}
-.mini-roller-stripe{width:4px;flex:none;background:linear-gradient(180deg,var(--gold),var(--crimson-hi));}
-.mini-roller-label{display:flex;align-items:center;padding:0 4px 0 16px;border-right:1px dashed rgba(255,255,255,0.14);
-  flex:none;font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
-.mini-roller-values{display:flex;align-items:center;overflow-x:auto;flex:1;min-width:0;}
-.mini-roller-value{display:flex;flex-direction:column;gap:2px;padding:8px 16px;border-right:1px dashed rgba(255,255,255,0.1);flex:none;}
-.mini-roller-value .l{font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);white-space:nowrap;}
-.mini-roller-value .v{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;}
-.mini-roller-btn{flex:none;border:none;cursor:pointer;font-family:inherit;}
-.mini-roller-btn.roll{padding:0 20px;border-left:1px solid rgba(77,124,255,0.3);background:rgba(41,91,255,0.16);
-  color:#CBD8FF;font-weight:700;font-size:12.5px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;}
-.mini-roller-btn.icon{width:42px;border-left:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--ink);font-size:14px;}
-.mini-roller-btn.icon.gold{color:var(--gold-hi);}
 
 /* ---------- printed ticket (paper receipt hanging below the divider) ---------- */
 /* Absolutely positioned relative to the divider so it never affects card
@@ -498,16 +479,6 @@ details[open] summary::before{content:"▾ ";}
       <a class="pill-cta" href="#slot-machine">Start Rolling</a>
     </div>
   </nav>
-  <div class="mini-roller-wrap" id="miniRollerWrap" aria-hidden="true">
-    <div class="mini-roller">
-      <div class="mini-roller-stripe" aria-hidden="true"></div>
-      <div class="mini-roller-label">Now Rolling</div>
-      <div class="mini-roller-values" id="miniRollerValues"></div>
-      <button class="mini-roller-btn roll" id="miniRollAgainBtn" type="button">Roll Again</button>
-      <button class="mini-roller-btn icon" id="miniCopyBtn" type="button" aria-label="Copy prompt">&#10697;</button>
-      <button class="mini-roller-btn icon gold" id="miniSaveBtn" type="button" aria-label="Save prompt">&#9734;</button>
-    </div>
-  </div>
 </div>
 
 <div id="top"></div>
@@ -1335,7 +1306,6 @@ function renderTicket(){
     els.copyBtn.disabled = true;
     els.favBtn.disabled = true;
     els.shareBtn.disabled = true;
-    renderMiniRoller();
     return;
   }
   els.ticket.hidden = false;
@@ -1347,7 +1317,6 @@ function renderTicket(){
   els.ticketMission.textContent = c.mission;
   els.favBtn.classList.toggle("favd", isFavorited(c));
   els.favBtn.innerHTML = isFavorited(c) ? '<span aria-hidden="true">&#9733;</span>' : '<span aria-hidden="true">&#9734;</span>';
-  renderMiniRoller();
 }
 
 // Restarts the ticket-print reveal (clip-path top-to-bottom) — called once
@@ -1383,47 +1352,9 @@ function playTicketTear(){
   });
 }
 
-/* ---------------- mini roller bar (sticky "Now Rolling" strip) ---------------- */
-// Only rendered/shown once the visitor has rolled at least once (hasRolled),
-// and only visible while scrolled past the hero and before "How It Works" —
-// uses separate show/hide thresholds (hysteresis) so it doesn't flicker
-// right at the scroll boundary.
+// Session-scoped: starts false on every page load (see init()) so a page
+// refresh always resets the receipt to hidden/empty.
 let hasRolled = false;
-const miniRollerWrapEl = document.getElementById("miniRollerWrap");
-const miniRollerValuesEl = document.getElementById("miniRollerValues");
-
-function renderMiniRoller(){
-  if(!miniRollerValuesEl) return;
-  const c = state.current;
-  if(!c || c.categoryId !== state.categoryId){ miniRollerValuesEl.innerHTML = ""; return; }
-  const cat = currentCategory();
-  miniRollerValuesEl.innerHTML = cat.reels
-    .filter(r=>isActive(r.key))
-    .map(r=>'<div class="mini-roller-value"><span class="l">'+escapeHTML(r.label.toUpperCase())+'</span><span class="v">'+escapeHTML(c.vals[r.key]||"")+'</span></div>')
-    .join("");
-}
-
-function updateMiniRollerVisibility(){
-  if(!miniRollerWrapEl) return;
-  if(!hasRolled){ miniRollerWrapEl.classList.remove("show"); return; }
-  const hero = document.getElementById("slot-machine");
-  const howItWorks = document.getElementById("how-it-works");
-  if(!hero || !howItWorks) return;
-  const heroBottom = hero.getBoundingClientRect().bottom;
-  const nextTop = howItWorks.getBoundingClientRect().top;
-  const wasShown = miniRollerWrapEl.classList.contains("show");
-  const pastHero = wasShown ? heroBottom < 130 : heroBottom < 70;
-  const beforeNextSection = wasShown ? nextTop > 40 : nextTop > 100;
-  miniRollerWrapEl.classList.toggle("show", pastHero && beforeNextSection);
-}
-window.addEventListener("scroll", updateMiniRollerVisibility, {passive:true});
-
-const miniRollAgainBtn = document.getElementById("miniRollAgainBtn");
-const miniCopyBtn = document.getElementById("miniCopyBtn");
-const miniSaveBtn = document.getElementById("miniSaveBtn");
-if(miniRollAgainBtn) miniRollAgainBtn.addEventListener("click", ()=>pullLeverEntry(lastRollUsedAI));
-if(miniCopyBtn) miniCopyBtn.addEventListener("click", ()=>{ if(els.copyBtn) els.copyBtn.click(); });
-if(miniSaveBtn) miniSaveBtn.addEventListener("click", ()=>{ if(els.favBtn) els.favBtn.click(); });
 
 function isFavorited(ticket){
   return state.favorites.some(f=>f.mission===ticket.mission);
@@ -1847,8 +1778,6 @@ async function pullLever(useAI){
   saveState();
   els.announcer.textContent = "New challenge: "+ticket.mission;
 
-  updateMiniRollerVisibility(); // no auto-scroll — this only toggles the sticky mini-bar
-
   spinning = false;
   setRollingUI(false);
   applyLeverState();
@@ -2192,7 +2121,6 @@ function init(){
     renderReelValues(placeholder);
     renderTicket();
   }
-  updateMiniRollerVisibility();
   checkAccount();
   initHowItWorksAnimation();
 }
