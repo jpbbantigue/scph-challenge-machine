@@ -75,7 +75,78 @@ async function main() {
     )
   `;
   await sql`CREATE INDEX IF NOT EXISTS linked_identities_account_idx ON linked_identities(account_key)`;
-  console.log("Schema ready: accounts, profile_handles, results, follows, linked_identities");
+
+  // Wikipedia-sourced genre/subgenre reference data for the Music reel
+  // (Genre 1 / Genre 2 picks). Self-referencing parent_id models genre ->
+  // subgenre; top-level genres have parent_id NULL. Seeded by
+  // scripts/crawl-genres.mjs + scripts/seed-genres.mjs, not on every deploy.
+  await sql`
+    CREATE TABLE IF NOT EXISTS genres (
+      id SERIAL PRIMARY KEY,
+      name TEXT UNIQUE NOT NULL,
+      parent_id INTEGER REFERENCES genres(id) ON DELETE SET NULL,
+      source TEXT NOT NULL DEFAULT 'wikipedia',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS genres_parent_idx ON genres(parent_id)`;
+
+  // Mood / Subject / Twist reel content, Music-scoped for now
+  // (category_id lets future categories point their own reels at these
+  // tables). Seeded by scripts/seed-reel-data.mjs.
+  await sql`
+    CREATE TABLE IF NOT EXISTS moods (
+      id SERIAL PRIMARY KEY,
+      text TEXT NOT NULL,
+      category_id TEXT NOT NULL DEFAULT 'music',
+      active BOOLEAN NOT NULL DEFAULT true
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS subjects (
+      id SERIAL PRIMARY KEY,
+      text TEXT NOT NULL,
+      category_id TEXT NOT NULL DEFAULT 'music',
+      active BOOLEAN NOT NULL DEFAULT true
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS twists (
+      id SERIAL PRIMARY KEY,
+      text TEXT NOT NULL,
+      category_id TEXT NOT NULL DEFAULT 'music',
+      active BOOLEAN NOT NULL DEFAULT true
+    )
+  `;
+
+  // Approved partner Discord servers whose members get the `affiliate`
+  // credit tier (between `basic` and `scph`). Populated manually via
+  // scripts/seed-affiliate-guilds.mjs, no admin UI yet — empty is fine.
+  await sql`
+    CREATE TABLE IF NOT EXISTS affiliate_guilds (
+      id SERIAL PRIMARY KEY,
+      guild_id TEXT UNIQUE NOT NULL,
+      name TEXT,
+      added_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+
+  // Free-API (Groq) credit tracking for anonymous (not signed-in)
+  // visitors, keyed by a random ID issued in a first-party cookie rather
+  // than an account_key. Same daily-reset shape as the accounts.credits
+  // JSON field, just its own table since there's no account row to hang
+  // it off of. last_ip backs the secondary per-IP abuse ceiling.
+  await sql`
+    CREATE TABLE IF NOT EXISTS anon_credits (
+      cookie_id TEXT PRIMARY KEY,
+      date DATE NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0,
+      last_ip INET
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS anon_credits_ip_date_idx ON anon_credits(last_ip, date)`;
+
+  console.log("Schema ready: accounts, profile_handles, results, follows, linked_identities, genres, moods, subjects, twists, affiliate_guilds, anon_credits");
 }
 
 main().catch((err) => {

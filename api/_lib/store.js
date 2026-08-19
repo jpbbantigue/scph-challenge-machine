@@ -7,17 +7,30 @@
 
 const { getSql } = require("./db");
 
-// Tiered daily AI-credit limits. "scph" is verified automatically at
-// Discord sign-in (see auth-callback.js, which checks the visitor's guild
-// list against SCPH_GUILD_ID and stamps the tier onto the session). A third
-// "affiliate" tier (75/day, for approved partner Discord servers) is
-// planned but deferred — see PHASING.md.
-const CREDIT_LIMITS = { basic: 50, scph: 100 };
+// Tiered daily AI-credit limits, strictly increasing (anonymous 3 < basic
+// 20 < affiliate 75 < scph 100 < paid 300). "scph" and "affiliate" are
+// verified automatically at Discord sign-in (see auth-callback.js:
+// computeDiscordTier, which checks the visitor's guild list against
+// SCPH_GUILD_ID first, then the affiliate_guilds table). "paid" is a
+// numbers-only placeholder for now — no billing/Stripe integration yet, so
+// nothing actually assigns a user to it in practice. Anonymous (not signed
+// in) visitors aren't in this map at all — see ANON_CREDIT_LIMIT /
+// ANON_IP_CREDIT_LIMIT and consumeAnonCredit() below, which track them by
+// cookie ID in a separate table instead of the accounts JSONB blob.
+const CREDIT_LIMITS = { basic: 20, affiliate: 75, scph: 100, paid: 300 };
 const DEFAULT_TIER = "basic";
 function creditLimitForTier(tier) {
   return CREDIT_LIMITS[tier] || CREDIT_LIMITS[DEFAULT_TIER];
 }
 const DAILY_AI_CREDIT_LIMIT = CREDIT_LIMITS[DEFAULT_TIER]; // kept for back-compat reference
+
+// Anonymous (not signed-in) visitors get a small real free-API allowance
+// too, tracked by a first-party cookie ID rather than an account. A
+// secondary, coarser per-IP ceiling (3x the per-cookie limit) blunts
+// trivial cookie-clearing abuse without blocking legitimate distinct users
+// behind a shared IP (offices, campus wifi, carriers).
+const ANON_CREDIT_LIMIT = 3;
+const ANON_IP_CREDIT_LIMIT = ANON_CREDIT_LIMIT * 3;
 const MAX_SOCIALS = 8;
 const MAX_LINKED_ACCOUNTS = 8;
 const MAX_BIO_LEN = 200;
@@ -99,6 +112,11 @@ function defaultUserData() {
     history: [],
     settings: null,
     credits: { date: todayStr(), used: 0 },
+    // Lifetime + per-day Groq token usage for this account, surfaced in
+    // Account/Settings alongside the credits progress bar. Only tracked
+    // for signed-in users — anonymous visitors have no profile to attach
+    // it to, so they only get the credit-limit enforcement, not tracking.
+    tokensUsed: { date: todayStr(), used: 0, lifetime: 0 },
     stats: { totalRolls: 0, categoryRolls: {}, streak: { current: 0, longest: 0, lastActiveDate: null } },
     profile: defaultProfile(),
     updatedAt: 0
@@ -113,6 +131,7 @@ function mergeWithDefaults(raw) {
     history: Array.isArray(raw.history) ? raw.history : def.history,
     settings: raw.settings || def.settings,
     credits: raw.credits && typeof raw.credits.used === "number" ? raw.credits : def.credits,
+    tokensUsed: raw.tokensUsed && typeof raw.tokensUsed.used === "number" ? raw.tokensUsed : def.tokensUsed,
     stats: raw.stats || def.stats,
     profile: Object.assign(defaultProfile(), raw.profile || {}),
     updatedAt: raw.updatedAt || 0
@@ -141,7 +160,8 @@ async function saveUserData(user, data) {
     favorites: Array.isArray(data.favorites) ? data.favorites.slice(0, 200) : current.favorites,
     history: Array.isArray(data.history) ? data.history.slice(-100) : current.history,
     settings: data.settings || current.settings,
-    credits: current.credits, // credits only change via consumeAICredit
+    credits: current.credits, // credits only change via reserveAICredit/commitAICreditUsage
+    tokensUsed: current.tokensUsed, // tokensUsed only changes via commitAICreditUsage
     stats: data.stats || current.stats,
     profile: current.profile, // profile fields only change via the profile-* functions below
     updatedAt: Date.now()
@@ -150,27 +170,98 @@ async function saveUserData(user, data) {
   return toSave;
 }
 
-// Checks the signed-in user's daily AI-credit balance, consuming one if
-// available. This only gates calls to this site's own Groq key (the site's
-// cost) — a visitor's own BYOK Claude/OpenAI key is never limited, since
-// that's their own API cost, not the site's.
-async function consumeAICredit(user) {
-  const key = userKey(user);
+// Checks the signed-in user's daily AI-credit balance WITHOUT writing yet
+// — called before the upstream Groq calls, to gate whether we attempt them
+// at all. Pair with commitAICreditUsage() after those calls resolve, which
+// does the actual write (credit + that pull's token usage) in one round
+// trip instead of two. This only gates calls to this site's own Groq key
+// (the site's cost) — a visitor's own BYOK Claude/OpenAI key is never
+// limited, since that's their own API cost, not the site's.
+async function reserveAICredit(user) {
   const limit = creditLimitForTier(user.tier);
   const data = await loadUserData(user);
   const today = todayStr();
   let credits = data.credits;
   if (credits.date !== today) credits = { date: today, used: 0 };
   if (credits.used >= limit) {
-    data.credits = credits;
-    await writeAccount(key, data);
-    return { ok: false, remaining: 0, limit };
+    return { ok: false, remaining: 0, limit, data, credits };
   }
+  return { ok: true, remaining: limit - credits.used, limit, data, credits };
+}
+
+// Commits one pull's credit spend + Groq token usage in a single write.
+// Called after the upstream Groq calls resolve (a pull still costs a
+// credit even if a reel call fails, matching prior behavior — credit
+// covers the attempt, not a guaranteed successful result).
+// `reserved` is the object returned by reserveAICredit() (carries the
+// already-loaded data + credits so this doesn't re-read from the DB).
+async function commitAICreditUsage(user, reserved, tokensUsedThisPull = 0) {
+  const key = userKey(user);
+  const { data, credits, limit } = reserved;
   credits.used += 1;
   data.credits = credits;
+
+  const today = todayStr();
+  let tokensUsed = data.tokensUsed && typeof data.tokensUsed.used === "number"
+    ? data.tokensUsed
+    : { date: today, used: 0, lifetime: 0 };
+  if (tokensUsed.date !== today) tokensUsed = { date: today, used: 0, lifetime: tokensUsed.lifetime || 0 };
+  tokensUsed.used += tokensUsedThisPull;
+  tokensUsed.lifetime = (tokensUsed.lifetime || 0) + tokensUsedThisPull;
+  data.tokensUsed = tokensUsed;
+
   data.updatedAt = Date.now();
   await writeAccount(key, data);
-  return { ok: true, remaining: limit - credits.used, limit };
+  return { remaining: limit - credits.used, limit, tokensUsed };
+}
+
+// Same-day/same-cookie/same-IP daily reset, mirroring the accounts.credits
+// shape but keyed by an anonymous cookie ID (no account row exists).
+// Requires BOTH the cookie's and the IP's counters to have room — each
+// increments independently on a successful pull.
+async function consumeAnonCredit(cookieId, ip) {
+  const sql = getSql();
+  const today = todayStr();
+
+  const rows = await sql`SELECT cookie_id, to_char(date, 'YYYY-MM-DD') AS date, used FROM anon_credits WHERE cookie_id = ${cookieId}`;
+  const cookieUsed = rows[0] && rows[0].date === today ? rows[0].used : 0;
+  if (cookieUsed >= ANON_CREDIT_LIMIT) {
+    return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
+  }
+
+  if (ip) {
+    const ipRows = await sql`
+      SELECT COALESCE(SUM(used), 0)::int AS total FROM anon_credits
+      WHERE last_ip = ${ip}::inet AND date = ${today}::date
+    `;
+    const ipUsed = ipRows[0] ? ipRows[0].total : 0;
+    if (ipUsed >= ANON_IP_CREDIT_LIMIT) {
+      return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
+    }
+  }
+
+  const nextUsed = cookieUsed + 1;
+  const ipParam = ip || null;
+  await sql`
+    INSERT INTO anon_credits (cookie_id, date, used, last_ip)
+    VALUES (${cookieId}, ${today}::date, ${nextUsed}, ${ipParam}::inet)
+    ON CONFLICT (cookie_id) DO UPDATE SET date = ${today}::date, used = ${nextUsed}, last_ip = COALESCE(${ipParam}::inet, anon_credits.last_ip)
+  `;
+  return { ok: true, remaining: ANON_CREDIT_LIMIT - nextUsed, limit: ANON_CREDIT_LIMIT };
+}
+
+// Read-only anonymous credits status (no increment) — used by auth-me.js
+// so the "(N/day)" hint has something to read before a pull is attempted.
+async function getAnonCreditsStatus(cookieId) {
+  const sql = getSql();
+  const today = todayStr();
+  // Compare dates as text (to_char) rather than letting the driver coerce
+  // the `date` column to a JS Date — that coercion applies the local
+  // timezone offset and can land on the wrong calendar day entirely,
+  // silently resetting/never-matching the daily counter.
+  const rows = await sql`SELECT to_char(date, 'YYYY-MM-DD') AS date, used FROM anon_credits WHERE cookie_id = ${cookieId}`;
+  const used = rows[0] && rows[0].date === today ? rows[0].used : 0;
+  return { remaining: Math.max(0, ANON_CREDIT_LIMIT - used), limit: ANON_CREDIT_LIMIT };
 }
 
 async function getCreditsStatus(user) {
@@ -466,7 +557,10 @@ async function deleteAccount(user) {
 module.exports = {
   loadUserData,
   saveUserData,
-  consumeAICredit,
+  reserveAICredit,
+  commitAICreditUsage,
+  consumeAnonCredit,
+  getAnonCreditsStatus,
   getCreditsStatus,
   setUsername,
   updateProfileFields,
@@ -488,5 +582,7 @@ module.exports = {
   getLinkedProviders,
   CREDIT_LIMITS,
   creditLimitForTier,
-  DAILY_AI_CREDIT_LIMIT
+  DAILY_AI_CREDIT_LIMIT,
+  ANON_CREDIT_LIMIT,
+  ANON_IP_CREDIT_LIMIT
 };
