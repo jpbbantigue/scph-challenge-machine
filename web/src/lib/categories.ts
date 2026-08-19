@@ -52,9 +52,9 @@ export const CATEGORIES: CategoryDef[] = [
   {
     id: "music", name: "Music", blurb: "Songs, scores & sonic ideas", accent: "royal",
     reels: [
+      { label: "Mood", key: "mood", items: ["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"] },
       { label: "Genre 1", key: "genre1", items: ["Dream Pop","Trip-Hop","Afrobeat","Baroque Pop","Drum & Bass","Neo-Soul","Shoegaze","Bolero","City Pop","Math Rock","Zydeco","Vaporwave","Highlife","Post-Punk","Bedroom Pop","Cumbia","Grime","Dungeon Synth","Emo Rap","J-Pop","Dub","Country Noir","Krautrock","Bachata"] },
       { label: "Genre 2", key: "genre2", items: ["Synthwave","Flamenco","Ambient Jazz","Trap","Bossa Nova","Industrial","Gospel","Chiptune","Reggaeton","Doom Metal","Folktronica","Baile Funk","Lo-fi Hip-Hop","Bluegrass","Witch House","Disco","Tuareg Blues","Ska","Balearic House","Opera","Nu-Disco","Highlife","Grunge","Salsa"] },
-      { label: "Mood", key: "mood", items: ["Quietly unsettling","Euphoric and reckless","Bittersweet nostalgia","Defiant","Tender and unresolved","Menacing calm","Weightless","Triumphant grief","Restless longing","Playfully unhinged","Cold detachment","Aching hopefulness","Simmering rage","Serene dread","Giddy infatuation","Weary resolve","Feral joy","Numb and drifting","Fragile bravado","Slow-burning regret"] },
       { label: "Subject", key: "subject", items: ["A lighthouse keeper's last night","Two rivals falling in love","A city that forgets itself","An astronaut coming home","A letter never sent","The last dance of summer","A machine learning to grieve","A ghost who pays rent","A thief who only steals memories","The last payphone in town","A wedding that never happens","A stranger who knows your name","The house that keeps changing rooms","A war fought over a song","Someone rehearsing an apology forever","A town built on a lie","The year the ocean rose","A twin who was never born","A radio station only the lonely find","Falling in love during a blackout"] },
       { label: "Twist", key: "twist", items: MUSIC_TWIST_ITEMS }
     ]
@@ -84,6 +84,38 @@ export const CATEGORIES: CategoryDef[] = [
 export const CATEGORY_BY_ID: Record<string, CategoryDef> = {};
 CATEGORIES.forEach((c) => { CATEGORY_BY_ID[c.id] = c; });
 
+// Music's reel content can be backed by GET /api/reel-data?category=music
+// (a Wikipedia-crawled genre DB + expanded mood/subject/twist tables) —
+// this swaps the hardcoded arrays above for the fetched ones in place, so
+// every existing pick()/pickDistinct() call site picks up the richer pool
+// automatically. Left untouched (falls back to the hardcoded lists above)
+// if the fetch fails or returns nothing usable — same resilience pattern
+// as the AI-generation fallback.
+export async function loadMusicReelData(): Promise<void> {
+  try {
+    const res = await fetch("/api/reel-data?category=music");
+    if (!res.ok) return;
+    const data = await res.json();
+    const music = CATEGORY_BY_ID.music;
+    if (!music) return;
+    const setItems = (key: string, items: any) => {
+      if (Array.isArray(items) && items.length) {
+        const reel = music.reels.find((r) => r.key === key);
+        if (reel) reel.items = items;
+      }
+    };
+    if (Array.isArray(data.genres) && data.genres.length) {
+      setItems("genre1", data.genres);
+      setItems("genre2", data.genres);
+    }
+    setItems("mood", data.moods);
+    setItems("subject", data.subjects);
+    setItems("twist", data.twists);
+  } catch (e) {
+    // Network error, bad JSON, etc — CATEGORIES keeps its hardcoded lists.
+  }
+}
+
 export interface Example {
   categoryId: string;
   text: string;
@@ -105,4 +137,19 @@ export function reelDef(cat: CategoryDef, key: string): ReelDef | undefined {
 export function pick(cat: CategoryDef, key: string): string {
   const list = reelDef(cat, key)!.items;
   return list[Math.floor(Math.random() * list.length)];
+}
+
+// Picks a value for `key` that differs from `avoid` (used to keep Genre 1
+// != Genre 2 within a single Music pull) — falls back to a plain pick if
+// the reel only has one possible value.
+export function pickDistinct(cat: CategoryDef, key: string, avoid: string | null | undefined): string {
+  const list = reelDef(cat, key)!.items;
+  if (!avoid || list.length <= 1) return pick(cat, key);
+  let v = list[Math.floor(Math.random() * list.length)];
+  let tries = 0;
+  while (v === avoid && tries < 20) {
+    v = list[Math.floor(Math.random() * list.length)];
+    tries++;
+  }
+  return v;
 }

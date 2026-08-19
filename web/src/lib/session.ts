@@ -91,3 +91,19 @@ export function sessionCookie(token: string): string {
 export function clearSessionCookie(): string {
   return COOKIE_NAME + "=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
 }
+
+// Anonymous-visitor tracking cookie — a bare random ID, not a signed
+// session. Backs the "3 free-API pulls/day" anonymous credit tier (see
+// lib/store.ts consumeAnonCredit/getAnonCreditsStatus): a per-IP backstop
+// exists server-side too, but this cookie is what lets a returning visitor
+// (same browser) keep a stable identity across days without an account.
+export const ANON_COOKIE_NAME = "scph_anon";
+const ANON_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // 1 year
+
+export function newAnonId(): string {
+  return crypto.randomUUID();
+}
+
+export function anonIdCookie(id: string): string {
+  return ANON_COOKIE_NAME + "=" + id + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" + ANON_COOKIE_MAX_AGE_SECONDS;
+}

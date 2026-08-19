@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getProvider, redirectUri } from "@/lib/providers";
 import { createSessionToken, sessionCookie, parseCookies, getSessionUser } from "@/lib/session";
 import { resolveAccountKey, linkIdentity } from "@/lib/store";
+import { getSql } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams;
@@ -107,20 +108,37 @@ async function safeText(res: Response): Promise<string> {
   }
 }
 
-// Checks whether the visitor is a member of the Suno Creatives PH Discord
-// server, for the 100/day credit tier. Fails safe to "basic" on any error.
+// Checks the visitor's Discord guild membership to decide their credit
+// tier: "scph" (Suno Creatives PH Discord, 100/day) checked first, then
+// "affiliate" (any approved partner server in the affiliate_guilds table,
+// 75/day) second, defaulting to "basic" (20/day) if neither matches.
+// SCPH_GUILD_ID must be set as an env var. Fails safe to "basic" on any
+// error -- a broken guild check should never block sign-in.
 async function computeDiscordTier(accessToken: string): Promise<string> {
   const scphGuildId = process.env.SCPH_GUILD_ID;
-  if (!scphGuildId) return "basic";
+  let guilds: any;
   try {
     const res = await fetch("https://discord.com/api/users/@me/guilds", {
       headers: { Authorization: "Bearer " + accessToken }
     });
     if (!res.ok) return "basic";
-    const guilds = await res.json();
-    const isMember = Array.isArray(guilds) && guilds.some((g: any) => g.id === scphGuildId);
-    return isMember ? "scph" : "basic";
+    guilds = await res.json();
+    if (!Array.isArray(guilds)) return "basic";
   } catch (e) {
     return "basic";
   }
+
+  if (scphGuildId && guilds.some((g: any) => g.id === scphGuildId)) return "scph";
+
+  try {
+    const sql = getSql();
+    const rows = await sql`SELECT guild_id FROM affiliate_guilds`;
+    const affiliateIds = new Set(rows.map((r: any) => r.guild_id));
+    if (guilds.some((g: any) => affiliateIds.has(g.id))) return "affiliate";
+  } catch (e) {
+    // affiliate_guilds lookup failing shouldn't block sign-in -- just skip
+    // the affiliate check and fall through to basic.
+  }
+
+  return "basic";
 }

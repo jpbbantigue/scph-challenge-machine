@@ -1,5 +1,6 @@
 "use client";
 
+import { ReactNode } from "react";
 import { CATEGORIES, CategoryDef, ACCENTS } from "@/lib/categories";
 
 export interface SlotMachineProps {
@@ -21,6 +22,7 @@ export interface SlotMachineProps {
   onRerollSingle: (key: string) => void;
   onRollFree: () => void;
   onRollAI: () => void;
+  ticket: ReactNode;
 }
 
 function sortedCategoriesForDropdown(favoriteCategoryIds: string[]) {
@@ -35,7 +37,7 @@ export default function SlotMachine(props: SlotMachineProps) {
   const {
     category, categoryId, values, spinningKeys, active, locks, favoriteCategoryIds, rollCount,
     spinning, creditsExhausted, useAiNote,
-    onCategoryChange, onToggleFavCat, onToggleActive, onToggleLock, onRerollSingle, onRollFree, onRollAI
+    onCategoryChange, onToggleFavCat, onToggleActive, onToggleLock, onRerollSingle, onRollFree, onRollAI, ticket
   } = props;
   const accent = ACCENTS[category.accent] || ACCENTS.royal;
   const isFav = favoriteCategoryIds.includes(categoryId);
@@ -152,6 +154,8 @@ export default function SlotMachine(props: SlotMachineProps) {
             Use AI <span className="roll-note">{useAiNote}</span>
           </button>
         </div>
+
+        {ticket}
       </div>
     </div>
   );

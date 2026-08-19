@@ -25,20 +25,36 @@ export function genreFusionDescriptor(active: (k: string) => boolean, vals: Reel
   return g1 || g2 || "";
 }
 
+// "a" vs "an" based on the leading word's first letter -- a simple
+// vowel-letter check, matching the "Write a/an {Mood}..." phrasing.
+export function indefiniteArticleFor(word: string): string {
+  const first = String(word || "").trim().charAt(0).toLowerCase();
+  return /[aeiou]/.test(first) ? "an" : "a";
+}
+
+// Exact target format: "Write a/an {Mood}, {Genre 1} x {Genre 2} about
+// {Subject}. {Twist}." Each active reel's raw value is stripped of trailing
+// punctuation and stitched in with casing preserved as-authored (Mood is
+// NOT lowercased).
 function buildMusicMission(active: (k: string) => boolean, vals: ReelValues): string {
   const useMood = active("mood") && vals.mood;
-  const genreLabel = genreFusionDescriptor(active, vals);
+  const useGenre1 = active("genre1") && vals.genre1;
+  const useGenre2 = active("genre2") && vals.genre2;
   const useSubject = active("subject") && vals.subject;
   const useTwist = active("twist") && vals.twist;
 
-  const descriptors: string[] = [];
-  if (useMood) descriptors.push(stripTrailingPunct(vals.mood as string).toLowerCase());
-  if (genreLabel) descriptors.push(genreLabel);
+  const leadParts: string[] = [];
+  if (useMood) leadParts.push(stripTrailingPunct(vals.mood as string));
+  const genreBits: string[] = [];
+  if (useGenre1) genreBits.push(stripTrailingPunct(vals.genre1 as string));
+  if (useGenre2) genreBits.push(stripTrailingPunct(vals.genre2 as string));
+  if (genreBits.length) leadParts.push(genreBits.join(" x "));
 
-  let mission = "Write a " + (descriptors.length ? descriptors.join(" ") + " song" : "song");
+  let mission = "Write " + indefiniteArticleFor(leadParts[0] || "");
+  if (leadParts.length) mission += " " + leadParts.join(", ");
   if (useSubject) mission += " about " + stripTrailingPunct(vals.subject as string);
   mission += ".";
-  if (useTwist) mission += " Constraint: " + stripTrailingPunct(vals.twist as string) + ".";
+  if (useTwist) mission += " " + stripTrailingPunct(vals.twist as string) + ".";
   return mission;
 }
 

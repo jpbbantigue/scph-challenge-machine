@@ -8,13 +8,24 @@ import type { SessionUser } from "./session";
 
 // Tiered daily AI-credit limits. "scph" is verified automatically at
 // Discord sign-in (see auth-callback, which checks the visitor's guild list
-// against SCPH_GUILD_ID and stamps the tier onto the session).
-export const CREDIT_LIMITS: Record<string, number> = { basic: 50, scph: 100 };
+// against SCPH_GUILD_ID and stamps the tier onto the session); "affiliate"
+// is verified the same way against a partner server's guild ID (see
+// affiliate_guilds table / auth-callback's computeDiscordTier). "paid" is a
+// numbers-only placeholder tier — no billing integration exists yet, so
+// nothing currently grants it, but the limit is wired up for when it does.
+// BYOK (bring-your-own-key) is unlimited at every tier — none of this
+// applies to it, it never calls this site's own Groq key.
+export const CREDIT_LIMITS: Record<string, number> = { basic: 20, affiliate: 75, scph: 100, paid: 300 };
 const DEFAULT_TIER = "basic";
 export function creditLimitForTier(tier?: string | null): number {
   return (tier && CREDIT_LIMITS[tier]) || CREDIT_LIMITS[DEFAULT_TIER];
 }
 export const DAILY_AI_CREDIT_LIMIT = CREDIT_LIMITS[DEFAULT_TIER]; // kept for back-compat reference
+
+// Anonymous (not signed-in) visitors get a small real daily allowance too,
+// tracked by the scph_anon cookie (see lib/session.ts) plus a per-IP
+// backstop against cookie-clearing abuse — see consumeAnonCredit below.
+export const ANON_CREDIT_LIMIT = 3;
 const MAX_SOCIALS = 8;
 const MAX_LINKED_ACCOUNTS = 8;
 const MAX_BIO_LEN = 200;
@@ -48,11 +59,20 @@ export interface Credits {
   date: string;
   used: number;
 }
+// Groq's usage.total_tokens per call, summed per pull and tracked both
+// per-day (resets like credits) and lifetime (never resets) — surfaced via
+// /api/auth-me so account.html/Settings can show it.
+export interface TokensUsed {
+  date: string;
+  today: number;
+  lifetime: number;
+}
 export interface UserData {
   favorites: any[];
   history: any[];
   settings: any;
   credits: Credits;
+  tokensUsed: TokensUsed;
   stats: Stats;
   profile: Profile;
   updatedAt: number;
@@ -132,6 +152,7 @@ function defaultUserData(): UserData {
     history: [],
     settings: null,
     credits: { date: todayStr(), used: 0 },
+    tokensUsed: { date: todayStr(), today: 0, lifetime: 0 },
     stats: { totalRolls: 0, categoryRolls: {}, streak: { current: 0, longest: 0, lastActiveDate: null } },
     profile: defaultProfile(),
     updatedAt: 0
@@ -146,6 +167,7 @@ function mergeWithDefaults(raw: any): UserData {
     history: Array.isArray(raw.history) ? raw.history : def.history,
     settings: raw.settings || def.settings,
     credits: raw.credits && typeof raw.credits.used === "number" ? raw.credits : def.credits,
+    tokensUsed: raw.tokensUsed && typeof raw.tokensUsed.lifetime === "number" ? raw.tokensUsed : def.tokensUsed,
     stats: raw.stats || def.stats,
     profile: Object.assign(defaultProfile(), raw.profile || {}),
     updatedAt: raw.updatedAt || 0
@@ -174,7 +196,8 @@ export async function saveUserData(user: SessionUser, data: Partial<UserData>): 
     favorites: Array.isArray(data.favorites) ? data.favorites.slice(0, 200) : current.favorites,
     history: Array.isArray(data.history) ? data.history.slice(-100) : current.history,
     settings: data.settings || current.settings,
-    credits: current.credits, // credits only change via consumeAICredit
+    credits: current.credits, // credits only change via reserveAICredit/commitAICreditUsage
+    tokensUsed: current.tokensUsed, // tokensUsed only changes via commitAICreditUsage
     stats: data.stats || current.stats,
     profile: current.profile, // profile fields only change via the profile-* functions below
     updatedAt: Date.now()
@@ -184,9 +207,13 @@ export async function saveUserData(user: SessionUser, data: Partial<UserData>): 
 }
 
 // Checks the signed-in user's daily AI-credit balance, consuming one if
-// available. This only gates calls to this site's own Groq key.
-export async function consumeAICredit(user: SessionUser): Promise<{ ok: boolean; remaining: number; limit: number }> {
-  const key = userKey(user);
+// available. This only gates calls to this site's own Groq key. Split into
+// reserve (before the Groq calls, so a request over the limit never even
+// starts them) + commit (after, once the actual token usage is known) —
+// see commitAICreditUsage below.
+export async function reserveAICredit(
+  user: SessionUser
+): Promise<{ ok: boolean; remaining: number; limit: number; data: UserData }> {
   const limit = creditLimitForTier(user.tier);
   const data = await loadUserData(user);
   const today = todayStr();
@@ -194,14 +221,32 @@ export async function consumeAICredit(user: SessionUser): Promise<{ ok: boolean;
   if (credits.date !== today) credits = { date: today, used: 0 };
   if (credits.used >= limit) {
     data.credits = credits;
-    await writeAccount(key, data);
-    return { ok: false, remaining: 0, limit };
+    return { ok: false, remaining: 0, limit, data };
   }
   credits.used += 1;
   data.credits = credits;
+  return { ok: true, remaining: limit - credits.used, limit, data };
+}
+
+// Commits the reservation from reserveAICredit and records this pull's
+// token usage (per-day + lifetime) in one write.
+export async function commitAICreditUsage(
+  user: SessionUser,
+  reserved: { data: UserData },
+  totalTokens: number
+): Promise<{ remaining: number }> {
+  const key = userKey(user);
+  const data = reserved.data;
+  const today = todayStr();
+  let tokensUsed = data.tokensUsed || { date: today, today: 0, lifetime: 0 };
+  if (tokensUsed.date !== today) tokensUsed = { date: today, today: 0, lifetime: tokensUsed.lifetime || 0 };
+  tokensUsed.today += totalTokens;
+  tokensUsed.lifetime = (tokensUsed.lifetime || 0) + totalTokens;
+  data.tokensUsed = tokensUsed;
   data.updatedAt = Date.now();
   await writeAccount(key, data);
-  return { ok: true, remaining: limit - credits.used, limit };
+  const limit = creditLimitForTier(user.tier);
+  return { remaining: limit - data.credits.used };
 }
 
 export async function getCreditsStatus(user: SessionUser): Promise<{ remaining: number; limit: number }> {
@@ -210,6 +255,69 @@ export async function getCreditsStatus(user: SessionUser): Promise<{ remaining: 
   const today = todayStr();
   const credits = data.credits.date === today ? data.credits : { date: today, used: 0 };
   return { remaining: limit - credits.used, limit };
+}
+
+// ---------------- Anonymous (not signed-in) AI credits ----------------
+// Backed by a small `anon_credits` table keyed by the scph_anon cookie ID,
+// with a per-IP daily cap as a backstop against clearing the cookie to
+// farm more pulls. Self-migrating (CREATE TABLE IF NOT EXISTS) since this
+// project has no separate migration runner.
+async function ensureAnonCreditsTable(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    CREATE TABLE IF NOT EXISTS anon_credits (
+      anon_id text PRIMARY KEY,
+      ip text,
+      date date NOT NULL,
+      used int NOT NULL DEFAULT 0,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `;
+}
+
+export async function getAnonCreditsStatus(anonId: string): Promise<{ remaining: number; limit: number }> {
+  const sql = getSql();
+  await ensureAnonCreditsTable();
+  const today = todayStr();
+  const rows = await sql`SELECT used FROM anon_credits WHERE anon_id = ${anonId} AND date = ${today}`;
+  const used = rows[0] ? (rows[0].used as number) : 0;
+  return { remaining: Math.max(0, ANON_CREDIT_LIMIT - used), limit: ANON_CREDIT_LIMIT };
+}
+
+export async function consumeAnonCredit(
+  anonId: string,
+  ip: string | null
+): Promise<{ ok: boolean; remaining: number; limit: number }> {
+  const sql = getSql();
+  await ensureAnonCreditsTable();
+  const today = todayStr();
+
+  // Per-IP backstop: even with a fresh cookie, the same IP can't exceed the
+  // anonymous limit either — counts every anon row touched from that IP
+  // today, so clearing cookies alone doesn't grant a fresh allowance.
+  if (ip) {
+    const ipRows = await sql`SELECT COALESCE(SUM(used),0)::int AS total FROM anon_credits WHERE ip = ${ip} AND date = ${today}`;
+    const ipUsed = ipRows[0] ? (ipRows[0].total as number) : 0;
+    if (ipUsed >= ANON_CREDIT_LIMIT) {
+      return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
+    }
+  }
+
+  const rows = await sql`
+    INSERT INTO anon_credits (anon_id, ip, date, used)
+    VALUES (${anonId}, ${ip}, ${today}, 0)
+    ON CONFLICT (anon_id) DO UPDATE SET
+      ip = EXCLUDED.ip,
+      used = CASE WHEN anon_credits.date = ${today} THEN anon_credits.used ELSE 0 END,
+      date = ${today}
+    RETURNING used
+  `;
+  const used = rows[0] ? (rows[0].used as number) : 0;
+  if (used >= ANON_CREDIT_LIMIT) {
+    return { ok: false, remaining: 0, limit: ANON_CREDIT_LIMIT };
+  }
+  await sql`UPDATE anon_credits SET used = used + 1, updated_at = now() WHERE anon_id = ${anonId}`;
+  return { ok: true, remaining: ANON_CREDIT_LIMIT - (used + 1), limit: ANON_CREDIT_LIMIT };
 }
 
 function normalizeHandle(handle: string | undefined | null): string {

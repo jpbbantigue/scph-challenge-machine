@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CATEGORIES, CATEGORY_BY_ID, pick, reelDef } from "@/lib/categories";
+import { CATEGORIES, CATEGORY_BY_ID, pick, pickDistinct, reelDef, loadMusicReelData } from "@/lib/categories";
 import { buildMission, nowLabel, shuffle, Ticket } from "@/lib/roll";
 import SlotMachine from "./SlotMachine";
 import ResultTicket from "./ResultTicket";
-import NowRollingBar from "./NowRollingBar";
 import ExampleResults from "./ExampleResults";
 import CategoryCards from "./CategoryCards";
 import NavDropdown, { AccountState } from "./NavDropdown";
@@ -104,7 +103,12 @@ export default function HomeApp() {
   const [favorites, setFavorites] = useState<Ticket[]>([]);
   const [rollCount, setRollCount] = useState(0);
   const [spinning, setSpinning] = useState(false);
+  // Session-scoped: starts false on every page load (never restored from
+  // persisted state below), so a refresh always resets the printed ticket
+  // to hidden/empty even if a previous roll is still sitting in localStorage.
   const [hasRolled, setHasRolled] = useState(false);
+  const [tearing, setTearing] = useState(false);
+  const [ticketAnimKey, setTicketAnimKey] = useState(0);
   const [aiFallbackMsg, setAiFallbackMsg] = useState<string | null>(null);
   const [lastRollUsedAI, setLastRollUsedAI] = useState(false);
 
@@ -124,6 +128,7 @@ export default function HomeApp() {
 
   // ---- init ----
   useEffect(() => {
+    loadMusicReelData().catch(() => {});
     const s = loadState();
     stateRef.current = s;
     setCategoryId(s.categoryId);
@@ -135,7 +140,9 @@ export default function HomeApp() {
     if (s.current && s.current.categoryId === s.categoryId) {
       setCurrent(s.current);
       setValues(s.current.vals);
-      setHasRolled(true);
+      // Intentionally NOT calling setHasRolled(true) here — the printed
+      // ticket must start hidden on every fresh page load regardless of
+      // persisted history (see hasRolled comment above).
     } else {
       setValues(placeholderValues(s.categoryId));
     }
@@ -163,16 +170,32 @@ export default function HomeApp() {
     return favorites.some((f) => f.mission === ticket.mission);
   }
 
+  // Music's Genre 1 and Genre 2 reels must never land on the same value
+  // within a single pull — pickDistinct re-rolls genre2 against whatever
+  // genre1 landed on (or vice versa, if only genre2 is being freshly rolled).
+  function applyDistinctGenres(map: Record<string, string>, keys: string[]) {
+    if (category.id !== "music" && category.id !== "album") return;
+    if (keys.includes("genre2")) {
+      const avoid = map.genre1 ?? (locks.genre1 && stateRef.current.current ? stateRef.current.current.vals.genre1 : null);
+      map.genre2 = pickDistinct(category, "genre2", avoid as string | null);
+    } else if (keys.includes("genre1") && !keys.includes("genre2")) {
+      const avoid = locks.genre2 && stateRef.current.current ? stateRef.current.current.vals.genre2 : null;
+      map.genre1 = pickDistinct(category, "genre1", avoid as string | null);
+    }
+  }
+
   async function getFreshValuesForPull(keys: string[], useAI: boolean): Promise<Record<string, string>> {
     if (!useAI) {
       const map: Record<string, string> = {};
       keys.forEach((key) => (map[key] = pick(category, key)));
+      applyDistinctGenres(map, keys);
       return map;
     }
     if (!account.signedIn) {
       setAiFallbackMsg("Sign in to use this site's AI (free daily credits) — or add your own Claude/ChatGPT key in Settings instead. — showing built-in results instead.");
       const map: Record<string, string> = {};
       keys.forEach((key) => (map[key] = pick(category, key)));
+      applyDistinctGenres(map, keys);
       return map;
     }
     const reelsPayload = keys.map((key) => {
@@ -212,11 +235,13 @@ export default function HomeApp() {
         const r = reelDef(category, key)!;
         map[key] = byLabel[r.label] || pick(category, key);
       });
+      if (map.genre1 && map.genre2 && map.genre1 === map.genre2) applyDistinctGenres(map, keys);
       return map;
     } catch (err: any) {
       setAiFallbackMsg((err && err.message ? err.message : "AI unavailable") + " — showing built-in results instead.");
       const map: Record<string, string> = {};
       keys.forEach((key) => (map[key] = pick(category, key)));
+      applyDistinctGenres(map, keys);
       return map;
     }
   }
@@ -293,28 +318,46 @@ export default function HomeApp() {
     if (s.history.length > 100) s.history.shift();
     persist();
 
-    setCurrent(ticket);
     setRollCount(s.history.length);
 
-    if (!hasRolled) {
-      setHasRolled(true);
-      setTimeout(() => {
-        const ticketWrapEl = document.getElementById("ticketWrap");
-        if (!ticketWrapEl) return;
-        const top = ticketWrapEl.getBoundingClientRect().top + window.scrollY - 110;
-        window.scrollTo({ top, behavior: "smooth" });
-      }, 400);
-    }
+    // Must flip hasRolled to true, and set the new ticket as current, BEFORE
+    // triggering the print animation — this mirrors a real ordering bug that
+    // was fixed on the static site: renderTicket() there gates visibility on
+    // hasRolled, so on the very first roll of a session it needs to already
+    // be true or the newly-printed ticket renders hidden.
+    setHasRolled(true);
+    setCurrent(ticket);
+    setTicketAnimKey((k) => k + 1);
 
     setSpinning(false);
   }
 
+  // Entry point for both roll buttons: if a ticket is already showing, play
+  // the tear-off first and only start the new roll once it finishes ("tear
+  // off, then reprint"); first roll of the session has nothing to tear, so
+  // it starts immediately.
+  async function pullLeverEntry(useAI: boolean) {
+    if (spinning || tearing) return;
+    if (useAI && creditsExhausted) return;
+    if (hasRolled && current && current.categoryId === categoryId) {
+      setTearing(true);
+      await sleep(360);
+      // Without genuinely hiding the ticket here (not just letting the CSS
+      // animation's fill-mode expire), the old ticket would flash back into
+      // view for the whole reel-spin duration instead of staying torn-off
+      // until the new roll prints — this was a real bug on the static site.
+      setHasRolled(false);
+      setTearing(false);
+    }
+    await pullLever(useAI);
+  }
+
   async function rerollSingle(key: string) {
-    if (spinning || locks[key] || !isActive(key)) return;
+    if (spinning || tearing || locks[key] || !isActive(key)) return;
     if (lastRollUsedAI && creditsExhausted) return;
     const s = stateRef.current;
     if (!s.current || s.current.categoryId !== categoryId) {
-      pullLever(lastRollUsedAI);
+      pullLeverEntry(lastRollUsedAI);
       return;
     }
     setSpinning(true);
@@ -341,6 +384,10 @@ export default function HomeApp() {
     } else {
       setCurrent(null);
     }
+    // No animation on a plain category switch — just sync visibility, same
+    // as the static site's renderTicket() (hidden unless the current ticket
+    // matches the newly-selected category).
+    setTearing(false);
     persist();
   }
 
@@ -387,7 +434,8 @@ export default function HomeApp() {
     if (isFavorited(s.current)) {
       s.favorites = s.favorites.filter((f) => f.mission !== s.current!.mission);
     } else {
-      s.favorites.push(s.current);
+      // Newest-first, capped at 8 — matches the ticket's own save-slot spec.
+      s.favorites = [s.current].concat(s.favorites).slice(0, 8);
     }
     setFavorites([...s.favorites]);
     persist();
@@ -416,14 +464,6 @@ export default function HomeApp() {
             </a>
           </div>
         </nav>
-        <NowRollingBar
-          hasRolled={hasRolled}
-          ticket={current}
-          category={category}
-          onRollAgain={() => pullLever(lastRollUsedAI)}
-          onCopy={copyMissionToClipboard}
-          onSave={toggleFavorite}
-        />
       </div>
 
       <div id="top" />
@@ -462,8 +502,19 @@ export default function HomeApp() {
           onToggleActive={toggleActive}
           onToggleLock={toggleLock}
           onRerollSingle={rerollSingle}
-          onRollFree={() => pullLever(false)}
-          onRollAI={() => pullLever(true)}
+          onRollFree={() => pullLeverEntry(false)}
+          onRollAI={() => pullLeverEntry(true)}
+          ticket={
+            <ResultTicket
+              ticket={current}
+              visible={hasRolled && !!(current && current.categoryId === categoryId)}
+              tearing={tearing}
+              animKey={ticketAnimKey}
+              favorited={isFavorited(current)}
+              onCopy={copyMissionToClipboard}
+              onToggleFavorite={toggleFavorite}
+            />
+          }
         />
       </section>
 
@@ -484,15 +535,6 @@ export default function HomeApp() {
           {aiFallbackMsg}
         </p>
       ) : null}
-
-      <ResultTicket
-        ticket={current}
-        category={category}
-        show={hasRolled}
-        favorited={isFavorited(current)}
-        onCopy={copyMissionToClipboard}
-        onToggleFavorite={toggleFavorite}
-      />
 
       <section className="section" id="how-it-works">
         <div className="section-head">

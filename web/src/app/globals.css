@@ -42,6 +42,9 @@ a:hover{color:var(--gold-hi);}
 
 @keyframes float-orb{0%,100%{transform:translate(0,0);}50%{transform:translate(18px,-24px);}}
 @keyframes settle{0%{transform:translateY(-6px);opacity:.4;}100%{transform:translateY(0);opacity:1;}}
+@keyframes ticket-print{0%{clip-path:inset(0 0 100% 0);}100%{clip-path:inset(0 0 0% 0);}}
+@keyframes ticket-tear{0%{transform:translateX(-50%) translateY(0) rotate(0deg);opacity:1;}100%{transform:translateX(-50%) translateY(30px) rotate(-4deg);opacity:0;}}
+@keyframes save-flash-pop{0%{transform:scale(1);}40%{transform:scale(1.35) translateY(-3px);}100%{transform:scale(1);}}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}
 }
@@ -63,7 +66,8 @@ a:hover{color:var(--gold-hi);}
 .page{position:relative;z-index:1;}
 
 /* ---------- nav ---------- */
-.nav-wrap{position:sticky;top:0;z-index:50;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+.nav-wrap{position:static;z-index:50;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+@media (max-width:768px){.nav-wrap{position:sticky;top:0;}}
 .topnav{
   width:100%;max-width:1180px;display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:11px 18px;border-radius:999px;
@@ -218,51 +222,53 @@ a:hover{color:var(--gold-hi);}
 .roll-btn.ai-variant .diamond{background:var(--gold);}
 .roll-btn .roll-note{opacity:0.7;font-weight:500;font-size:12.5px;}
 
-/* ---------- mini roller bar ---------- */
-.mini-roller-wrap{position:sticky;top:0;z-index:49;display:flex;justify-content:center;overflow:hidden;padding:0 20px;
-  transition:max-height .32s ease, opacity .28s ease, margin-top .32s ease;
-  max-height:0;opacity:0;margin-top:0;pointer-events:none;}
-.mini-roller-wrap.show{max-height:68px;opacity:1;margin-top:8px;pointer-events:auto;}
-.mini-roller{width:100%;max-width:1180px;display:flex;align-items:stretch;border-radius:12px;overflow:hidden;
-  background:rgba(9,12,22,0.92);border:1px solid rgba(244,191,58,0.3);backdrop-filter:blur(18px);
-  box-shadow:0 14px 32px rgba(0,0,0,0.4);font-family:var(--font-mono);}
-.mini-roller-stripe{width:4px;flex:none;background:linear-gradient(180deg,var(--gold),var(--crimson-hi));}
-.mini-roller-label{display:flex;align-items:center;padding:0 4px 0 16px;border-right:1px dashed rgba(255,255,255,0.14);
-  flex:none;font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
-.mini-roller-values{display:flex;align-items:center;overflow-x:auto;flex:1;min-width:0;}
-.mini-roller-value{display:flex;flex-direction:column;gap:2px;padding:8px 16px;border-right:1px dashed rgba(255,255,255,0.1);flex:none;}
-.mini-roller-value .l{font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-40);white-space:nowrap;}
-.mini-roller-value .v{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;}
-.mini-roller-btn{flex:none;border:none;cursor:pointer;font-family:inherit;}
-.mini-roller-btn.roll{padding:0 20px;border-left:1px solid rgba(77,124,255,0.3);background:rgba(41,91,255,0.16);
-  color:#CBD8FF;font-weight:700;font-size:12.5px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;}
-.mini-roller-btn.icon{width:42px;border-left:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:var(--ink);font-size:14px;}
-.mini-roller-btn.icon.gold{color:var(--gold-hi);}
-
-/* ---------- ticket / result ---------- */
-.ticket-wrap{max-width:640px;margin:0 auto;padding:0 24px clamp(48px,7vw,88px);display:none;scroll-margin-top:150px;}
-.ticket-wrap.show{display:block;}
+/* ---------- printed ticket (paper receipt hanging below the divider) ---------- */
+/* Absolutely positioned relative to the divider so it never affects card
+   height — it visually "hangs" out of the slot machine without pushing
+   anything below it. */
+.ticket-divider{margin-top:14px;border-top:1px dashed rgba(255,255,255,0.25);position:relative;}
 .ticket{
-  border-radius:20px;padding:28px 30px;
-  background:linear-gradient(180deg, rgba(20,26,46,0.85), rgba(9,12,22,0.9));
-  border:1px solid rgba(77,124,255,0.22);box-shadow:0 20px 50px rgba(0,0,0,0.4);
-  font-family:var(--font-mono);
+  position:absolute;top:100%;left:50%;width:92%;transform:translateX(-50%);transform-origin:top center;
+  background:#fdfbf3;border-radius:0 0 8px 8px;box-shadow:0 16px 30px rgba(0,0,0,0.4);
+  z-index:5;overflow:hidden;
+  display:flex;align-items:flex-start;gap:10px;padding:16px 18px;
+  clip-path:inset(0 0 0% 0);
 }
-.ticket-head{display:flex;justify-content:space-between;font-size:12px;letter-spacing:0.06em;color:var(--ink-40);margin-bottom:18px;}
-.ticket-body{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
-.ticket-line{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:baseline;}
-.ticket-line .tag{font-size:11.5px;letter-spacing:0.06em;color:var(--ink-40);}
-.ticket-line .val{font-size:15px;font-weight:600;color:var(--ink);}
-.ticket-rule{border-top:1px dashed rgba(255,255,255,0.15);margin:0 0 18px;}
-.ticket-mission{font-style:italic;font-size:15px;line-height:1.6;color:rgba(243,245,252,0.85);margin:0 0 24px;}
-.ticket-actions{display:flex;flex-wrap:wrap;gap:12px;}
+.ticket.printing{animation:ticket-print .5s ease-out forwards;}
+.ticket.tearing{animation:ticket-tear .36s ease-in forwards;}
+.ticket-text{flex:1;min-width:0;}
+#ticketDivider .ticket .ticket-mission{
+  font-family:var(--font-mono);font-size:13px;line-height:1.55;color:#1a1a1a;font-style:italic;margin:0 0 8px;
+}
+#ticketDivider .ticket .ticket-meta{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.04em;color:rgba(26,26,26,0.5);}
+.ticket-actions{display:flex;gap:6px;flex:none;}
 .ticket-actions button{
-  padding:11px 20px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);background:transparent;
-  color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
-  display:flex;align-items:center;gap:7px;transition:all .2s ease;
+  width:30px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,0.15);background:transparent;
+  color:#1a1a1a;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+  font-size:15px;transition:all .15s ease;
 }
-.ticket-actions button:hover{border-color:var(--royal-hi);background:rgba(41,91,255,0.1);}
-.ticket-actions button.favd{border-color:var(--gold);background:rgba(244,191,58,0.14);color:var(--gold-hi);}
+.ticket-actions button:hover:not(:disabled){border-color:var(--royal-hi);background:rgba(41,91,255,0.08);}
+.ticket-actions button:disabled{opacity:0.4;cursor:not-allowed;}
+.ticket-actions #favBtn{color:#C68B24;}
+.ticket-actions #favBtn:hover:not(:disabled){border-color:#C68B24;background:rgba(244,191,58,0.12);}
+.ticket-actions #favBtn.saveflash{animation:save-flash-pop .55s ease;}
+.ticket-actions #favBtn.favd{color:#C68B24;background:rgba(244,191,58,0.14);}
+.ticket-icon.copy-icon{position:relative;width:13px;height:13px;display:inline-block;}
+.ticket-icon.copy-icon::before,.ticket-icon.copy-icon::after{
+  content:"";position:absolute;width:9px;height:9px;border:1.5px solid currentColor;border-radius:2px;background:#fdfbf3;
+}
+.ticket-icon.copy-icon::before{top:0;left:0;}
+.ticket-icon.copy-icon::after{bottom:0;right:0;}
+.copy-flash{color:var(--royal-hi);}
+
+@media (max-width:560px){
+  .reels{grid-template-columns:repeat(2,1fr);}
+  .console-card{padding:18px;border-radius:20px;}
+  .roll-row{flex-direction:column;align-items:stretch;}
+  .roll-btn{flex:1 1 auto;}
+  .ticket{width:96%;padding:14px;flex-direction:column;}
+  .ticket-actions{align-self:flex-end;}
+}
 .copy-flash{color:var(--royal-hi);}
 
 /* ---------- shared section heading ---------- */
